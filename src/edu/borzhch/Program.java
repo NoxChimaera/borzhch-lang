@@ -4,6 +4,10 @@
  * and open the template in the editor.
  */
 package edu.borzhch;
+import edu.borzhch.language.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  *
@@ -15,7 +19,17 @@ public class Program {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        
+        FileReader r = null;
+        try {
+            r = new FileReader(args[0]);
+        } catch (FileNotFoundException fileNotFoundException){}
+        
+        Lexer lexer = new Lexer(r);
+       
+        try {
+            lexer.yylex();
+        } catch (IOException iOException){}
     }
     
 }
