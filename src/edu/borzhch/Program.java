@@ -25,11 +25,8 @@ public class Program {
             r = new FileReader(args[0]);
         } catch (FileNotFoundException fileNotFoundException){}
         
-        Lexer lexer = new Lexer(r);
-       
-        try {
-            lexer.yylex();
-        } catch (IOException iOException){}
+        Parser parser = new Parser(false);
+        parser.run();
     }
     
 }

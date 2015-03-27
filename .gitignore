@@ -1,6 +1,15 @@
+#netbeans
 /nbproject/private/
 /build/
 /dist/
 
-*.*~
+#vim
+*~
 *.swp
+
+#ctags
+tags
+
+#yacc
+*.output
+*.tab.c
