@@ -8,10 +8,11 @@ package edu.borzhch.language;
 %unicode
 %line
 %column
-%debug
 
 %{
   StringBuilder sb = new StringBuilder();
+
+  private Parser yyparser;
 %}
 
 LineTerminator = \r|\n|\r\n
@@ -24,8 +25,7 @@ TraditionalComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
 /* identifiers */
-StructIdentifier = _?[:uppercase:][:letter::digit:]*
-Identifier = _?[:lowercase:][:letter::digit:]*
+Identifier = _?[:letter:][[:letter:][:digit:]]*
 
 /* literals */
 IntegerLiteral = 0 | [1-9][0-9]*
@@ -40,12 +40,11 @@ BooleanLiteral = "true" | "false"
 
 /* keywords */
 <YYINITIAL> {
-  "int"     { return Parser.INTEGER; }
-  "float"   { return Parser.FLOAT; }
-  "string"  { return Parser.STRING; }
-  "bool"    { return Parser.BOOLEAN; }
-  "tuple"   { return Parser.TUPLE; }
-  "struct"  { return Parser.STRUCT; }
+  "int"     { return Parser.TYPE; }
+  "float"   { return Parser.TYPE; }
+  "string"  { return Parser.TYPE; }
+  "bool"    { return Parser.TYPE; }
+  "tuple"   { return Parser.TYPE; }
 }
 
 <YYINITIAL> {
@@ -62,6 +61,8 @@ BooleanLiteral = "true" | "false"
   "case"      { return Parser.CASE; }
   "defun"     { return Parser.DEFUN; }
   "include"   { return Parser.INCLUDE; }
+  "new"       { return Parser.NEW; }
+  "struct"    { return Parser.STRUCT; }
 }  
 
 /* operators */
@@ -96,14 +97,14 @@ BooleanLiteral = "true" | "false"
   "]"   { return Parser.R_SQBRACE; }
 }
 
+<YYINITIAL> {BooleanLiteral}    { return Parser.BOOLEAN; }
+
 /* identifiers */
-<YYINITIAL> {StructIdentifier}  { return Parser.STRUCT_IDENTIFIER; }
 <YYINITIAL> {Identifier}        { return Parser.IDENTIFIER; }
 
 /* literals */
 <YYINITIAL> {IntegerLiteral}    { return Parser.INTEGER; }
 <YYINITIAL> {FloatLiteral}      { return Parser.FLOAT; }
-<YYINITIAL> {BooleanLiteral}    { return Parser.BOOLEAN; }
 <YYINITIAL> \"                  { sb.setLength(0); yybegin(STRING_DQUOTED); }
 <YYINITIAL> \'                  { sb.setLength(0); yybegin(STRING_SQUOTED); }
 <YYINITIAL> {Comment}           {/* ignore */}
@@ -111,7 +112,7 @@ BooleanLiteral = "true" | "false"
 <STRING_DQUOTED> {
   \"            { 
                   yybegin(YYINITIAL); 
-                  Parser.yylval = new ParserVal(sb.toString()); 
+                  yyparser.yylval = new ParserVal(sb.toString()); 
                   return Parser.STRING; 
                 }
   [^\n\r\"\\]+  { sb.append(yytext()); }
@@ -126,7 +127,7 @@ BooleanLiteral = "true" | "false"
 <STRING_SQUOTED> {
   \'            { 
                   yybegin(YYINITIAL); 
-                  Parser.yylval = new ParserVal(sb.toString()); 
+                  yyparser.yylval = new ParserVal(sb.toString()); 
                   return Parser.STRING; 
                 }
   [^\n\r\'\\]+  { sb.append(yytext()); }
