@@ -5,17 +5,12 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.constants.BOType;
+
 /**
  *
  * @author Balushkin M.
  */
-public abstract class NodeAST {
-    public abstract void debug(int lvl);
-    
-    protected void printLevel(int lvl) {
-        for (int i = 0; i < lvl; ++lvl) {
-            System.out.println(" ");
-        }
-        System.out.println("|>");
-    }
+public abstract class ConstantNode extends NodeAST {
+    BOType cType;
 }

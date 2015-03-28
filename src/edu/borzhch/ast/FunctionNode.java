@@ -18,26 +18,43 @@ public class FunctionNode extends NodeAST {
     String returnTypeName;
     
     NodeList args;
-    NodeList instructions;
+    NodeList statements;
     
     public FunctionNode(String name, BOType returnType) {
         funcName = name;
         this.returnType = returnType;
         returnTypeName = BOHelper.toString(returnType);
-        args = new NodeList();
-        instructions = new NodeList();
+        args = new ArgumentList();
+        statements = new StatementList();
     }
     
     public FunctionNode(String name, String returnTypeName) {
         funcName = name;
         returnType = BOType.REF;
         this.returnTypeName = returnTypeName;        
-        args = new NodeList();
-        instructions = new NodeList();
+        args = new ArgumentList();
+        statements = new StatementList();
+    }
+    
+    public void setArguments(NodeList argumentList) {
+        args = argumentList;
+    }
+    public void setStatements(NodeList statementList) { 
+        statements = statementList;
     }
     
     @Override
     public void debug(int lvl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        printLevel(lvl);
+        System.out.println("Function: " + funcName);
+
+        ++lvl;
+        printLevel(lvl);
+        System.out.println("Type: " + returnTypeName + " ("
+                + BOHelper.toString(returnType) + ")");
+        printLevel(lvl);
+        System.out.println("Statement List:");
+        ++lvl;
+        statements.debug(lvl);
     }
 }

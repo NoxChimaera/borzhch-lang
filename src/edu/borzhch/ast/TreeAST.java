@@ -9,13 +9,13 @@ package edu.borzhch.ast;
  *
  * @author Balushkin M.
  */
-public abstract class NodeAST {
-    public abstract void debug(int lvl);
+public class TreeAST {
+    static NodeAST root;
+    public static void setRoot(NodeAST r) {
+        root = r;
+    }
     
-    protected void printLevel(int lvl) {
-        for (int i = 0; i < lvl; ++lvl) {
-            System.out.println(" ");
-        }
-        System.out.println("|>");
+    public void debug(int lvl) {
+        root.debug(lvl);
     }
 }

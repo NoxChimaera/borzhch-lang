@@ -9,13 +9,15 @@ package edu.borzhch.ast;
  *
  * @author Balushkin M.
  */
-public abstract class NodeAST {
-    public abstract void debug(int lvl);
+public class IntegerNode extends ConstantNode {
+    int val;
+    public IntegerNode(int value) {
+        val = value;
+    }
     
-    protected void printLevel(int lvl) {
-        for (int i = 0; i < lvl; ++lvl) {
-            System.out.println(" ");
-        }
-        System.out.println("|>");
+    @Override
+    public void debug(int lvl) {
+        printLevel(lvl);
+        System.out.println(val);
     }
 }

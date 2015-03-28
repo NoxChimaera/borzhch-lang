@@ -9,13 +9,9 @@ package edu.borzhch.ast;
  *
  * @author Balushkin M.
  */
-public abstract class NodeAST {
-    public abstract void debug(int lvl);
-    
-    protected void printLevel(int lvl) {
-        for (int i = 0; i < lvl; ++lvl) {
-            System.out.println(" ");
-        }
-        System.out.println("|>");
+public class ReturnNode extends NodeAST {
+    @Override
+    public void debug(int lvl) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

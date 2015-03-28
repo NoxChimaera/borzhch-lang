@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author Balushkin M.
  */
-public class NodeList extends NodeAST {
+public abstract class NodeList extends NodeAST {
     ArrayList<NodeAST> nodes;
     public NodeList() {
         nodes = new ArrayList<>();
@@ -29,7 +29,11 @@ public class NodeList extends NodeAST {
     
     @Override
     public void debug(int lvl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        printLevel(lvl);
+        System.out.println("Node List");
+        ++lvl;
+        for (NodeAST node : nodes) {
+            node.debug(lvl);
+        }
     }
-    
 }
