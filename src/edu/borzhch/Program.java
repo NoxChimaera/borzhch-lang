@@ -4,13 +4,11 @@
  * and open the template in the editor.
  */
 package edu.borzhch;
-import edu.borzhch.ast.*;
-import edu.borzhch.codegen.java.JavaCodegen;
-import edu.borzhch.constants.BOType;
 import edu.borzhch.language.*;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import com.beust.jcommander.JCommander;
 
 /**
  *
@@ -22,23 +20,16 @@ public class Program {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        test();
-    }
-    
-    public static void test() {
-        NodeList list = new ProgramNode();
-        FunctionNode function = new FunctionNode("main", BOType.VOID);
-        StatementList stmts = function.getStatements();
-        stmts.add(new DeclarationNode("res", BOType.INT));
-        stmts.add(new AssignNode("res", new IntegerNode(42)));
-        stmts.add(new ReturnNode(new VariableNode("res", BOType.INT)));
+        OptParser op = new OptParser();
+        new JCommander(op, args);
         
-        list.add(function);
-        
-        TreeAST.setRoot(list);
-        TreeAST.codegen();
-        
-//        System.out.println(JavaCodegen.foobar);
-//        list.debug(0);
+        FileReader r = null;
+        try {
+            for (String arg : op.getFiles()) {
+                r = new FileReader(arg);
+                Parser parser = new Parser(r, op.getDebugParser());
+                parser.run();
+            }
+        } catch (FileNotFoundException fileNotFoundException){}
     }
 }
