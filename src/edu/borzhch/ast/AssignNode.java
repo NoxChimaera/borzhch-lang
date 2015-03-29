@@ -5,14 +5,26 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+
 /**
- *
+ * Присваивание
  * @author Balushkin M.
  */
 public class AssignNode extends NodeAST {
+    /**
+     * Идентификатор переменной
+     */
     String left;
+    /**
+     * Выражение
+     */
     NodeAST right;
     
+    /**
+     * @param id Идентификатор переменной
+     * @param expr Выражение
+     */
     public AssignNode(String id, NodeAST expr) {
         left = id;
         right = expr;
@@ -28,5 +40,16 @@ public class AssignNode extends NodeAST {
         printLevel(lvl);
         System.out.println("Expression: ");
         right.debug(lvl + 1);
+    }
+
+    @Override
+    public void codegen() {
+        // Generate expression, push result into stack
+        // e.g.:
+        // 0:   bipush 42
+        right.codegen();
+        // 1:   istore var_index
+        // TODO: types. It works only with integers just now
+        JavaCodegen.method().store(left);
     }
 }

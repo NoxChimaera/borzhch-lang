@@ -1,7 +1,7 @@
 #netbeans
-/nbproject/private/
-/build/
-/dist/
+/nbproject/private/*
+/build/*
+/dist/*
 
 #vim
 *~
@@ -10,6 +10,11 @@
 #ctags
 tags
 
+#flex
+Lexer.java
+
 #yacc
 *.output
 *.tab.c
+Parser.java
+ParserVal.java

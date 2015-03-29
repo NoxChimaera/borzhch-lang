@@ -5,15 +5,17 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 
 /**
- *
+ * Узел переменной
  * @author Balushkin M.
  */
 public class VariableNode extends NodeAST {
     String id;
+    // ???
     BOType varType;
     String varTypeName;
     
@@ -31,7 +33,12 @@ public class VariableNode extends NodeAST {
 
     @Override
     public void debug(int lvl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        printLevel(lvl);
+        System.out.println("Variable: " + id);
     }
-    
+
+    @Override
+    public void codegen() {
+        // iload var_index
+    }
 }

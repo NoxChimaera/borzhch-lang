@@ -5,13 +5,35 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+
 /**
- *
+ * Узел конструкции return
  * @author Balushkin M.
  */
 public class ReturnNode extends NodeAST {
+    NodeAST expr;
+    
+    public ReturnNode(NodeAST retVal) {
+        expr = retVal;
+    }
+    
     @Override
     public void debug(int lvl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        printLevel(lvl);
+        System.out.println("Return: ");
+        ++lvl;
+        printLevel(lvl);
+        System.out.println("Expression: ");
+        expr.debug(lvl + 1);
+    }
+
+    @Override
+    public void codegen() {
+//        JavaCodegen.returnVoid();
+        
+//        JavaCodegen.add("return ");
+//        expr.codegen();
+//        JavaCodegen.add(";");
     }
 }

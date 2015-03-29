@@ -6,7 +6,7 @@
 package edu.borzhch.ast;
 
 /**
- *
+ * Список аргументов
  * @author Balushkin M.
  */
 public class ArgumentList extends NodeList {
