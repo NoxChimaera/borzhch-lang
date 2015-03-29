@@ -40,11 +40,12 @@ function: DEFUN TYPE IDENTIFIER L_BRACE param_list R_BRACE codeblock
         ;
 
 param_list: /* empty */
+          | decl
           | decl param_tail
           ;
 
-param_tail: COMMA param_tail
-          | decl
+param_tail: COMMA decl param_tail
+          | COMMA decl
           ;
 
 codeblock: L_CURBRACE stmt_list R_CURBRACE
@@ -71,19 +72,25 @@ decl_assign: decl ASSIGN exp
 
 stmt_list: /* empty */
 				 | stmt SEMICOLON stmt_list
+         | if stmt_list
+         | loop stmt_list
+         | switch stmt_list
          ;
 
 stmt: exp
-    | if
-    | loop
-    | switch
     | decl
     | decl_assign
+    | assign
     | GOTO IDENTIFIER
     | RETURN exp
     | BREAK
     | CONTINUE
     ;
+
+assign: structref ASSIGN exp
+      | IDENTIFIER ASSIGN exp
+      | arrayref ASSIGN exp
+      ;
 
 if: IF L_BRACE exp R_BRACE codeblock %prec IFX else
   ;
@@ -117,6 +124,7 @@ exp: exp ADD_ARITHM exp
    | NEW IDENTIFIER
    | reference
    | tuple_value
+   | IDENTIFIER
    | INTEGER
    | FLOAT
    | STRING
@@ -134,8 +142,17 @@ structref: IDENTIFIER DOT IDENTIFIER
 arrayref: IDENTIFIER L_SQBRACE exp R_SQBRACE
         ;
 
-tuple_value: L_CURBRACE exp R_CURBRACE
+tuple_value: L_CURBRACE exp_list R_CURBRACE
            ;
+
+exp_list: /* empty */
+          | exp
+          | exp exp_tail
+          ;
+
+exp_tail: COMMA exp exp_tail
+        | COMMA exp
+        ;
 
 %%
 

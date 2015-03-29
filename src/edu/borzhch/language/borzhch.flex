@@ -10,9 +10,10 @@ package edu.borzhch.language;
 %column
 
 %{
-  StringBuilder sb = new StringBuilder();
+  private static final int BUFSIZE = 8192;
+  StringBuilder sb = new StringBuilder(BUFSIZE);
 
-  private Parser yyparser;
+  private Parser yyparser = new Parser();
 %}
 
 LineTerminator = \r|\n|\r\n
