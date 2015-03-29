@@ -6,7 +6,7 @@
 package edu.borzhch.ast;
 
 /**
- *
+ * Список выражений
  * @author Balushkin M.
  */
 public class StatementList extends NodeList {

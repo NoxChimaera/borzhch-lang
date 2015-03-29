@@ -11,11 +11,12 @@ package edu.borzhch.ast;
  */
 public abstract class NodeAST {
     public abstract void debug(int lvl);
+    public abstract void codegen();
     
     protected void printLevel(int lvl) {
-        for (int i = 0; i < lvl; ++lvl) {
-            System.out.println(" ");
+        for (int i = 0; i < lvl; ++i) {
+            System.out.print(" ");
         }
-        System.out.println("|>");
+        System.out.print("|>");
     }
 }

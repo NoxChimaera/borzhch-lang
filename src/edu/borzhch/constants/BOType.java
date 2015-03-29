@@ -6,14 +6,32 @@
 package edu.borzhch.constants;
 
 /**
- *
+ * Типы языка Borzhch
  * @author Balushkin M.
  */
 public enum BOType {
-    MAGIC,
+    /**
+     * void, не используется в явном виде
+     */
+    VOID,
+    /**
+     * Логический тип
+     */
     BOOL,
+    /**
+     * Целочисленный тип
+     */
     INT,
+    /**
+     * Число с плавающей точкой
+     */
     FLOAT,
+    /**
+     * Строка
+     */
     STRING,
+    /**
+     * Ссылочный тип
+     */
     REF
 }

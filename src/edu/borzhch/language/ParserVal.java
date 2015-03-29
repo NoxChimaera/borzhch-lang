@@ -9,6 +9,8 @@ package edu.borzhch.language;
  * This class provides some of the functionality
  * of the yacc/C 'union' directive
  */
+package edu.borzhch.language;
+
 public class ParserVal
 {
 /**

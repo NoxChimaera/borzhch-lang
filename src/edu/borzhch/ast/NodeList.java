@@ -8,7 +8,7 @@ package edu.borzhch.ast;
 import java.util.ArrayList;
 
 /**
- *
+ * Список узлов
  * @author Balushkin M.
  */
 public abstract class NodeList extends NodeAST {
@@ -34,6 +34,13 @@ public abstract class NodeList extends NodeAST {
         ++lvl;
         for (NodeAST node : nodes) {
             node.debug(lvl);
+        }
+    }
+
+    @Override
+    public void codegen() {
+        for (NodeAST node : nodes) {
+            node.codegen();
         }
     }
 }

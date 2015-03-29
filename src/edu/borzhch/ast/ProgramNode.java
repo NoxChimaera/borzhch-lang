@@ -5,12 +5,10 @@
  */
 package edu.borzhch.ast;
 
-import edu.borzhch.constants.BOType;
-
 /**
- * Константа
+ * Узел программы
  * @author Balushkin M.
  */
-public abstract class ConstantNode extends NodeAST {
-    BOType cType;
+public class ProgramNode extends NodeList {
+    
 }

@@ -5,8 +5,10 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+
 /**
- *
+ * Целочтсленная константа
  * @author Balushkin M.
  */
 public class IntegerNode extends ConstantNode {
@@ -19,5 +21,11 @@ public class IntegerNode extends ConstantNode {
     public void debug(int lvl) {
         printLevel(lvl);
         System.out.println(val);
+    }
+
+    @Override
+    public void codegen() {
+        // Push variable into stack
+        JavaCodegen.method().push(val);
     }
 }

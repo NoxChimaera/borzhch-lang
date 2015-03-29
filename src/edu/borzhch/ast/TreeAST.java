@@ -5,8 +5,10 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+
 /**
- *
+ * Дерево
  * @author Balushkin M.
  */
 public class TreeAST {
@@ -15,7 +17,14 @@ public class TreeAST {
         root = r;
     }
     
-    public void debug(int lvl) {
+    public static void debug(int lvl) {
         root.debug(lvl);
+    }
+    
+    public static void codegen() {
+        JavaCodegen.newClass("Program");
+        JavaCodegen.setMainClass("Program");
+        root.codegen();
+        JavaCodegen.compileClass("Program");
     }
 }
