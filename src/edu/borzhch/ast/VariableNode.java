@@ -19,6 +19,13 @@ public class VariableNode extends NodeAST {
     BOType varType;
     String varTypeName;
     
+    // test
+    public VariableNode(String identifier) {
+        id = identifier;
+        varType = BOType.VOID;
+        varTypeName = "void";
+    }
+    
     public VariableNode(String identifier, BOType type) {
         id = identifier;
         varType = type;
