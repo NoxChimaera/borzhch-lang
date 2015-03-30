@@ -71,13 +71,13 @@ BooleanLiteral = "true" | "false"
   "**"          { return Parser.POW; }
   "==" | "!="   { yyparser.yylval = new ParserVal(yytext()); return Parser.EQ; }
   "<=" | ">="   { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS; }
-  "++" | "--"   { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
+  "#" | "@"   { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
   "&&" | "and"  { yyparser.yylval = new ParserVal(yytext()); return Parser.AND; }
   "||" | "or"   { yyparser.yylval = new ParserVal(yytext()); return Parser.OR; }
 }
 
 <YYINITIAL> {
-  "+" | "-"   { yyparser.yylval = new ParserVal(yytext()); return Parser.ADD_ARITHM; }
+  "+" | "-"   { yyparser.yylval = new ParserVal(yytext()); return Parser.ADD_ARITHM;  }
   "*" | "/"   { yyparser.yylval = new ParserVal(yytext()); return Parser.MUL_ARITHM; }
   "<" | ">"   { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS; }
   "!" | "not" { yyparser.yylval = new ParserVal(yytext()); return Parser.NOT; }

@@ -19,3 +19,7 @@ Lexer.java
 Parser.java
 ParserVal.java
 yacc.*
+
+#yacc 'n flex generics
+/src/edu/borzhch/language/Parser.java
+/src/edu/borzhch/language/Lexer.java
