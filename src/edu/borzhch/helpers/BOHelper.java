@@ -79,7 +79,7 @@ public class BOHelper {
     public static Type toJVMType(BOType type) {
          switch (type) {
             case VOID:
-                 return Type.VOID;
+                return Type.VOID;
             case BOOL:
                 return Type.BOOLEAN;
             case INT:

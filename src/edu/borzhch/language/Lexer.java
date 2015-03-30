@@ -468,6 +468,10 @@ public class Lexer {
   StringBuilder sb = new StringBuilder(BUFSIZE);
 
   private Parser yyparser = new Parser();
+  public Lexer(java.io.Reader r, Parser yyparser) {
+    this(r);
+    this.yyparser = yyparser;
+  }
 
 
   /**
@@ -856,15 +860,17 @@ public class Lexer {
           }
         case 54: break;
         case 3: 
-          { return Parser.MUL_ARITHM;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.MUL_ARITHM;
           }
         case 55: break;
         case 4: 
-          { return Parser.IDENTIFIER;
+          { yyparser.yylval = new ParserVal(yytext());
+    return Parser.IDENTIFIER;
           }
         case 56: break;
         case 5: 
-          { return Parser.INTEGER;
+          { yyparser.yylval = new ParserVal(Integer.parseInt(yytext()));
+    return Parser.INTEGER;
           }
         case 57: break;
         case 6: 
@@ -876,19 +882,19 @@ public class Lexer {
           }
         case 59: break;
         case 8: 
-          { return Parser.NOT;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.NOT;
           }
         case 60: break;
         case 9: 
-          { return Parser.MORELESS;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS;
           }
         case 61: break;
         case 10: 
-          { return Parser.ADD_ARITHM;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.ADD_ARITHM;
           }
         case 62: break;
         case 11: 
-          { return Parser.XOR;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.XOR;
           }
         case 63: break;
         case 12: 
@@ -950,7 +956,8 @@ public class Lexer {
           }
         case 77: break;
         case 26: 
-          { return Parser.FLOAT;
+          { yyparser.yylval = new ParserVal(Float.parseFloat(yytext()));
+    return Parser.FLOAT;
           }
         case 78: break;
         case 27: 
@@ -958,7 +965,7 @@ public class Lexer {
           }
         case 79: break;
         case 28: 
-          { return Parser.OR;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.OR;
           }
         case 80: break;
         case 29: 
@@ -966,15 +973,15 @@ public class Lexer {
           }
         case 81: break;
         case 30: 
-          { return Parser.EQ;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.EQ;
           }
         case 82: break;
         case 31: 
-          { return Parser.INCR;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR;
           }
         case 83: break;
         case 32: 
-          { return Parser.AND;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.AND;
           }
         case 84: break;
         case 33: 
@@ -1002,7 +1009,7 @@ public class Lexer {
           }
         case 90: break;
         case 39: 
-          { return Parser.TYPE;
+          { yyparser.yylval = new ParserVal(yytext()); return Parser.TYPE;
           }
         case 91: break;
         case 40: 
@@ -1010,7 +1017,9 @@ public class Lexer {
           }
         case 92: break;
         case 41: 
-          { return Parser.BOOLEAN;
+          { if (yytext().equals("true")) { yyparser.yylval = new ParserVal(1); }
+    else { yyparser.yylval = new ParserVal(0); } 
+    return Parser.BOOLEAN;
           }
         case 93: break;
         case 42: 

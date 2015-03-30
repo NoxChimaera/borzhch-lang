@@ -18,3 +18,4 @@ Lexer.java
 *.tab.c
 Parser.java
 ParserVal.java
+yacc.*
