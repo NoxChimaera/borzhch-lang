@@ -14,6 +14,19 @@ import org.apache.bcel.generic.*;
  * @author Balushkin M.
  */
 public class BOHelper {
+    public static boolean isType(String str) {
+        switch (str) {
+            case "void":
+            case "bool":
+            case "int":
+            case "float":
+            case "string":
+                return true;
+            default:
+                return false;
+        }
+    }
+    
     /**
      * Конвертация из строки в Borzhch
      * @param type Имя типа

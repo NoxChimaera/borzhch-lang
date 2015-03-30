@@ -17,6 +17,9 @@ public class DeclarationNode extends NodeAST {
     BOType varType;
     String varTypeName;
     String varName;
+    public String getName() {
+        return varName;
+    }
     
     /**
      * Объявление переменных примитивных типов

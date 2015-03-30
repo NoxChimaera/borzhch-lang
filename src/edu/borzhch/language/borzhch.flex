@@ -14,6 +14,10 @@ package edu.borzhch.language;
   StringBuilder sb = new StringBuilder(BUFSIZE);
 
   private Parser yyparser = new Parser();
+  public Lexer(java.io.Reader r, Parser yyparser) {
+    this(r);
+    this.yyparser = yyparser;
+  }
 %}
 
 LineTerminator = \r|\n|\r\n
@@ -41,11 +45,7 @@ BooleanLiteral = "true" | "false"
 
 /* keywords */
 <YYINITIAL> {
-  "int"     { return Parser.TYPE; }
-  "float"   { return Parser.TYPE; }
-  "string"  { return Parser.TYPE; }
-  "bool"    { return Parser.TYPE; }
-  "tuple"   { return Parser.TYPE; }
+  "int"|"float"|"string"|"bool"|"tuple"   { yyparser.yylval = new ParserVal(yytext()); return Parser.TYPE; }
 }
 
 <YYINITIAL> {
@@ -69,19 +69,19 @@ BooleanLiteral = "true" | "false"
 /* operators */
 <YYINITIAL> {
   "**"          { return Parser.POW; }
-  "==" | "!="   { return Parser.EQ; }
-  "<=" | ">="   { return Parser.MORELESS; }
-  "++" | "--"   { return Parser.INCR; }
-  "&&" | "and"  { return Parser.AND; }
-  "||" | "or"   { return Parser.OR; }
+  "==" | "!="   { yyparser.yylval = new ParserVal(yytext()); return Parser.EQ; }
+  "<=" | ">="   { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS; }
+  "++" | "--"   { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
+  "&&" | "and"  { yyparser.yylval = new ParserVal(yytext()); return Parser.AND; }
+  "||" | "or"   { yyparser.yylval = new ParserVal(yytext()); return Parser.OR; }
 }
 
 <YYINITIAL> {
-  "+" | "-"   { return Parser.ADD_ARITHM; }
-  "*" | "/"   { return Parser.MUL_ARITHM; }
-  "<" | ">"   { return Parser.MORELESS; }
-  "!" | "not" { return Parser.NOT; }
-  "^" | "xor" { return Parser.XOR; }
+  "+" | "-"   { yyparser.yylval = new ParserVal(yytext()); return Parser.ADD_ARITHM; }
+  "*" | "/"   { yyparser.yylval = new ParserVal(yytext()); return Parser.MUL_ARITHM; }
+  "<" | ">"   { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS; }
+  "!" | "not" { yyparser.yylval = new ParserVal(yytext()); return Parser.NOT; }
+  "^" | "xor" { yyparser.yylval = new ParserVal(yytext()); return Parser.XOR; }
   "="         { return Parser.ASSIGN; }
 }
 
@@ -98,14 +98,27 @@ BooleanLiteral = "true" | "false"
   "]"   { return Parser.R_SQBRACE; }
 }
 
-<YYINITIAL> {BooleanLiteral}    { return Parser.BOOLEAN; }
+<YYINITIAL> {BooleanLiteral}    { 
+    if (yytext().equals("true")) { yyparser.yylval = new ParserVal(1); }
+    else { yyparser.yylval = new ParserVal(0); } 
+    return Parser.BOOLEAN; 
+}
 
 /* identifiers */
-<YYINITIAL> {Identifier}        { return Parser.IDENTIFIER; }
+<YYINITIAL> {Identifier}        { 
+    yyparser.yylval = new ParserVal(yytext());
+    return Parser.IDENTIFIER; 
+}
 
 /* literals */
-<YYINITIAL> {IntegerLiteral}    { return Parser.INTEGER; }
-<YYINITIAL> {FloatLiteral}      { return Parser.FLOAT; }
+<YYINITIAL> {IntegerLiteral}    { 
+    yyparser.yylval = new ParserVal(Integer.parseInt(yytext()));
+    return Parser.INTEGER; 
+}
+<YYINITIAL> {FloatLiteral}      { 
+    yyparser.yylval = new ParserVal(Float.parseFloat(yytext()));
+    return Parser.FLOAT; 
+}
 <YYINITIAL> \"                  { sb.setLength(0); yybegin(STRING_DQUOTED); }
 <YYINITIAL> \'                  { sb.setLength(0); yybegin(STRING_SQUOTED); }
 <YYINITIAL> {Comment}           {/* ignore */}
