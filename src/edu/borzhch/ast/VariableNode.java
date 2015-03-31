@@ -16,25 +16,24 @@ import edu.borzhch.helpers.BOHelper;
 public class VariableNode extends NodeAST {
     String id;
     // ???
-    BOType varType;
     String varTypeName;
     
     // test
     public VariableNode(String identifier) {
         id = identifier;
-        varType = BOType.VOID;
+        type = BOType.VOID;
         varTypeName = "void";
     }
     
     public VariableNode(String identifier, BOType type) {
         id = identifier;
-        varType = type;
+        this.type = type;
         varTypeName = BOHelper.toString(type);
     }
     
     public VariableNode(String identifier, String typeName) {
         id = identifier;
-        varType = BOType.REF;
+        this.type = BOType.REF;
         varTypeName = typeName;
     }
 

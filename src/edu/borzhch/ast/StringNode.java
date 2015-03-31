@@ -5,6 +5,8 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.constants.BOType;
+
 /**
  *
  * @author Balushkin M.
@@ -13,12 +15,13 @@ public class StringNode extends NodeAST {
     String sval;
     public StringNode(String val) {
         sval = val;
+        type = BOType.STRING;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println(sval);
+        System.out.printf("'%s';S\n", sval);
     }
 
     @Override

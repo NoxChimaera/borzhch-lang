@@ -25,19 +25,21 @@
 
 %nonassoc IFX
 
-%left MORELESS EQ
-%left AND OR
+%left OR
+%left AND 
 %left XOR
+%left EQ
+%left MORELESS
 %left ADD_ARITHM
 %left MUL_ARITHM
 %right POW
-%left INCR
 %left UN_ARITHM NOT
+%right INCR DOT
 
 %type <obj> global_list global 
 %type <obj> function struct_decl
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference structref arrayref 
+%type <obj> reference structref arrayref idref
 %%
 
 start: 
@@ -211,25 +213,31 @@ stmt_list: /* empty */ { $$ = null; }
              StatementList list = new StatementList();
              list.add((NodeAST) $1);
              if ($3 != null) list.addAll((StatementList) $3);
+             $$ = list;
          }
          | if stmt_list { $$ = null; }
          | loop stmt_list { $$ = null; }
          | switch stmt_list { $$ = null; }
          ;
 
-stmt: decl { $$ = $1; }
+stmt: 
+    decl { $$ = $1; }
     | decl_assign { $$ = $1; }
-    | assign { $$ = null; }
+    | assign { $$ = $1; }
     | GOTO IDENTIFIER { $$ = null; }
     | RETURN exp { $$ = null; }
     | BREAK { $$ = null; }
     | CONTINUE { $$ = null; }
     ;
 
-assign: structref ASSIGN exp
-      | IDENTIFIER ASSIGN exp
-      | arrayref ASSIGN exp
-      ;
+assign: 
+    structref ASSIGN exp
+    | IDENTIFIER ASSIGN exp {
+        AssignNode an = new AssignNode($1, (NodeAST) $3);
+        $$ = an;
+    }
+    | arrayref ASSIGN exp
+    ;
 
 if: IF L_BRACE exp R_BRACE codeblock %prec IFX else
   ;
@@ -250,47 +258,54 @@ switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock
 
 exp: 
     exp ADD_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp MUL_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp POW exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, "**"); }
-   | exp EQ exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp MORELESS exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp AND exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "a"); }
-   | exp OR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "o"); }
-   | exp XOR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "x"); }
-   | L_BRACE exp R_BRACE { $$ = $2; }
-   | NOT exp { $$ = new UnOpNode((NodeAST) $2, "n"); }
+    | exp MUL_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+    | exp POW exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, "**"); }
+    | exp EQ exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+    | exp MORELESS exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+    | exp AND exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "and"); }
+    | exp OR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "or"); }
+    | exp XOR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "xor"); }
+    | L_BRACE exp R_BRACE { $$ = $2; }
+    | NOT exp { $$ = new UnOpNode((NodeAST) $2, "not"); }
 
-   | ADD_ARITHM exp %prec UN_ARITHM { $$ = new UnOpNode((NodeAST) $2, $1); }
+    | ADD_ARITHM exp %prec UN_ARITHM { $$ = new UnOpNode((NodeAST) $2, $1); }
 
-   /*| AR_MINUS exp %prec UN_MINUS { $$ = new UnOpNode((NodeAST) $2, "-"); }
-   | AR_PLUS exp %prec UN_PLUS { $$ = new UnOpNode((NodeAST) $2, "+"); }*/
+    /*| AR_MINUS exp %prec UN_MINUS { $$ = new UnOpNode((NodeAST) $2, "-"); }
+    | AR_PLUS exp %prec UN_PLUS { $$ = new UnOpNode((NodeAST) $2, "+"); }*/
 
-   | IDENTIFIER INCR { $$ = new PostOpNode(new VariableNode($1), $2); }
-   | NEW IDENTIFIER { $$ = new NewObjectNode($2); }
-   | reference { $$ = $1; }
-   | tuple_value { $$ = null; }
-   | IDENTIFIER { $$ = new VariableNode($1); }
-   | INTEGER { $$ = new IntegerNode($1); }
-   | FLOAT { $$ = new FloatNode((float)$1); }
-   | STRING { $$ = new StringNode($1); }
-   | BOOLEAN { $$ = new BooleanNode($1); }
-   ;
-
-reference: 
-    structref { $$ = $1; }
-    | arrayref { $$ = $1; }
+    | IDENTIFIER INCR { $$ = new PostOpNode(new VariableNode($1), $2); }
+    | NEW IDENTIFIER { $$ = new NewObjectNode($2); }
+    | reference { $$ = $1; }
+    | tuple_value { $$ = null; }
+    /*| IDENTIFIER { $$ = new VariableNode($1); }*/
+    | idref { $$ = $1; }
+    | INTEGER { $$ = new IntegerNode($1); }
+    | FLOAT { $$ = new FloatNode((float)$1); }
+    | STRING { $$ = new StringNode($1); }
+    | BOOLEAN { $$ = new BooleanNode($1); }
     ;
 
-structref: 
-    IDENTIFIER DOT IDENTIFIER {
-        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
-        $$ = dot;
+idref:
+    idref DOT idref {
+        $$ = new DotOpNode((NodeAST) $1, (NodeAST) $3);
     }
-    | IDENTIFIER DOT structref {
+    | IDENTIFIER { $$ = new VariableNode($1); }
+
+reference: 
+    /*structref { $$ = $1; }*/
+    arrayref { $$ = $1; }
+    ;
+
+/*structref: 
+    IDENTIFIER DOT structref {
         DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) $3);
         $$ = dot;
     }
-    ;
+    | IDENTIFIER DOT IDENTIFIER { 
+        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
+        $$ = dot;
+    }
+    ;*/
 
 arrayref: 
     IDENTIFIER L_SQBRACE exp R_SQBRACE {

@@ -5,6 +5,8 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.constants.BOType;
+
 /**
  *
  * @author Balushkin M.
@@ -13,12 +15,13 @@ public class FloatNode extends ConstantNode {
     float val;
     public FloatNode(float fval) {
         val = fval;
+        type = BOType.FLOAT;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println(val);
+        System.out.printf("%f;F\n", val);
     }
 
     @Override

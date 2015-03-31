@@ -6,6 +6,7 @@
 package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.constants.BOType;
 
 /**
  * Целочтсленная константа
@@ -15,12 +16,13 @@ public class IntegerNode extends ConstantNode {
     int val;
     public IntegerNode(int value) {
         val = value;
+        type = BOType.INT;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println(val);
+        System.out.printf("%d;I\n", val);
     }
 
     @Override

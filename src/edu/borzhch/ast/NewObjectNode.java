@@ -5,6 +5,8 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.constants.BOType;
+
 /**
  *
  * @author Balushkin M.
@@ -13,6 +15,7 @@ public class NewObjectNode extends NodeAST {
     String identifier;
     public NewObjectNode(String id) {
         identifier = id;
+        type = BOType.REF;
     }
     
     @Override

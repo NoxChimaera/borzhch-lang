@@ -10,9 +10,9 @@ package edu.borzhch.ast;
  * @author Balushkin M.
  */
 public class DotOpNode extends NodeAST {
-    VariableNode l;
+    NodeAST l;
     NodeAST r;
-    public DotOpNode(VariableNode left, NodeAST right) {
+    public DotOpNode(NodeAST left, NodeAST right) {
         l = left;
         r = right;
     }

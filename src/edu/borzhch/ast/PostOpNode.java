@@ -21,9 +21,6 @@ public class PostOpNode extends OpNode {
     public void debug(int lvl) {
         printLevel(lvl);
         System.out.println("Post " + op);
-        ++lvl;
-        printLevel(lvl);
-        System.out.println("to");
         var.debug(lvl + 1);
     }
 
