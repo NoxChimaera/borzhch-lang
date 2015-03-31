@@ -5,6 +5,9 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.constants.BOType;
+
 /**
  *
  * @author Balushkin M.
@@ -13,17 +16,18 @@ public class FloatNode extends ConstantNode {
     float val;
     public FloatNode(float fval) {
         val = fval;
+        type = BOType.FLOAT;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println(val);
+        System.out.printf("%f;F\n", val);
     }
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JavaCodegen.method().pushFloat(val);
     }
     
 }

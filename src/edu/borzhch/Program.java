@@ -24,14 +24,19 @@ public class Program {
         OptParser op = new OptParser();
         new JCommander(op, args);
         
-        FileReader r = null;
+        FileReader r;
         try {
             for (String arg : op.getFiles()) {
                 r = new FileReader(arg);
                 Parser parser = new Parser(r, op.getDebugParser());
                 parser.run();
+                TreeAST.debug(0);
+                TreeAST.codegen();
             }
-        } catch (FileNotFoundException fileNotFoundException){}
-        if(op.getDebugTree()) TreeAST.debug(0);
+        } catch (FileNotFoundException fileNotFoundException){
+            System.err.println(fileNotFoundException);
+            System.out.println(fileNotFoundException);
+        }
+				if(op.getDebugTree()) TreeAST.debug(0);
     }
 }

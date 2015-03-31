@@ -41,8 +41,13 @@ public class FunctionNode extends NodeAST {
      */
     public FunctionNode(String name, String returnTypeName) {
         funcName = name;
-        returnType = BOType.REF;
-        this.returnTypeName = returnTypeName;        
+        this.returnTypeName = returnTypeName;
+        if (BOHelper.isType(returnTypeName)) {
+            returnType = BOHelper.getType(returnTypeName);
+        } else {
+            returnType = BOType.REF;
+        }
+   
         args = new ArgumentList();
         statements = new StatementList();
     }

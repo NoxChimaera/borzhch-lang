@@ -5,6 +5,10 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.constants.BOType;
+import edu.borzhch.helpers.BOHelper;
+
 /**
  *
  * @author Balushkin M.
@@ -22,15 +26,59 @@ public class ArOpNode extends OpNode {
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println("Arithmetic " + op);
+        System.out.println("Arithmetic " + op + " (" 
+                + BOHelper.toString(type) + ")");
         ++lvl;
         l.debug(lvl);
         r.debug(lvl);
-        
     }
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        l.codegen();
+        r.codegen();
+        
+        switch (type) {
+            case INT:
+                codegenInt(); 
+                break;
+            case FLOAT:
+                codegenFloat();
+                break;
+        }
+    }
+    private void codegenFloat() {
+        JavaCodegen.method().convert(r.type, l.type);
+        switch (op) {
+            case "+":
+                JavaCodegen.method().add(BOType.FLOAT);
+                break;
+            case "-":
+                JavaCodegen.method().sub(BOType.FLOAT);
+                break;
+            case "*":               
+                JavaCodegen.method().mul(BOType.FLOAT);
+                break;
+            case "/":                
+                JavaCodegen.method().div(BOType.FLOAT);
+                break;
+        }
+    }
+    private void codegenInt() {
+        JavaCodegen.method().convert(r.type, l.type);
+        switch (op) {
+            case "+":
+                JavaCodegen.method().add(BOType.INT);
+                break;
+            case "-":
+                JavaCodegen.method().sub(BOType.INT);
+                break;
+            case "*":               
+                JavaCodegen.method().mul(BOType.INT);
+                break;
+            case "/":                
+                JavaCodegen.method().div(BOType.INT);
+                break;
+        }
     }
 }

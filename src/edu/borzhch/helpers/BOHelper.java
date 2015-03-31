@@ -27,6 +27,10 @@ public class BOHelper {
         }
     }
     
+    public static boolean isNumber(BOType type) {
+        return BOType.INT == type || BOType.FLOAT == type;
+    }
+    
     /**
      * Конвертация из строки в Borzhch
      * @param type Имя типа

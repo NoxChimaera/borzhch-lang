@@ -5,6 +5,8 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.constants.BOType;
+
 /**
  *
  * @author Balushkin M.
@@ -13,12 +15,15 @@ public class BooleanNode extends ConstantNode {
     boolean bval;
     public BooleanNode(int val) {
         bval = val != 0;
+        type = BOType.BOOL;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println(bval);
+        System.out.printf("%b;B\n", bval);
+        
+//        System.out.println(bval);
     }
 
     @Override

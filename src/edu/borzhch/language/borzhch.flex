@@ -58,7 +58,8 @@ BooleanLiteral = "true" | "false"
   "else"      { return Parser.ELSE; }
   "switch"    { return Parser.SWITCH;}
   "case"      { return Parser.CASE; }
-  "defun"     { return Parser.DEFUN; }
+  "function"     { return Parser.DEFUN; }
+  "procedure"     { return Parser.PROC; }
   "include"   { return Parser.INCLUDE; }
   "new"       { return Parser.NEW; }
   "struct"    { return Parser.STRUCT; }

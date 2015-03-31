@@ -8,7 +8,7 @@
   import edu.borzhch.ast.*;
   import edu.borzhch.helpers.*;
   import edu.borzhch.SymTable;
-  
+  import edu.borzhch.constants.*;
 %}
 
 %token <sval> TYPE IDENTIFIER
@@ -25,19 +25,21 @@
 
 %nonassoc IFX
 
-%left MORELESS EQ
-%left AND OR
+%left OR
+%left AND 
 %left XOR
+%left EQ
+%left MORELESS
 %left ADD_ARITHM
 %left MUL_ARITHM
 %right POW
-%left INCR
 %left UN_ARITHM NOT
+%right INCR DOT
 
 %type <obj> global_list global exp_list exp_tail
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference structref arrayref param_list decl_block
+%type <obj> reference structref arrayref param_list decl_block idref
 %%
 
 start: 
@@ -108,7 +110,7 @@ function:
           String msg = String.format("identifier <%s> already in use\n", $2);
           System.err.println(msg);
         }
-        FunctionNode func = new FunctionNode($2, BOHelper.getType("void"));
+        FunctionNode func = new FunctionNode($2, BOType.VOID);
         func.setStatements((StatementList) $6);
 
         funcTable.pushSymbol($2, "void");
@@ -236,6 +238,7 @@ stmt_list: /* empty */ { $$ = null; }
              StatementList list = new StatementList();
              list.add((NodeAST) $1);
              if ($3 != null) list.addAll((StatementList) $3);
+             $$ = list;
          }
          | if stmt_list { 
             StatementList node = new StatementList();
@@ -262,15 +265,18 @@ stmt: decl            { $$ = $1; }
     | CONTINUE        { $$ = null; }
     ;
 
-assign: structref ASSIGN exp
-      | IDENTIFIER ASSIGN exp {
-        if(!isIdentifierExist($1)) {
+assign: 
+    structref ASSIGN exp
+    | IDENTIFIER ASSIGN exp {
+				if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> not declared\n", $1);
           System.err.println(msg);
         }
-      }
-      | arrayref ASSIGN exp
-      ;
+        AssignNode an = new AssignNode($1, (NodeAST) $3);
+        $$ = an;
+    }
+    | arrayref ASSIGN exp
+    ;
 
 if: IF L_BRACE exp R_BRACE codeblock %prec IFX else {
     IfNode node = new IfNode((NodeAST) $3, (StatementList) $5, (IfNode) $6);
@@ -299,23 +305,120 @@ switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock
       | SWITCH L_BRACE exp R_BRACE codeblock 
       ;
 
-exp: 
-   exp ADD_ARITHM exp     { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp MUL_ARITHM exp   { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp POW exp          { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, "**"); }
-   | exp EQ exp           { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp MORELESS exp     { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp AND exp          { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "a"); }
-   | exp OR exp           { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "o"); }
-   | exp XOR exp          { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "x"); }
+exp:
+   exp ADD_ARITHM exp { 
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        }
+        ArOpNode node = new ArOpNode(l, r, $2);
+        node.type(infer);
+        $$ = node;
+    }
+    | exp MUL_ARITHM exp { 
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        }
+        ArOpNode node = new ArOpNode(l, r, $2);
+        node.type(infer);
+        $$ = node;
+    }
+    | exp POW exp { 
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;
+        if (!BOHelper.isNumber(l.type())) {
+            yyerror(ErrorHelper.incompatibleTypes(l.type(), BOType.FLOAT));
+        } else
+        if (!BOHelper.isNumber(r.type())) {
+            yyerror(ErrorHelper.incompatibleTypes(l.type(), BOType.FLOAT));
+        }
+
+        ArOpNode node = new ArOpNode(l, r, "**");
+       node.type(BOType.FLOAT);
+        $$ = node;
+    }
+    | exp EQ exp {          
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;     
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        }
+        CmpOpNode node = new CmpOpNode(l, r, $2);
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp MORELESS exp {         
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;     
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        } else
+        if (!BOHelper.isNumber(infer)) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), "number"));
+        }
+        CmpOpNode node = new CmpOpNode(l, r, $2);
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp AND exp {
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3; 
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.BOOL != infer) {
+            yyerror(ErrorHelper.incompatibleTypes(infer, BOType.BOOL));
+        }
+        LogOpNode node = new LogOpNode(l, r, "and");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp OR exp {
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3; 
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.BOOL != infer) {
+            yyerror(ErrorHelper.incompatibleTypes(infer, BOType.BOOL));
+        }
+        LogOpNode node = new LogOpNode(l, r, "or");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp XOR exp {
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3; 
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.BOOL != infer) {
+            yyerror(ErrorHelper.incompatibleTypes(infer, BOType.BOOL));
+        }
+        LogOpNode node = new LogOpNode(l, r, "xor");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
    | L_BRACE exp R_BRACE  { $$ = $2; }
-   | NOT exp              { $$ = new UnOpNode((NodeAST) $2, "n"); }
-
-   | ADD_ARITHM exp %prec UN_ARITHM { $$ = new UnOpNode((NodeAST) $2, $1); }
-
-   /*| AR_MINUS exp %prec UN_MINUS { $$ = new UnOpNode((NodeAST) $2, "-"); }
-   | AR_PLUS exp %prec UN_PLUS { $$ = new UnOpNode((NodeAST) $2, "+"); }*/
-
+   | NOT exp {
+        NodeAST r = (NodeAST) $2; 
+        if (BOType.BOOL != r.type()) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), BOType.BOOL));
+        }
+        UnOpNode node = new UnOpNode(r, "not");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | ADD_ARITHM exp %prec UN_ARITHM NOT exp {
+        NodeAST e = (NodeAST) $2; 
+        if (!BOHelper.isNumber(e.type())) {
+            yyerror(ErrorHelper.incompatibleTypes(e.type(), "number"));
+        }
+        UnOpNode node = new UnOpNode(e, $1);
+        node.type(e.type());
+        $$ = node;
+    }
    | IDENTIFIER INCR  { 
       if(!isIdentifierExist($1)) {
         String msg = String.format("identifier <%s> not declared\n", $1);
@@ -332,46 +435,40 @@ exp:
    }
    | reference        { $$ = $1; }
    | tuple_value      { $$ = $1; }
-   | IDENTIFIER       { 
-      if(!isIdentifierExist($1)) {
-        String msg = String.format("identifier <%s> not declared\n", $1);
-        System.err.println(msg);
-      }
-      $$ = new VariableNode($1);
-   }
+	 | idref 						{ $$ = $1; }
    | INTEGER          { $$ = new IntegerNode($1); }
    | FLOAT            { $$ = new FloatNode((float)$1); }
    | STRING           { $$ = new StringNode($1); }
    | BOOLEAN          { $$ = new BooleanNode($1); }
    ;
+	 
+idref:
+    idref DOT idref {
+        $$ = new DotOpNode((NodeAST) $1, (NodeAST) $3);
+    }
+    | IDENTIFIER { 
+			if(!isIdentifierExist($1)) {
+        String msg = String.format("identifier <%s> not declared\n", $1);
+        System.err.println(msg);
+      }
+			$$ = new VariableNode($1); 
+		}
 
 reference: 
-    structref { $$ = $1; }
-    | arrayref { $$ = $1; }
+    /*structref { $$ = $1; }*/
+    arrayref { $$ = $1; }
     ;
-
-structref: 
-    IDENTIFIER DOT IDENTIFIER {
-        if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> not declared\n", $1);
-          System.err.println(msg);
-        }
-        if(!isIdentifierExist($3)) {
-          String msg = String.format("identifier <%s> not declared\n", $3);
-          System.err.println(msg);
-        }
-        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
-        $$ = dot;
-    }
-    | IDENTIFIER DOT structref {
-        if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> not declared\n", $1);
-          System.err.println(msg);
-        }
+		
+/*structref: 
+    IDENTIFIER DOT structref {
         DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) $3);
         $$ = dot;
     }
-    ;
+    | IDENTIFIER DOT IDENTIFIER { 
+        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
+        $$ = dot;
+    }
+    ;*/
 
 arrayref: 
     IDENTIFIER L_SQBRACE exp R_SQBRACE {

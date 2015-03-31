@@ -69,11 +69,73 @@ public class MethodBuilder {
     
     /**
      * Добавляет число в стек
-     * @param val Целочисленная константа
+     * @param ival Целочисленная константа
      * @see PUSH
      */
-    public void push(int val) {
-        il.append(new PUSH(cg.getConstantPool(), val));
+    public void pushInt(int ival) {
+        il.append(new PUSH(cg.getConstantPool(), ival));
+    }
+    public void pushFloat(float fval) {
+        il.append(new PUSH(cg.getConstantPool(), fval));
+    }
+    public void pushString(String str) {
+        il.append(new PUSH(cg.getConstantPool(), str));
+    }
+    public void pushBool(boolean bval) {
+        il.append(new PUSH(cg.getConstantPool(), bval));
+    }
+ 
+    public void add(BOType type) {
+        switch (type) {
+            case INT:
+                il.append(new IADD());
+                break;
+            case FLOAT:
+                il.append(new FADD());
+        }
+    }
+    public void sub(BOType type) {
+        switch (type) {
+            case INT:
+                il.append(new ISUB());
+                break;
+            case FLOAT:
+                il.append(new FSUB());
+        }
+    }
+    public void mul(BOType type) {
+        switch (type) {
+            case INT:
+                il.append(new IMUL());
+                break;
+            case FLOAT:
+                il.append(new FMUL());
+        }
+    }
+    public void div(BOType type) {
+        switch (type) {
+            case INT:
+                il.append(new IDIV());
+                break;
+            case FLOAT:
+                il.append(new FDIV());
+        }
+    }
+    
+    public void convert(BOType from, BOType to) {
+        if (from == to) return;
+        
+        switch (from) {
+            case INT:
+                if (BOType.FLOAT == to) {
+                    il.append(new I2F());
+                }
+            break;
+            case FLOAT:
+                if (BOType.INT == to) {
+                    il.append(new F2I());
+                }
+        }
     }
 
     /**
@@ -86,7 +148,10 @@ public class MethodBuilder {
         il.append(new ILOAD(1));
         il.append(f.createInvoke("java.io.PrintStream", "println", 
                 Type.VOID, new Type[] { Type.INT }, INVOKEVIRTUAL));
-
+       
+//        il.append(new ILOAD(1));
+//        il.append(new IRETURN());
+        
         il.append(new RETURN());
         // MOCK END
         
