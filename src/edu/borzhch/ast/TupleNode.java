@@ -10,11 +10,19 @@ package edu.borzhch.ast;
  * @author Balushkin M.
  */
 public class TupleNode extends NodeAST {
-//    StatementList 
+    StatementList statementList = null;    
+    
+    public TupleNode(StatementList statementList) {
+        this.statementList = statementList;
+    }
     
     @Override
     public void debug(int lvl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        printLevel(lvl);
+        System.out.println("Tuple:");
+        
+        ++lvl;
+        statementList.debug(lvl);
     }
 
     @Override

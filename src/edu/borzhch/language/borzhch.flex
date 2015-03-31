@@ -25,9 +25,7 @@ InputCharacter = [^\r\n]
 Whitespace     = {LineTerminator} | [ \t\f]
 
 /* comments */
-Comment = {TraditionalComment} | {EndOfLineComment}
-TraditionalComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
-EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
+Comment = "//" {InputCharacter}* {LineTerminator}
 
 /* identifiers */
 Identifier = _?[:letter:][[:letter:][:digit:]]*
@@ -37,7 +35,7 @@ IntegerLiteral = 0 | [1-9][0-9]*
 FloatLiteral = [0-9]+\.[0-9]*
 BooleanLiteral = "true" | "false"
 
-%state STRING_DQUOTED, STRING_SQUOTED
+%state STRING_DQUOTED, STRING_SQUOTED, COMMENT
 
 %%
 
@@ -71,7 +69,7 @@ BooleanLiteral = "true" | "false"
   "**"          { return Parser.POW; }
   "==" | "!="   { yyparser.yylval = new ParserVal(yytext()); return Parser.EQ; }
   "<=" | ">="   { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS; }
-  "#" | "@"   { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
+  "#" | "@"     { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
   "&&" | "and"  { yyparser.yylval = new ParserVal(yytext()); return Parser.AND; }
   "||" | "or"   { yyparser.yylval = new ParserVal(yytext()); return Parser.OR; }
 }
@@ -122,6 +120,7 @@ BooleanLiteral = "true" | "false"
 <YYINITIAL> \"                  { sb.setLength(0); yybegin(STRING_DQUOTED); }
 <YYINITIAL> \'                  { sb.setLength(0); yybegin(STRING_SQUOTED); }
 <YYINITIAL> {Comment}           {/* ignore */}
+<YYINITIAL> \/\*                { yybegin(COMMENT); }
 
 <STRING_DQUOTED> {
   \"            { 
@@ -151,6 +150,11 @@ BooleanLiteral = "true" | "false"
   \\r           { sb.append('\r'); }
   \\\'          { sb.append('\''); }
   \\            { sb.append('\\'); }
+}
+
+<COMMENT> {
+  \*\/ { yybegin(YYINITIAL); }
+  [^] { /*ignore*/ }
 }
 
 /* error fallback */

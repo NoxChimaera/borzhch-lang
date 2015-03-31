@@ -15,10 +15,16 @@ public class OptParser {
     @Parameter(names = "-dparser", description = "Parser debug mode")
     private boolean debugParser = false;
     
+    @Parameter(names = "-dtree", description = "Tree debug mode")
+    private boolean debugTree = false;
+    
     public List<String> getFiles() {
         return this.files;
     }
     public boolean getDebugParser() {
         return this.debugParser;
+    }
+    public boolean getDebugTree() {
+        return this.debugTree;
     }
 }

@@ -34,10 +34,10 @@
 %left INCR
 %left UN_ARITHM NOT
 
-%type <obj> global_list global 
-%type <obj> function struct_decl
+%type <obj> global_list global exp_list exp_tail
+%type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference structref arrayref 
+%type <obj> reference structref arrayref param_list decl_block
 %%
 
 start: 
@@ -54,14 +54,15 @@ init: /* empty */ {
     ;
 
 
-global_list: 
-    global global_list { 
+global_list: /* empty */ { 
+           $$ = null; 
+    }
+    | global global_list { 
         StatementList list = new StatementList(); 
         list.add((NodeAST) $1);
         if ($2 != null) list.addAll((NodeList) $2);
         $$ = list;
     }
-    | /* empty */ { $$ = null; }
     ;
 
 global: function { $$ = $1; }
@@ -90,7 +91,12 @@ function:
             String msg = String.format("unknown type <%s>\n", $2);
             System.err.println(msg);
         }
+        if(isIdentifierExist($3)) {
+          String msg = String.format("identifier <%s> already in use\n", $3);
+          System.err.println(msg);
+        }
 
+        func.setArguments((NodeList) $5);
         func.setStatements((StatementList) $7);
 
         funcTable.pushSymbol($3, $2);        
@@ -98,6 +104,10 @@ function:
         $$ = func;
     }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
+        if(isIdentifierExist($2)) {
+          String msg = String.format("identifier <%s> already in use\n", $2);
+          System.err.println(msg);
+        }
         FunctionNode func = new FunctionNode($2, BOHelper.getType("void"));
         func.setStatements((StatementList) $6);
 
@@ -107,9 +117,9 @@ function:
     }
     ;
 
-param_list: /* empty */
-          | decl
-          | decl param_tail
+param_list: /* empty */ { $$ = null; }
+          | decl { $$ = null; }
+          | decl param_tail { $$ = null; }
           ;
 
 param_tail: COMMA decl param_tail
@@ -126,14 +136,26 @@ struct_decl: STRUCT IDENTIFIER decl_block {
                 System.err.println(msg);
               }
               structTable.pushSymbol($2, "ref");
+
+              StructDeclarationNode node = new StructDeclarationNode($2, (StatementList) $3);
+              $$ = node;
            }
            ;
 
-decl_block: L_CURBRACE decl_list R_CURBRACE
+decl_block: L_CURBRACE decl_list R_CURBRACE {
+            $$ = $2;
+          }
           ;
 
-decl_list: /* empty*/
-         | decl SEMICOLON decl_list
+decl_list: /* empty*/ {
+          $$ = null;
+         }
+         | decl SEMICOLON decl_list {
+          StatementList node = new StatementList();
+          node.add((NodeAST) $1);
+          node.addAll((NodeList) $3);
+          $$ = node;
+         }
          ;
 
 decl: TYPE IDENTIFIER { 
@@ -145,53 +167,56 @@ decl: TYPE IDENTIFIER {
           String msg = String.format("unknown type <%s>\n", $1);
           System.err.println(msg);
         }
-        DeclarationNode decl = new DeclarationNode($2, BOHelper.getType($1));
+
         topTable.pushSymbol($2, $1);
+        
+        DeclarationNode decl = new DeclarationNode($2, BOHelper.getType($1));
         $$ = decl;  
     }
     | IDENTIFIER IDENTIFIER {
+        if(!isTypeExist($1)) {
+          String msg = String.format("unknown type <%s>\n", $1);
+          System.err.println(msg);
+        }
         if(isIdentifierExist($2)) {
           String msg = String.format("identifier <%s> already in use\n", $2);
           System.err.println(msg);
         }
+
+        topTable.pushSymbol($2, $1);
+
+        DeclarationNode decl = new DeclarationNode($2, $1);
+        $$ = decl;
+    }
+    | TYPE L_SQBRACE R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
           System.err.println(msg);
         }
-
-        DeclarationNode decl = new DeclarationNode($2, $1);
-
-        topTable.pushSymbol($2, $1);
-
-        $$ = decl;
-    }
-    | TYPE L_SQBRACE R_SQBRACE IDENTIFIER { 
         if(isIdentifierExist($4)) {
           String msg = String.format("identifier <%s> already in use\n", $4);
           System.err.println(msg);
         }
+        
+        topTable.pushSymbol($4, "ref");
+        
+        DeclarationNode decl = new DeclarationNode($4, BOHelper.getType("ref"));
+        $$ = decl;
+    }
+    | TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
           System.err.println(msg);
         }
-        
-        topTable.pushSymbol($4, "ref");
-
-        $$ = null;
-    }
-    | TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
         if(isIdentifierExist($5)) {
           String msg = String.format("identifier <%s> already in use\n", $5);
           System.err.println(msg);
         }
-        if(!isTypeExist($1)) {
-          String msg = String.format("unknown type <%s>\n", $1);
-          System.err.println(msg);
-        }
         
         topTable.pushSymbol($5, "ref");
-        
-        $$ = null;
+
+        DeclarationNode decl = new DeclarationNode($5, BOHelper.getType("ref"));
+        $$ = decl;
     }
     ;
 
@@ -212,31 +237,57 @@ stmt_list: /* empty */ { $$ = null; }
              list.add((NodeAST) $1);
              if ($3 != null) list.addAll((StatementList) $3);
          }
-         | if stmt_list { $$ = null; }
+         | if stmt_list { 
+            StatementList node = new StatementList();
+            node.add((NodeAST) $1);
+            node.addAll((NodeList) $2);
+            $$ = node; 
+         }
          | loop stmt_list { $$ = null; }
          | switch stmt_list { $$ = null; }
          ;
 
-stmt: decl { $$ = $1; }
-    | decl_assign { $$ = $1; }
-    | assign { $$ = null; }
-    | GOTO IDENTIFIER { $$ = null; }
-    | RETURN exp { $$ = null; }
-    | BREAK { $$ = null; }
-    | CONTINUE { $$ = null; }
+stmt: decl            { $$ = $1; }
+    | decl_assign     { $$ = $1; }
+    | assign          { $$ = null; }
+    | GOTO IDENTIFIER { 
+      if(!isIdentifierExist($2)) {
+        String msg = String.format("identifier <%s> not declared\n", $2);
+        System.err.println(msg);
+      }
+      $$ = null; 
+    }
+    | RETURN exp      { $$ = null; }
+    | BREAK           { $$ = null; }
+    | CONTINUE        { $$ = null; }
     ;
 
 assign: structref ASSIGN exp
-      | IDENTIFIER ASSIGN exp
+      | IDENTIFIER ASSIGN exp {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> not declared\n", $1);
+          System.err.println(msg);
+        }
+      }
       | arrayref ASSIGN exp
       ;
 
-if: IF L_BRACE exp R_BRACE codeblock %prec IFX else
+if: IF L_BRACE exp R_BRACE codeblock %prec IFX else {
+    IfNode node = new IfNode((NodeAST) $3, (StatementList) $5, (IfNode) $6);
+    $$ = node;
+  }
   ;
 
-else: /* empty */
-    | ELSE if
-    | ELSE codeblock
+else: /* empty */ {
+      $$ = null;
+    }
+    | ELSE if {
+      $$ = (IfNode) $2;
+    }
+    | ELSE codeblock {
+      IfNode node = new IfNode(null, (StatementList) $2, null);
+      $$ = node;
+    }
     ;
 
 loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON exp R_BRACE codeblock
@@ -249,31 +300,49 @@ switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock
       ;
 
 exp: 
-    exp ADD_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp MUL_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp POW exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, "**"); }
-   | exp EQ exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp MORELESS exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-   | exp AND exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "a"); }
-   | exp OR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "o"); }
-   | exp XOR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "x"); }
-   | L_BRACE exp R_BRACE { $$ = $2; }
-   | NOT exp { $$ = new UnOpNode((NodeAST) $2, "n"); }
+   exp ADD_ARITHM exp     { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+   | exp MUL_ARITHM exp   { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+   | exp POW exp          { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, "**"); }
+   | exp EQ exp           { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+   | exp MORELESS exp     { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
+   | exp AND exp          { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "a"); }
+   | exp OR exp           { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "o"); }
+   | exp XOR exp          { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "x"); }
+   | L_BRACE exp R_BRACE  { $$ = $2; }
+   | NOT exp              { $$ = new UnOpNode((NodeAST) $2, "n"); }
 
    | ADD_ARITHM exp %prec UN_ARITHM { $$ = new UnOpNode((NodeAST) $2, $1); }
 
    /*| AR_MINUS exp %prec UN_MINUS { $$ = new UnOpNode((NodeAST) $2, "-"); }
    | AR_PLUS exp %prec UN_PLUS { $$ = new UnOpNode((NodeAST) $2, "+"); }*/
 
-   | IDENTIFIER INCR { $$ = new PostOpNode(new VariableNode($1), $2); }
-   | NEW IDENTIFIER { $$ = new NewObjectNode($2); }
-   | reference { $$ = $1; }
-   | tuple_value { $$ = null; }
-   | IDENTIFIER { $$ = new VariableNode($1); }
-   | INTEGER { $$ = new IntegerNode($1); }
-   | FLOAT { $$ = new FloatNode((float)$1); }
-   | STRING { $$ = new StringNode($1); }
-   | BOOLEAN { $$ = new BooleanNode($1); }
+   | IDENTIFIER INCR  { 
+      if(!isIdentifierExist($1)) {
+        String msg = String.format("identifier <%s> not declared\n", $1);
+        System.err.println(msg);
+      }
+      $$ = new PostOpNode(new VariableNode($1), $2); 
+   }
+   | NEW IDENTIFIER   { 
+      if(!isTypeExist($2)) {
+        String msg = String.format("unknown type <%s>\n", $2);
+        System.err.println(msg);
+      }
+      $$ = new NewObjectNode($2); 
+   }
+   | reference        { $$ = $1; }
+   | tuple_value      { $$ = $1; }
+   | IDENTIFIER       { 
+      if(!isIdentifierExist($1)) {
+        String msg = String.format("identifier <%s> not declared\n", $1);
+        System.err.println(msg);
+      }
+      $$ = new VariableNode($1);
+   }
+   | INTEGER          { $$ = new IntegerNode($1); }
+   | FLOAT            { $$ = new FloatNode((float)$1); }
+   | STRING           { $$ = new StringNode($1); }
+   | BOOLEAN          { $$ = new BooleanNode($1); }
    ;
 
 reference: 
@@ -283,10 +352,22 @@ reference:
 
 structref: 
     IDENTIFIER DOT IDENTIFIER {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> not declared\n", $1);
+          System.err.println(msg);
+        }
+        if(!isIdentifierExist($3)) {
+          String msg = String.format("identifier <%s> not declared\n", $3);
+          System.err.println(msg);
+        }
         DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
         $$ = dot;
     }
     | IDENTIFIER DOT structref {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> not declared\n", $1);
+          System.err.println(msg);
+        }
         DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) $3);
         $$ = dot;
     }
@@ -294,6 +375,10 @@ structref:
 
 arrayref: 
     IDENTIFIER L_SQBRACE exp R_SQBRACE {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> not declared\n", $1);
+          System.err.println(msg);
+        }
         $$ = new ArrayElementNode(
             new VariableNode($1),
             (NodeAST) $3
@@ -301,16 +386,35 @@ arrayref:
     }
     ;
 
-tuple_value: L_CURBRACE exp_list R_CURBRACE
+tuple_value: L_CURBRACE exp_list R_CURBRACE {
+            TupleNode node = new TupleNode((StatementList) $2);
+            $$ = node;
+           }
            ;
 
-exp_list: /* empty */
-          | exp
-          | exp exp_tail
-          ;
+exp_list: /* empty */ {
+          $$ = null;
+        }
+        | exp {
+          $$ = $1;
+        }
+        | exp exp_tail {
+          StatementList node = new StatementList();
+          node.add((NodeAST) $1);
+          node.addAll((NodeList) $2);
+          $$ = node;
+        }
+        ;
 
-exp_tail: COMMA exp exp_tail
-        | COMMA exp
+exp_tail: COMMA exp exp_tail {
+          StatementList node = new StatementList();
+          node.add((NodeAST) $2);
+          node.addAll((NodeList) $3);
+          $$ = node;
+        }
+        | COMMA exp {
+          $$ = $2;
+        }
         ;
 
 %%

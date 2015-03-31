@@ -24,7 +24,7 @@ public abstract class NodeList extends NodeAST {
         nodes.addAll(col);
     }
     public void addAll(NodeList list) {
-        nodes.addAll(list.nodes);
+        if(list != null) nodes.addAll(list.nodes);
     }
     
     @Override
