@@ -12,5 +12,4 @@ import edu.borzhch.constants.BOType;
  * @author Balushkin M.
  */
 public abstract class OpNode extends NodeAST {
-    BOType type;
 }

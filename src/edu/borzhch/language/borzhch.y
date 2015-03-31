@@ -8,7 +8,7 @@
   import edu.borzhch.ast.*;
   import edu.borzhch.helpers.*;
   import edu.borzhch.SymTable;
-  
+  import edu.borzhch.constants.*;
 %}
 
 %token <sval> TYPE IDENTIFIER
@@ -257,22 +257,119 @@ switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock
       ;
 
 exp: 
-    exp ADD_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-    | exp MUL_ARITHM exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-    | exp POW exp { $$ = new ArOpNode((NodeAST) $1, (NodeAST) $3, "**"); }
-    | exp EQ exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-    | exp MORELESS exp { $$ = new CmpOpNode((NodeAST) $1, (NodeAST) $3, $2); }
-    | exp AND exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "and"); }
-    | exp OR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "or"); }
-    | exp XOR exp { $$ = new LogOpNode((NodeAST) $1, (NodeAST) $3, "xor"); }
+    exp ADD_ARITHM exp { 
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        }
+        ArOpNode node = new ArOpNode(l, r, $2);
+        node.type(infer);
+        $$ = node;
+    }
+    | exp MUL_ARITHM exp { 
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        }
+        ArOpNode node = new ArOpNode(l, r, $2);
+        node.type(infer);
+        $$ = node;
+    }
+    | exp POW exp { 
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;
+        if (!BOHelper.isNumber(l.type())) {
+            yyerror(ErrorHelper.incompatibleTypes(l.type(), BOType.FLOAT));
+        } else
+        if (!BOHelper.isNumber(r.type())) {
+            yyerror(ErrorHelper.incompatibleTypes(l.type(), BOType.FLOAT));
+        }
+
+        ArOpNode node = new ArOpNode(l, r, "**");
+       node.type(BOType.FLOAT);
+        $$ = node;
+    }
+    | exp EQ exp {          
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;     
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        }
+        CmpOpNode node = new CmpOpNode(l, r, $2);
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp MORELESS exp {         
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3;     
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), l.type()));
+        } else
+        if (!BOHelper.isNumber(infer)) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), "number"));
+        }
+        CmpOpNode node = new CmpOpNode(l, r, $2);
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp AND exp {
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3; 
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.BOOL != infer) {
+            yyerror(ErrorHelper.incompatibleTypes(infer, BOType.BOOL));
+        }
+        LogOpNode node = new LogOpNode(l, r, "and");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp OR exp {
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3; 
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.BOOL != infer) {
+            yyerror(ErrorHelper.incompatibleTypes(infer, BOType.BOOL));
+        }
+        LogOpNode node = new LogOpNode(l, r, "or");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | exp XOR exp {
+        NodeAST l = (NodeAST) $1;
+        NodeAST r = (NodeAST) $3; 
+        BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
+        if (BOType.BOOL != infer) {
+            yyerror(ErrorHelper.incompatibleTypes(infer, BOType.BOOL));
+        }
+        LogOpNode node = new LogOpNode(l, r, "xor");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
     | L_BRACE exp R_BRACE { $$ = $2; }
-    | NOT exp { $$ = new UnOpNode((NodeAST) $2, "not"); }
-
-    | ADD_ARITHM exp %prec UN_ARITHM { $$ = new UnOpNode((NodeAST) $2, $1); }
-
-    /*| AR_MINUS exp %prec UN_MINUS { $$ = new UnOpNode((NodeAST) $2, "-"); }
-    | AR_PLUS exp %prec UN_PLUS { $$ = new UnOpNode((NodeAST) $2, "+"); }*/
-
+    | NOT exp {
+        NodeAST r = (NodeAST) $2; 
+        if (BOType.BOOL != r.type()) {
+            yyerror(ErrorHelper.incompatibleTypes(r.type(), BOType.BOOL));
+        }
+        UnOpNode node = new UnOpNode(r, "not");
+        node.type(BOType.BOOL);
+        $$ = node;
+    }
+    | ADD_ARITHM exp %prec UN_ARITHM NOT exp {
+        NodeAST e = (NodeAST) $2; 
+        if (!BOHelper.isNumber(e.type())) {
+            yyerror(ErrorHelper.incompatibleTypes(e.type(), "number"));
+        }
+        UnOpNode node = new UnOpNode(e, $1);
+        node.type(e.type());
+        $$ = node;
+    }
     | IDENTIFIER INCR { $$ = new PostOpNode(new VariableNode($1), $2); }
     | NEW IDENTIFIER { $$ = new NewObjectNode($2); }
     | reference { $$ = $1; }

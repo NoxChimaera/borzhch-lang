@@ -28,6 +28,6 @@ public class IntegerNode extends ConstantNode {
     @Override
     public void codegen() {
         // Push variable into stack
-        JavaCodegen.method().push(val);
+        JavaCodegen.method().pushInt(val);
     }
 }

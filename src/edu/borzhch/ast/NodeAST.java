@@ -12,7 +12,13 @@ import edu.borzhch.constants.BOType;
  * @author Balushkin M.
  */
 public abstract class NodeAST {
-    BOType type;
+    protected BOType type;
+    public BOType type() {
+        return type;
+    }
+    public void type(BOType newType) {
+        type = newType;
+    }
     
     public abstract void debug(int lvl);
     public abstract void codegen();

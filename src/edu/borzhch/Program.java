@@ -31,6 +31,7 @@ public class Program {
                 Parser parser = new Parser(r, op.getDebugParser());
                 parser.run();
                 TreeAST.debug(0);
+                TreeAST.codegen();
             }
         } catch (FileNotFoundException fileNotFoundException){
             System.err.println(fileNotFoundException);

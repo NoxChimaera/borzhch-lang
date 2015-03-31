@@ -5,6 +5,9 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+
 /**
  *
  * @author Balushkin M.
@@ -22,15 +25,39 @@ public class ArOpNode extends OpNode {
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println("Arithmetic " + op);
+        System.out.println("Arithmetic " + op + " (" 
+                + BOHelper.toString(type) + ")");
         ++lvl;
         l.debug(lvl);
         r.debug(lvl);
-        
     }
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        l.codegen();
+        r.codegen();
+        
+        switch (type) {
+            case INT:
+                codegenInt(); 
+                break;
+        }
+    }
+    
+    private void codegenInt() {
+        switch (op) {
+            case "+":
+                JavaCodegen.method().addInt();
+                break;
+            case "-":
+                JavaCodegen.method().subInt();
+                break;
+            case "*":
+                JavaCodegen.method().mulInt();
+                break;
+            case "/":
+                JavaCodegen.method().divInt();
+                break;
+        }
     }
 }

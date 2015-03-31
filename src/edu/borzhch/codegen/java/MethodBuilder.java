@@ -10,6 +10,7 @@ import edu.borzhch.helpers.BOHelper;
 import java.util.HashMap;
 import static org.apache.bcel.Constants.*;
 import org.apache.bcel.generic.*;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 /**
  * Конструктор методов
@@ -69,11 +70,37 @@ public class MethodBuilder {
     
     /**
      * Добавляет число в стек
-     * @param val Целочисленная константа
+     * @param ival Целочисленная константа
      * @see PUSH
      */
-    public void push(int val) {
-        il.append(new PUSH(cg.getConstantPool(), val));
+    public void pushInt(int ival) {
+        il.append(new PUSH(cg.getConstantPool(), ival));
+    }
+    public void pushFloat(float fval) {
+        il.append(new PUSH(cg.getConstantPool(), fval));
+    }
+    public void pushString(String str) {
+        il.append(new PUSH(cg.getConstantPool(), str));
+    }
+    public void pushBool(boolean bval) {
+        il.append(new PUSH(cg.getConstantPool(), bval));
+    }
+    
+    public void addInt() {
+        il.append(new IADD());
+    }
+    public void subInt() {
+        il.append(new ISUB());
+    }
+    public void mulInt() {
+        il.append(new IMUL());
+    }
+    public void divInt() {
+        il.append(new IDIV());
+    }
+    
+    public void addFloat() {
+        il.append(new FADD());
     }
 
     /**
