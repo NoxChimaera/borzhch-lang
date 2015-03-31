@@ -6,6 +6,7 @@
 package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 
 /**
@@ -41,22 +42,42 @@ public class ArOpNode extends OpNode {
             case INT:
                 codegenInt(); 
                 break;
+            case FLOAT:
+                codegenFloat();
+                break;
         }
     }
-    
-    private void codegenInt() {
+    private void codegenFloat() {
+        JavaCodegen.method().convert(r.type, l.type);
         switch (op) {
             case "+":
-                JavaCodegen.method().addInt();
+                JavaCodegen.method().add(BOType.FLOAT);
                 break;
             case "-":
-                JavaCodegen.method().subInt();
+                JavaCodegen.method().sub(BOType.FLOAT);
                 break;
-            case "*":
-                JavaCodegen.method().mulInt();
+            case "*":               
+                JavaCodegen.method().mul(BOType.FLOAT);
                 break;
-            case "/":
-                JavaCodegen.method().divInt();
+            case "/":                
+                JavaCodegen.method().div(BOType.FLOAT);
+                break;
+        }
+    }
+    private void codegenInt() {
+        JavaCodegen.method().convert(r.type, l.type);
+        switch (op) {
+            case "+":
+                JavaCodegen.method().add(BOType.INT);
+                break;
+            case "-":
+                JavaCodegen.method().sub(BOType.INT);
+                break;
+            case "*":               
+                JavaCodegen.method().mul(BOType.INT);
+                break;
+            case "/":                
+                JavaCodegen.method().div(BOType.INT);
                 break;
         }
     }

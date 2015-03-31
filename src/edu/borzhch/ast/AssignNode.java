@@ -44,6 +44,8 @@ public class AssignNode extends NodeAST {
 
     @Override
     public void codegen() {
+//        SymTable.
+        
         // Generate expression, push result into stack
         // e.g.:
         // 0:   bipush 42

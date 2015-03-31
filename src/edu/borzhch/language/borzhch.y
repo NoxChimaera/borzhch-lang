@@ -100,7 +100,7 @@ function:
         $$ = func;
     }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
-        FunctionNode func = new FunctionNode($2, BOHelper.getType("void"));
+        FunctionNode func = new FunctionNode($2, BOType.VOID);
         func.setStatements((StatementList) $6);
 
         funcTable.pushSymbol($2, "void");
