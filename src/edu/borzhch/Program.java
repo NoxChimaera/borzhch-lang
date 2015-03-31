@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import com.beust.jcommander.JCommander;
+import edu.borzhch.ast.TreeAST;
 
 /**
  *
@@ -23,13 +24,17 @@ public class Program {
         OptParser op = new OptParser();
         new JCommander(op, args);
         
-        FileReader r = null;
+        FileReader r;
         try {
             for (String arg : op.getFiles()) {
                 r = new FileReader(arg);
                 Parser parser = new Parser(r, op.getDebugParser());
                 parser.run();
+                TreeAST.debug(0);
             }
-        } catch (FileNotFoundException fileNotFoundException){}
+        } catch (FileNotFoundException fileNotFoundException){
+            System.err.println(fileNotFoundException);
+            System.out.println(fileNotFoundException);
+        }
     }
 }
