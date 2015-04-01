@@ -187,8 +187,9 @@ decl: TYPE IDENTIFIER {
 
         topTable.pushSymbol($2, $1);
         
-        DeclarationNode decl = new DeclarationNode($2, BOHelper.getType($1));
-        $$ = decl;  
+        DeclarationNode node = new DeclarationNode($2, BOHelper.getType($1));
+        node.type(BOHelper.getType($1));
+        $$ = node;  
     }
     | IDENTIFIER IDENTIFIER {
         if(!isTypeExist($1)) {
@@ -241,7 +242,8 @@ decl_assign:
     decl ASSIGN exp {
         DeclarationNode decl = (DeclarationNode) $1;
         String name = decl.getName();
-        AssignNode an = new AssignNode(new VariableNode(name, structTable.getSymbolType(name)), 
+
+        AssignNode an = new AssignNode(new VariableNode(name, topTable.getSymbolType(name)), 
                 (NodeAST) val_peek(0).obj);
 
         StatementList list = new StatementList();
@@ -473,6 +475,8 @@ exp:
         yyerror(msg);
       }
       $$ = new PostOpNode(new VariableNode($1), $2); 
+        ((NodeAST) $$).type(BOType.INT);
+        ((PostOpNode) $$).setPush(true);
    }
     | NEW IDENTIFIER { 
         if(!isTypeExist($2)) {

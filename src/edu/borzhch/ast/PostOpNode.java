@@ -5,6 +5,10 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
+
 /**
  *
  * @author Balushkin M.
@@ -12,6 +16,11 @@ package edu.borzhch.ast;
 public class PostOpNode extends OpNode {
     VariableNode var;
     String op;
+    boolean needPush = false;
+    public void setPush(boolean push) {
+        needPush = push;
+    }
+    
     public PostOpNode(VariableNode variable, String operator) {
         var = variable;
         op = operator;
@@ -26,7 +35,17 @@ public class PostOpNode extends OpNode {
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int index = var.getIndex();
+        switch (op) {
+            case "#":
+                JavaCodegen.method().inc(index);
+                break;
+            case "@":
+                JavaCodegen.method().dec(index);
+                break;
+        }
+        if (needPush) {
+            JavaCodegen.method().load(var.id, BOHelper.toJVMType(var.type));
+        }
     }
-    
 }

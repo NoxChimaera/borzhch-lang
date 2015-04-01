@@ -5,6 +5,8 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+
 /**
  *
  * @author Balushkin M.
@@ -26,7 +28,14 @@ public class UnOpNode extends OpNode {
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        expr.codegen();
+        switch (op) {
+            case "!":
+                JavaCodegen.method().not();
+                break;
+            case "-":
+                JavaCodegen.method().neg(expr.type);
+                break;
+        }
     }
-    
 }
