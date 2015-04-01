@@ -53,6 +53,7 @@ public class ForNode extends NodeAST {
         declaration.codegen();
         
         //1: label top
+        JavaCodegen.method().nop();
         InstructionHandle top = JavaCodegen.method().getLastHandler();
         
         //2: cond

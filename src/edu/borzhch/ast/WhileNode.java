@@ -6,7 +6,7 @@ import edu.borzhch.WaitingTable;
 import org.apache.bcel.generic.InstructionHandle;
 import edu.borzhch.codegen.java.JavaCodegen;
 import org.apache.bcel.generic.GOTO;
-import org.apache.bcel.generic.IFNE;
+import org.apache.bcel.generic.IFEQ;
 
 /**
  *
@@ -34,13 +34,14 @@ public class WhileNode extends NodeAST {
     @Override
     public void codegen() {        
         //0: label top
+        JavaCodegen.method().nop();
         InstructionHandle top = JavaCodegen.method().getLastHandler();
         
         //1: cond
         condition.codegen();
         
         //2: ifn goto label end
-        IFNE ifne = JavaCodegen.method().ifne();
+        IFEQ ifeq = JavaCodegen.method().ifeq();
         
         //3: codeblock        
         codeblock.codegen();
@@ -53,7 +54,7 @@ public class WhileNode extends NodeAST {
         //5: label dno
         JavaCodegen.method().nop();
         InstructionHandle bottom = JavaCodegen.method().getLastHandler();
-        ifne.setTarget(bottom);
+        ifeq.setTarget(bottom);
         WaitingTable.resolveWaitingEnd(bottom);
     }
     
