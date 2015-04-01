@@ -35,6 +35,11 @@ public class ArOpNode extends OpNode {
 
     @Override
     public void codegen() {
+        if (op.equals("**")) {
+            codegenPower();
+            return;
+        }
+        
         l.codegen();
         r.codegen();
         
@@ -46,6 +51,16 @@ public class ArOpNode extends OpNode {
                 codegenFloat();
                 break;
         }
+    }
+    
+    private void codegenPower() {
+        l.codegen();
+        JavaCodegen.method().convertToDouble(l.type);
+        r.codegen();
+        JavaCodegen.method().convertToDouble(r.type);
+        JavaCodegen.method().invokeStatic("pow");
+        JavaCodegen.method().convertDouble(BOType.FLOAT);
+        type = BOType.FLOAT;
     }
     private void codegenFloat() {
         JavaCodegen.method().convert(r.type, l.type);

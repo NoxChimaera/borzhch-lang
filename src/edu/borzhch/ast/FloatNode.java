@@ -27,7 +27,7 @@ public class FloatNode extends ConstantNode {
 
     @Override
     public void codegen() {
-        JavaCodegen.method().pushFloat(val);
+        JavaCodegen.method().push(val);
     }
     
 }

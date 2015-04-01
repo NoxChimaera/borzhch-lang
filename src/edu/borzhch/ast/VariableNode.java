@@ -33,8 +33,12 @@ public class VariableNode extends NodeAST {
     
     public VariableNode(String identifier, String typeName) {
         id = identifier;
-        this.type = BOType.REF;
         varTypeName = typeName;
+        if (BOHelper.isType(typeName)) {
+            type = BOHelper.getType(typeName);
+        } else {
+            type = BOType.REF;
+        }
     }
 
     @Override

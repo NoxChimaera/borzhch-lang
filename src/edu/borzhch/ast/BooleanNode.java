@@ -5,6 +5,7 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 
 /**
@@ -22,13 +23,11 @@ public class BooleanNode extends ConstantNode {
     public void debug(int lvl) {
         printLevel(lvl);
         System.out.printf("%b;B\n", bval);
-        
-//        System.out.println(bval);
     }
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JavaCodegen.method().push(bval);
     }
     
 }

@@ -222,9 +222,12 @@ decl: TYPE IDENTIFIER {
     }
     ;
 
-decl_assign: decl ASSIGN exp {
+decl_assign: 
+    decl ASSIGN exp {
         DeclarationNode decl = (DeclarationNode) $1;
-        AssignNode an = new AssignNode(decl.getName(), (NodeAST) $3);
+        String name = decl.getName();
+        AssignNode an = new AssignNode(new VariableNode(name, structTable.getSymbolType(name)), 
+                (NodeAST) val_peek(0).obj);
 
         StatementList list = new StatementList();
         list.add(decl);
@@ -234,21 +237,21 @@ decl_assign: decl ASSIGN exp {
     ;
 
 stmt_list: /* empty */ { $$ = null; }
-         | stmt SEMICOLON stmt_list { 
-             StatementList list = new StatementList();
-             list.add((NodeAST) $1);
-             if ($3 != null) list.addAll((StatementList) $3);
-             $$ = list;
-         }
-         | if stmt_list { 
-            StatementList node = new StatementList();
-            node.add((NodeAST) $1);
-            node.addAll((NodeList) $2);
-            $$ = node; 
-         }
-         | loop stmt_list { $$ = null; }
-         | switch stmt_list { $$ = null; }
-         ;
+    | stmt SEMICOLON stmt_list { 
+        StatementList list = new StatementList();
+        list.add((NodeAST) $1);
+        if ($3 != null) list.addAll((StatementList) $3);
+            $$ = list;
+    }
+    | if stmt_list { 
+        StatementList node = new StatementList();
+        node.add((NodeAST) $1);
+        node.addAll((NodeList) $2);
+        $$ = node; 
+    }
+    | loop stmt_list { $$ = null; }
+    | switch stmt_list { $$ = null; }
+    ;
 
 stmt: decl            { $$ = $1; }
     | decl_assign     { $$ = $1; }
@@ -268,11 +271,12 @@ stmt: decl            { $$ = $1; }
 assign: 
     structref ASSIGN exp
     | IDENTIFIER ASSIGN exp {
-				if(!isIdentifierExist($1)) {
+        if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> not declared\n", $1);
           System.err.println(msg);
         }
-        AssignNode an = new AssignNode($1, (NodeAST) $3);
+        AssignNode an = new AssignNode(new VariableNode($1, structTable.getSymbolType($1)), 
+            (NodeAST) $3);
         $$ = an;
     }
     | arrayref ASSIGN exp
@@ -426,49 +430,37 @@ exp:
       }
       $$ = new PostOpNode(new VariableNode($1), $2); 
    }
-   | NEW IDENTIFIER   { 
-      if(!isTypeExist($2)) {
-        String msg = String.format("unknown type <%s>\n", $2);
-        System.err.println(msg);
-      }
-      $$ = new NewObjectNode($2); 
-   }
-   | reference        { $$ = $1; }
-   | tuple_value      { $$ = $1; }
-	 | idref 						{ $$ = $1; }
-   | INTEGER          { $$ = new IntegerNode($1); }
-   | FLOAT            { $$ = new FloatNode((float)$1); }
-   | STRING           { $$ = new StringNode($1); }
-   | BOOLEAN          { $$ = new BooleanNode($1); }
-   ;
+    | NEW IDENTIFIER   { 
+        if(!isTypeExist($2)) {
+            String msg = String.format("unknown type <%s>\n", $2);
+            System.err.println(msg);
+        }
+        $$ = new NewObjectNode($2); 
+    }
+    | reference        { $$ = $1; }
+    | tuple_value      { $$ = $1; }
+    | idref 						{ $$ = $1; }
+    | INTEGER          { $$ = new IntegerNode($1); }
+    | FLOAT            { $$ = new FloatNode((float)$1); }
+    | STRING           { $$ = new StringNode($1); }
+    | BOOLEAN          { $$ = new BooleanNode($1); }
+    ;
 	 
 idref:
     idref DOT idref {
         $$ = new DotOpNode((NodeAST) $1, (NodeAST) $3);
     }
     | IDENTIFIER { 
-			if(!isIdentifierExist($1)) {
-        String msg = String.format("identifier <%s> not declared\n", $1);
-        System.err.println(msg);
-      }
-			$$ = new VariableNode($1); 
-		}
+        if(!isIdentifierExist($1)) {
+            String msg = String.format("identifier <%s> not declared\n", $1);
+            System.err.println(msg);
+        }
+        $$ = new VariableNode($1); 
+}
 
 reference: 
-    /*structref { $$ = $1; }*/
     arrayref { $$ = $1; }
     ;
-		
-/*structref: 
-    IDENTIFIER DOT structref {
-        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) $3);
-        $$ = dot;
-    }
-    | IDENTIFIER DOT IDENTIFIER { 
-        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
-        $$ = dot;
-    }
-    ;*/
 
 arrayref: 
     IDENTIFIER L_SQBRACE exp R_SQBRACE {
