@@ -25,5 +25,4 @@ yacc.*
 /src/edu/borzhch/language/Lexer.java
 vendors/bcel-5.2/docs
 make.bat
-make.bat
 .gitignore
