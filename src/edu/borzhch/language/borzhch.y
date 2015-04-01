@@ -36,10 +36,11 @@
 %left UN_ARITHM NOT
 %right INCR DOT
 
-%type <obj> global_list global exp_list exp_tail
+%type <obj> global_list global exp_list exp_tail param_tail loop
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference structref arrayref param_list decl_block idref
+%type <obj> reference arrayref param_list decl_block idref
+%type <obj> switch
 %%
 
 start: 
@@ -301,10 +302,6 @@ stmt: decl            { $$ = $1; }
 
 assign: 
     idref ASSIGN exp {
-        if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> not declared\n", $1);
-          yyerror(msg);
-        }
         AssignNode an = new AssignNode((VariableNode) $1, (NodeAST) $3);
         $$ = an;
     }
@@ -593,7 +590,7 @@ private int yylex() {
 }
 
 public void yyerror(String error) {
-  System.err.println("Error on line %d, column %d: %s", yyline, yycolumn, error);
+  System.err.println(String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error));
 }
 
 public Parser(Reader r, boolean debug) {

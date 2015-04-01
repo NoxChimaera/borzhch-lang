@@ -2,6 +2,12 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.WaitingTable;
+import edu.borzhch.codegen.java.JavaCodegen;
+import org.apache.bcel.generic.GOTO;
+import org.apache.bcel.generic.IFNE;
+import org.apache.bcel.generic.InstructionHandle;
+
 /**
  *
  * @author Tursukov A.E. <goldenflame412@gmail.com>
@@ -43,7 +49,35 @@ public class ForNode extends NodeAST {
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //0: decl
+        declaration.codegen();
+        
+        //1: label top
+        InstructionHandle top = JavaCodegen.method().getLastHandler();
+        
+        //2: cond
+        condition.codegen();
+        
+        //3: ifne goto Label2
+        IFNE ifne = JavaCodegen.method().ifne();
+        //nop
+        
+        //4: codeblock
+        codeblock.codegen();
+        WaitingTable.resolveWaitingStart(top);
+                
+        //5: operation
+        operation.codegen();
+        
+        //6: goto top
+        GOTO go = JavaCodegen.method().go();
+        go.setTarget(top);
+        
+        //7: label bottom
+        JavaCodegen.method().nop();
+        InstructionHandle bottom = JavaCodegen.method().getLastHandler();
+        ifne.setTarget(bottom);
+        WaitingTable.resolveWaitingEnd(bottom);
     }
     
 }

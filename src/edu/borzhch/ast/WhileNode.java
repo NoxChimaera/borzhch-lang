@@ -2,8 +2,11 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.WaitingTable;
 import org.apache.bcel.generic.InstructionHandle;
 import edu.borzhch.codegen.java.JavaCodegen;
+import org.apache.bcel.generic.GOTO;
+import org.apache.bcel.generic.IFNE;
 
 /**
  *
@@ -29,13 +32,29 @@ public class WhileNode extends NodeAST {
     }
 
     @Override
-    public void codegen() {
+    public void codegen() {        
+        //0: label top
+        InstructionHandle top = JavaCodegen.method().getLastHandler();
+        
+        //1: cond
         condition.codegen();
         
-        InstructionHandle top = JavaCodegen.method();
+        //2: ifn goto label end
+        IFNE ifne = JavaCodegen.method().ifne();
         
+        //3: codeblock        
         codeblock.codegen();
+        WaitingTable.resolveWaitingStart(top);
         
+        //4: jmp Label1
+        GOTO goTop = JavaCodegen.method().go();
+        goTop.setTarget(top);
+        
+        //5: label dno
+        JavaCodegen.method().nop();
+        InstructionHandle bottom = JavaCodegen.method().getLastHandler();
+        ifne.setTarget(bottom);
+        WaitingTable.resolveWaitingEnd(bottom);
     }
     
 }

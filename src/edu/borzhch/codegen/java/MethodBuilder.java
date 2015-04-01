@@ -194,6 +194,11 @@ public class MethodBuilder {
         return icmp;
     }
     
+    public IFNE ifne() {
+        IFNE ifne = new IFNE(null);
+        il.append(ifne);
+        return ifne;
+    }
     public IFEQ ifeq() {
         IFEQ ifeq = new IFEQ(null);
         il.append(ifeq);

@@ -6,13 +6,18 @@ package edu.borzhch.language;
 %class Lexer
 %byaccj
 %unicode
-%line
-%column
 
 %{
   private static final int BUFSIZE = 8192;
   StringBuilder sb = new StringBuilder(BUFSIZE);
+  
+  public int Yyline() {
+    return yyline;
+  }
 
+  public int Yycolumn() {
+    return yycolumn;
+  }
   private Parser yyparser = new Parser();
   public Lexer(java.io.Reader r, Parser yyparser) {
     this(r);
