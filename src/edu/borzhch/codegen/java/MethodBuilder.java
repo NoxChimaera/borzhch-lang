@@ -59,12 +59,13 @@ public class MethodBuilder {
      * @param name Имя переменной
      * @see ISTORE
      */
-    public void store(String name) {
+    public void store(String name, Type type) {
         LocalVariableGen lg = localVariables.get(name);
         int index = lg.getIndex();
 //        Type type = localVariables.get(name).getType();
         // TODO: Recognizing types
-        lg.setStart(il.append(new ISTORE(index)));
+        lg.setStart(il.append(f.createStore(type, index)));
+//        lg.setStart(il.append(new ISTORE(index)));
     }
     
     /**
@@ -72,19 +73,32 @@ public class MethodBuilder {
      * @param ival Целочисленная константа
      * @see PUSH
      */
-    public void pushInt(int ival) {
+    public void push(int ival) {
         il.append(new PUSH(cg.getConstantPool(), ival));
     }
-    public void pushFloat(float fval) {
+    public void push(float fval) {
         il.append(new PUSH(cg.getConstantPool(), fval));
     }
-    public void pushString(String str) {
+    public void push(String str) {
         il.append(new PUSH(cg.getConstantPool(), str));
     }
-    public void pushBool(boolean bval) {
+    public void push(boolean bval) {
         il.append(new PUSH(cg.getConstantPool(), bval));
     }
  
+    public void and() {
+        il.append(new IAND());
+    }
+    public void or() {
+        il.append(new IOR());
+    }
+    public void xor() {
+        il.append(new IXOR());
+    }
+    public void not() {
+        il.append(new INEG());
+    }
+    
     public void add(BOType type) {
         switch (type) {
             case INT:
@@ -122,6 +136,32 @@ public class MethodBuilder {
         }
     }
     
+    public void fcmpl() {
+        il.append(new FCMPL());
+    }
+    
+    
+    public void convertToDouble(BOType from) {
+        switch (from) {
+            case INT:
+                il.append(new I2D());
+                break;
+            case FLOAT:
+                il.append(new F2D());
+                break;
+        }
+    }
+    public void convertDouble(BOType to) {
+        switch (to) {
+            case INT:
+                il.append(new D2I());
+                break;
+            case FLOAT:
+                il.append(new D2F());
+                break;
+        }
+    }
+    
     public void convert(BOType from, BOType to) {
         if (from == to) return;
         
@@ -138,20 +178,36 @@ public class MethodBuilder {
         }
     }
 
+    public void invokeStatic(String function) {
+        switch (function) {
+            case "pow":
+                il.append(f.createInvoke("java.lang.Math", "pow", Type.DOUBLE, 
+                    new Type[] { Type.DOUBLE, Type.DOUBLE }, INVOKESTATIC));
+                break;
+        }
+    }
+    
+    public void getStdout() {
+        il.append(f.createGetStatic("java.lang.System", 
+            "out", new ObjectType("java.io.PrintStream")));
+    }
+    
+   public void printLine(Type type) {
+       il.append(f.createInvoke("java.io.PrintStream", "pintln", 
+               Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
+    }
+   public void printLine(String str) {
+       il.append(f.createPrintln(str));
+   }
+   
     /**
      * Компилирует метод
      */
     public void compile() {
-        // MOCK START    
-        il.append(f.createGetStatic("java.lang.System", 
-                "out", new ObjectType("java.io.PrintStream")));
-        il.append(new ILOAD(1));
-        il.append(f.createInvoke("java.io.PrintStream", "println", 
-                Type.VOID, new Type[] { Type.INT }, INVOKEVIRTUAL));
-       
-//        il.append(new ILOAD(1));
-//        il.append(new IRETURN());
-        
+        // MOCK START   
+        getStdout();
+        il.append(f.createLoad(Type.BOOLEAN, 1));
+        printLine(Type.BOOLEAN);
         il.append(new RETURN());
         // MOCK END
         

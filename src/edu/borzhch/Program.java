@@ -37,6 +37,6 @@ public class Program {
             System.err.println(fileNotFoundException);
             System.out.println(fileNotFoundException);
         }
-				if(op.getDebugTree()) TreeAST.debug(0);
+        if(op.getDebugTree()) TreeAST.debug(0);
     }
 }

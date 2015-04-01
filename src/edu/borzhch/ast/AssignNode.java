@@ -6,6 +6,7 @@
 package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
 
 /**
  * Присваивание
@@ -15,7 +16,7 @@ public class AssignNode extends NodeAST {
     /**
      * Идентификатор переменной
      */
-    String left;
+    VariableNode left;
     /**
      * Выражение
      */
@@ -25,7 +26,7 @@ public class AssignNode extends NodeAST {
      * @param id Идентификатор переменной
      * @param expr Выражение
      */
-    public AssignNode(String id, NodeAST expr) {
+    public AssignNode(VariableNode id, NodeAST expr) {
         left = id;
         right = expr;
     }
@@ -44,14 +45,14 @@ public class AssignNode extends NodeAST {
 
     @Override
     public void codegen() {
-//        SymTable.
-        
         // Generate expression, push result into stack
         // e.g.:
         // 0:   bipush 42
         right.codegen();
+        // And convert it to veriable type
+        JavaCodegen.method().convert(right.type, left.type);
         // 1:   istore var_index
         // TODO: types. It works only with integers just now
-        JavaCodegen.method().store(left);
+        JavaCodegen.method().store(left.id, BOHelper.toJVMType(left.type));
     }
 }
