@@ -44,9 +44,6 @@ public class LogOpNode extends OpNode {
             case "xor":
                 JavaCodegen.method().xor();
                 break;
-            case "not":
-                JavaCodegen.method().not();
-                break;
         }
     }
 }

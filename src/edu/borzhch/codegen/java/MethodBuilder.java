@@ -37,6 +37,16 @@ public class MethodBuilder {
         localVariables = new HashMap<>();
     }
     
+    public int getLastIndex() {
+        return il.getEnd().getPosition();
+    }
+    public InstructionHandle getHandler(int pos) {
+        return il.findHandle(pos);
+    }
+    public InstructionHandle getLastHandler() {
+        return il.getEnd();
+    }
+    
     /**
      * Добавляет локальную переменную
      * @param id Идентификатор переменной
@@ -46,12 +56,10 @@ public class MethodBuilder {
         LocalVariableGen lg = mg.addLocalVariable(id, BOHelper.toJVMType(type), 
                 null, null);
         localVariables.put(id, lg);
-        
-//    public static void istore(String var) {
-//        lg = mg.addLocalVariable(var, Type.INT, null, null);
-//        int local = lg.getIndex();
-//        lg.setStart(il.append(new ISTORE(local)));
-//    }
+
+    }
+    public int getVariableIndex(String id) {
+        return localVariables.get(id).getIndex();
     }
     
     /**
@@ -66,6 +74,10 @@ public class MethodBuilder {
         // TODO: Recognizing types
         lg.setStart(il.append(f.createStore(type, index)));
 //        lg.setStart(il.append(new ISTORE(index)));
+    }
+    public void load(String name, Type type) {
+        int index = getVariableIndex(name);
+        il.append(f.createLoad(type, index));
     }
     
     /**
@@ -99,6 +111,16 @@ public class MethodBuilder {
         il.append(new INEG());
     }
     
+    public void neg(BOType type) {
+        switch (type) {
+            case INT:
+                il.append(new INEG());
+                break;
+            case FLOAT:
+                il.append(new FNEG());
+                break;
+        }
+    }
     public void add(BOType type) {
         switch (type) {
             case INT:
@@ -136,10 +158,58 @@ public class MethodBuilder {
         }
     }
     
+    public void inc(int index) {
+        il.append(new IINC(index, 1));
+    }
+    public void dec(int index) {
+        il.append(new IINC(index, -1));
+    }
+    
     public void fcmpl() {
         il.append(new FCMPL());
     }
+    public IfInstruction icmp(String opcode) {
+        IfInstruction icmp = null;
+        switch (opcode) {
+            case "eq":
+                icmp = new IF_ICMPEQ(null);
+                break;
+            case "ne":
+                icmp = new IF_ICMPNE(null);
+                break;
+            case "gt":
+                icmp = new IF_ICMPGT(null);
+                break;
+            case "ge":
+                icmp = new IF_ICMPGE(null);
+                break;
+            case "lt":
+                icmp = new IF_ICMPLT(null);
+                break;
+            case "le":
+                icmp = new IF_ICMPLE(null);
+                break;
+        }
+        il.append(icmp);
+        return icmp;
+    }
     
+    public IFEQ ifeq() {
+        IFEQ ifeq = new IFEQ(null);
+        il.append(ifeq);
+        return ifeq;
+    }
+    
+    public GOTO go() {
+        GOTO go = new GOTO(null);
+        il.append(go);
+        return go;
+    }
+    
+    public void nop() {
+        NOP nop = new NOP();
+        il.append(nop);
+    }
     
     public void convertToDouble(BOType from) {
         switch (from) {
@@ -193,7 +263,7 @@ public class MethodBuilder {
     }
     
    public void printLine(Type type) {
-       il.append(f.createInvoke("java.io.PrintStream", "pintln", 
+       il.append(f.createInvoke("java.io.PrintStream", "println", 
                Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
     }
    public void printLine(String str) {

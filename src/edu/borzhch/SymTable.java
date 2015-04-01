@@ -48,6 +48,7 @@ public class SymTable {
         String result = null;
         for(HashMap<String, String> symbol : symbols) {
             result = symbol.get(identifier);
+            if (result != null) break;
         }
         return result;
     }

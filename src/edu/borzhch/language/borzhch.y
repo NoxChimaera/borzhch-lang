@@ -172,8 +172,9 @@ decl: TYPE IDENTIFIER {
 
         topTable.pushSymbol($2, $1);
         
-        DeclarationNode decl = new DeclarationNode($2, BOHelper.getType($1));
-        $$ = decl;  
+        DeclarationNode node = new DeclarationNode($2, BOHelper.getType($1));
+        node.type(BOHelper.getType($1));
+        $$ = node;  
     }
     | IDENTIFIER IDENTIFIER {
         if(!isTypeExist($1)) {
@@ -226,7 +227,8 @@ decl_assign:
     decl ASSIGN exp {
         DeclarationNode decl = (DeclarationNode) $1;
         String name = decl.getName();
-        AssignNode an = new AssignNode(new VariableNode(name, structTable.getSymbolType(name)), 
+
+        AssignNode an = new AssignNode(new VariableNode(name, topTable.getSymbolType(name)), 
                 (NodeAST) val_peek(0).obj);
 
         StatementList list = new StatementList();
@@ -423,13 +425,15 @@ exp:
         node.type(e.type());
         $$ = node;
     }
-   | IDENTIFIER INCR  { 
-      if(!isIdentifierExist($1)) {
-        String msg = String.format("identifier <%s> not declared\n", $1);
-        System.err.println(msg);
-      }
-      $$ = new PostOpNode(new VariableNode($1), $2); 
-   }
+    | IDENTIFIER INCR  { 
+        if(!isIdentifierExist($1)) {
+            String msg = String.format("identifier <%s> not declared\n", $1);
+            System.err.println(msg);
+        }
+        $$ = new PostOpNode(new VariableNode($1, topTable.getSymbolType($1)), $2); 
+        ((NodeAST) $$).type(BOType.INT);
+        ((PostOpNode) $$).setPush(true);
+    }
     | NEW IDENTIFIER   { 
         if(!isTypeExist($2)) {
             String msg = String.format("unknown type <%s>\n", $2);

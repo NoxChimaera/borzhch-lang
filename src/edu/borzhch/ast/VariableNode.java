@@ -40,6 +40,10 @@ public class VariableNode extends NodeAST {
             type = BOType.REF;
         }
     }
+    
+    public int getIndex() {
+        return JavaCodegen.method().getVariableIndex(id);
+    }
 
     @Override
     public void debug(int lvl) {
@@ -50,5 +54,6 @@ public class VariableNode extends NodeAST {
     @Override
     public void codegen() {
         // iload var_index
+        JavaCodegen.method().load(id, BOHelper.toJVMType(type));
     }
 }

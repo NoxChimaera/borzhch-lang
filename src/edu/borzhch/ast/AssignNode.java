@@ -37,7 +37,8 @@ public class AssignNode extends NodeAST {
         System.out.println("Assignment");
         ++lvl;
         printLevel(lvl);
-        System.out.println("Variable: " + left);
+        System.out.println("Variable: " + left.id + " (" 
+                + BOHelper.toString(left.type) + ")");
         printLevel(lvl);
         System.out.println("Expression: ");
         right.debug(lvl + 1);
