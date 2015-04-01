@@ -101,7 +101,7 @@ function:
         func.setArguments((NodeList) $5);
         func.setStatements((StatementList) $7);
 
-        funcTable.pushSymbol($3, $2);        
+        funcTable.pushSymbol($3, $2);
 
         $$ = func;
     }
@@ -120,12 +120,24 @@ function:
     ;
 
 param_list: /* empty */ { $$ = null; }
-          | decl { $$ = null; }
-          | decl param_tail { $$ = null; }
+          | decl { $$ = $1; }
+          | decl param_tail { 
+            StatementList node = new StatementList();
+            node.add((NodeAST) $1);
+            node.addAll((NodeList) $2);
+            $$ = node; 
+          }
           ;
 
-param_tail: COMMA decl param_tail
-          | COMMA decl
+param_tail: COMMA decl param_tail {
+            StatementList node = new StatementList();
+            node.add((NodeAST) $2);
+            node.addAll((NodeList) $3);
+            $$ = node; 
+          }
+          | COMMA decl {
+            $$ = $2;
+          }
           ;
 
 codeblock: 
@@ -266,14 +278,9 @@ stmt: decl            { $$ = $1; }
     ;
 
 assign: 
-    structref ASSIGN exp
-    | IDENTIFIER ASSIGN exp {
-				if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> not declared\n", $1);
-          System.err.println(msg);
-        }
-        AssignNode an = new AssignNode($1, (NodeAST) $3);
-        $$ = an;
+    idref ASSIGN exp {
+        AssignNode node = new AssignNode((NodeAST) $1, (NodeAST) $3);
+        $$ = node;
     }
     | arrayref ASSIGN exp
     ;
@@ -447,39 +454,26 @@ idref:
         $$ = new DotOpNode((NodeAST) $1, (NodeAST) $3);
     }
     | IDENTIFIER { 
-			if(!isIdentifierExist($1)) {
-        String msg = String.format("identifier <%s> not declared\n", $1);
-        System.err.println(msg);
-      }
-			$$ = new VariableNode($1); 
-		}
+	    if(!isIdentifierExist($1)) {
+            String msg = String.format("identifier <%s> not declared\n", $1);
+            System.err.println(msg);
+        }
+		$$ = new VariableNode($1); 
+	}
+    ;
 
 reference: 
     /*structref { $$ = $1; }*/
     arrayref { $$ = $1; }
     ;
 		
-/*structref: 
-    IDENTIFIER DOT structref {
-        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) $3);
-        $$ = dot;
-    }
-    | IDENTIFIER DOT IDENTIFIER { 
-        DotOpNode dot = new DotOpNode((VariableNode) new VariableNode($1), (NodeAST) new VariableNode($3));
-        $$ = dot;
-    }
-    ;*/
-
 arrayref: 
     IDENTIFIER L_SQBRACE exp R_SQBRACE {
         if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> not declared\n", $1);
           System.err.println(msg);
         }
-        $$ = new ArrayElementNode(
-            new VariableNode($1),
-            (NodeAST) $3
-        );
+        $$ = new ArrayElementNode(new VariableNode($1), (NodeAST) $3);
     }
     ;
 
