@@ -35,3 +35,12 @@ public enum BOType {
      */
     REF
 }
+
+//public class BOType {
+//    public static final int VOID = 0;
+//    public static final int BOOL = 1;
+//    public static final int INT = 2;
+//    public static final int FLOAT = 3;
+//    public static final int STRING = 4;
+//    public static final int REF = 5;
+//}
