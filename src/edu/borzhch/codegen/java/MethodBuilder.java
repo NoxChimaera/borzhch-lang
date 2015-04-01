@@ -269,10 +269,17 @@ public class MethodBuilder {
     
     public void printLine(Type type) {
         il.append(f.createInvoke("java.io.PrintStream", "println", 
-                Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
-     }
+            Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
+    }
     public void printLine(String str) {
         il.append(f.createPrintln(str));
+    }
+   
+    public void newArray(Type type) {
+        il.append(new NEWARRAY((BasicType) type));
+    }
+    public void setArray(String arrayRef, Type arrayType) {
+        il.append(new IASTORE());
     }
     
     /**
@@ -281,8 +288,8 @@ public class MethodBuilder {
     public void compile() {
         // MOCK START   
         getStdout();
-        il.append(f.createLoad(Type.BOOLEAN, 1));
-        printLine(Type.BOOLEAN);
+        il.append(f.createLoad(Type.INT, 1));
+        printLine(Type.INT);
         il.append(new RETURN());
         // MOCK END
         

@@ -7,7 +7,6 @@ package edu.borzhch;
 import edu.borzhch.language.*;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import com.beust.jcommander.JCommander;
 import edu.borzhch.ast.TreeAST;
 
@@ -30,13 +29,12 @@ public class Program {
                 r = new FileReader(arg);
                 Parser parser = new Parser(r, op.getDebugParser());
                 parser.run();
-                TreeAST.debug(0);
-                TreeAST.codegen();
             }
         } catch (FileNotFoundException fileNotFoundException){
             System.err.println(fileNotFoundException);
             System.out.println(fileNotFoundException);
         }
         if(op.getDebugTree()) TreeAST.debug(0);
+        TreeAST.codegen();
     }
 }

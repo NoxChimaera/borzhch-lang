@@ -90,7 +90,7 @@ public class CmpOpNode extends OpNode {
         JavaCodegen.method().push(1);
         InstructionHandle ihTrue = JavaCodegen.method().getLastHandler();
         ineq.setTarget(ihTrue);
-        // 4: nop // hacked by Sidhe
+        // 4: nop // hacked by elves
         JavaCodegen.method().nop();
         InstructionHandle crutch = JavaCodegen.method().getLastHandler();
         go.setTarget(crutch);
@@ -122,7 +122,7 @@ public class CmpOpNode extends OpNode {
             JavaCodegen.method().push(0);
         InstructionHandle ihTrue = JavaCodegen.method().getLastHandler();
         eq.setTarget(ihTrue);
-        // 4: nop // hacked by Sidhe
+        // 4: nop // hacked by elves
         JavaCodegen.method().nop();
         InstructionHandle crutch = JavaCodegen.method().getLastHandler();
         go.setTarget(crutch);
@@ -155,7 +155,7 @@ public class CmpOpNode extends OpNode {
             JavaCodegen.method().push(0);
         InstructionHandle ihTrue = JavaCodegen.method().getLastHandler();
         ifeq.setTarget(ihTrue);
-        // 5: nop // hacked by Sidhe
+        // 5: nop // hacked by Aen Sidhe
         JavaCodegen.method().nop();
         InstructionHandle crutch = JavaCodegen.method().getLastHandler();
         go.setTarget(crutch);

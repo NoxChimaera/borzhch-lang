@@ -40,7 +40,7 @@
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref
-%type <obj> switch
+%type <obj> switch structref
 %%
 
 start: 
@@ -207,7 +207,7 @@ decl: TYPE IDENTIFIER {
         DeclarationNode decl = new DeclarationNode($2, $1);
         $$ = decl;
     }
-    | TYPE L_SQBRACE R_SQBRACE IDENTIFIER { 
+    /*| TYPE L_SQBRACE R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
           yyerror(msg);
@@ -221,7 +221,7 @@ decl: TYPE IDENTIFIER {
         
         DeclarationNode decl = new DeclarationNode($4, BOHelper.getType("ref"));
         $$ = decl;
-    }
+    }*/
     | TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
@@ -235,7 +235,13 @@ decl: TYPE IDENTIFIER {
         topTable.pushSymbol($5, "ref");
 
         DeclarationNode decl = new DeclarationNode($5, BOHelper.getType("ref"));
-        $$ = decl;
+        NewArrayNode nan = new NewArrayNode($1, (NodeAST) $3);
+        AssignNode store = new AssignNode(new VariableNode($5, "ref"), nan);
+
+        StatementList node = new StatementList();
+        node.add(decl);
+        node.add(store);
+        $$ = node;
     }
     ;
 
@@ -301,12 +307,23 @@ stmt: decl            { $$ = $1; }
     ;
 
 assign: 
-    idref ASSIGN exp {
-        AssignNode an = new AssignNode((VariableNode) $1, (NodeAST) $3);
+    structref ASSIGN exp
+    | IDENTIFIER ASSIGN exp {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> not declared\n", $1);
+          System.err.println(msg);
+        }
+        AssignNode an = new AssignNode(new VariableNode($1, topTable.getSymbolType($1)), 
+            (NodeAST) $3);
         $$ = an;
     }
     | arrayref ASSIGN exp {
-        $$ = null;
+        /*arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode*/
+
+        ArrayElementNode index = (ArrayElementNode) $1;
+        NodeAST value = (NodeAST) $3;
+        SetArrayNode node = new SetArrayNode(index, value);
+        $$ = node;
     }
     ;
 
@@ -500,8 +517,8 @@ idref:
             String msg = String.format("identifier <%s> not declared\n", $1);
             yyerror(msg);
         }
-		$$ = new VariableNode($1); 
-	}
+        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
+    }
     ;
 
 reference: 
@@ -514,7 +531,10 @@ arrayref:
           String msg = String.format("identifier <%s> not declared\n", $1);
           yyerror(msg);
         }
-        $$ = new ArrayElementNode(new VariableNode($1), (NodeAST) $3);
+        $$ = new ArrayElementNode(
+            new VariableNode($1, topTable.getSymbolType($1)),
+            (NodeAST) $3
+        );
     }
     ;
 

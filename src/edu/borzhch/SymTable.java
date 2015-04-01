@@ -52,6 +52,10 @@ public class SymTable {
             result = symbol.get(identifier);
             if(result != null) break;
         }
+        if (result == null && null != previous) {
+            result = previous.getSymbolType(identifier);
+        }
+        
         return result;
     }
     

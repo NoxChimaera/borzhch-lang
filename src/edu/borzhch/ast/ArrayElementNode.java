@@ -32,7 +32,9 @@ public class ArrayElementNode extends NodeAST {
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // load array reference
+        ref.codegen();
+        // push index
+        index.codegen();
     }
-    
 }
