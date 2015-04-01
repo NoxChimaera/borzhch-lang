@@ -192,14 +192,14 @@ public class MethodBuilder {
             "out", new ObjectType("java.io.PrintStream")));
     }
     
-   public void printLine(Type type) {
-       il.append(f.createInvoke("java.io.PrintStream", "pintln", 
-               Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
+    public void printLine(Type type) {
+        il.append(f.createInvoke("java.io.PrintStream", "println", 
+                Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
+     }
+    public void printLine(String str) {
+        il.append(f.createPrintln(str));
     }
-   public void printLine(String str) {
-       il.append(f.createPrintln(str));
-   }
-   
+    
     /**
      * Компилирует метод
      */

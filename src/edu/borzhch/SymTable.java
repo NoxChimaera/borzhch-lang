@@ -34,10 +34,12 @@ public class SymTable {
     
     public boolean findSymbol(String identifier) {
         boolean result = false;
-        if(symbols != null)
+        if(symbols != null) {
             for(HashMap<String, String> symbol : symbols) {
                 result = symbol.containsKey(identifier);
+                if(result) break;
             }
+        }
         if(this.previous != null && !result) {
             result = this.previous.findSymbol(identifier);
         }
@@ -48,6 +50,7 @@ public class SymTable {
         String result = null;
         for(HashMap<String, String> symbol : symbols) {
             result = symbol.get(identifier);
+            if(result != null) break;
         }
         return result;
     }

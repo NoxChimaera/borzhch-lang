@@ -63,6 +63,7 @@ BooleanLiteral = "true" | "false"
   "include"   { return Parser.INCLUDE; }
   "new"       { return Parser.NEW; }
   "struct"    { return Parser.STRUCT; }
+  "print"     { return Parser.PRINT; }
 }  
 
 /* operators */

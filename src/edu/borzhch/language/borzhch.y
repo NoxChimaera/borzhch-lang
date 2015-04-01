@@ -19,7 +19,7 @@
 %token IF L_BRACE R_BRACE ELSE FOR WHILE DO SWITCH NEW
 %token <sval> STRING 
 %token <ival> BOOLEAN 
-%token COMMA ASSIGN DOT SEMICOLON
+%token COMMA ASSIGN DOT SEMICOLON PRINT
 %token CASE TUPLE INCLUDE UN_MINUS UN_PLUS
 %token <sval> INCR MUL_ARITHM ADD_ARITHM MORELESS EQ
 
@@ -50,7 +50,10 @@ start:
 
 init: /* empty */ {
         topTable = new SymTable(null);
+        
         funcTable = new SymTable(null);
+        funcTable.pushSymbol("print", "void");
+
         structTable = new SymTable(null);
     }
     ;
@@ -91,11 +94,11 @@ function:
             func = new FunctionNode($3, $2);
         } else {
             String msg = String.format("unknown type <%s>\n", $2);
-            System.err.println(msg);
+            yyerror(msg);
         }
         if(isIdentifierExist($3)) {
           String msg = String.format("identifier <%s> already in use\n", $3);
-          System.err.println(msg);
+          yyerror(msg);
         }
 
         func.setArguments((NodeList) $5);
@@ -108,7 +111,7 @@ function:
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if(isIdentifierExist($2)) {
           String msg = String.format("identifier <%s> already in use\n", $2);
-          System.err.println(msg);
+          yyerror(msg);
         }
         FunctionNode func = new FunctionNode($2, BOType.VOID);
         func.setStatements((StatementList) $6);
@@ -147,7 +150,7 @@ codeblock:
 struct_decl: STRUCT IDENTIFIER decl_block {
               if(isIdentifierExist($2)) {
                 String msg = String.format("identifier <%s> already in use\n", $2);
-                System.err.println(msg);
+                yyerror(msg);
               }
               structTable.pushSymbol($2, "ref");
 
@@ -175,11 +178,11 @@ decl_list: /* empty*/ {
 decl: TYPE IDENTIFIER { 
         if(isIdentifierExist($2)) {
           String msg = String.format("identifier <%s> already in use\n", $2);
-          System.err.println(msg);
+          yyerror(msg);
         }
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
-          System.err.println(msg);
+          yyerror(msg);
         }
 
         topTable.pushSymbol($2, $1);
@@ -190,11 +193,11 @@ decl: TYPE IDENTIFIER {
     | IDENTIFIER IDENTIFIER {
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
-          System.err.println(msg);
+          yyerror(msg);
         }
         if(isIdentifierExist($2)) {
           String msg = String.format("identifier <%s> already in use\n", $2);
-          System.err.println(msg);
+          yyerror(msg);
         }
 
         topTable.pushSymbol($2, $1);
@@ -205,11 +208,11 @@ decl: TYPE IDENTIFIER {
     | TYPE L_SQBRACE R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
-          System.err.println(msg);
+          yyerror(msg);
         }
         if(isIdentifierExist($4)) {
           String msg = String.format("identifier <%s> already in use\n", $4);
-          System.err.println(msg);
+          yyerror(msg);
         }
         
         topTable.pushSymbol($4, "ref");
@@ -220,11 +223,11 @@ decl: TYPE IDENTIFIER {
     | TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
-          System.err.println(msg);
+          yyerror(msg);
         }
         if(isIdentifierExist($5)) {
           String msg = String.format("identifier <%s> already in use\n", $5);
-          System.err.println(msg);
+          yyerror(msg);
         }
         
         topTable.pushSymbol($5, "ref");
@@ -253,7 +256,7 @@ stmt_list: /* empty */ { $$ = null; }
         StatementList list = new StatementList();
         list.add((NodeAST) $1);
         if ($3 != null) list.addAll((StatementList) $3);
-            $$ = list;
+        $$ = list;
     }
     | if stmt_list { 
         StatementList node = new StatementList();
@@ -261,37 +264,51 @@ stmt_list: /* empty */ { $$ = null; }
         node.addAll((NodeList) $2);
         $$ = node; 
     }
-    | loop stmt_list { $$ = null; }
-    | switch stmt_list { $$ = null; }
+    | loop stmt_list { 
+        StatementList node = new StatementList();
+        node.add((NodeAST) $1);
+        node.addAll((NodeList) $2);
+        $$ = node; 
+    }
+    | switch stmt_list { 
+        StatementList node = new StatementList();
+        node.add((NodeAST) $1);
+        node.addAll((NodeList) $2);
+        $$ = node; 
+    }
     ;
 
 stmt: decl            { $$ = $1; }
     | decl_assign     { $$ = $1; }
-    | assign          { $$ = null; }
+    | assign          { $$ = $1; }
     | GOTO IDENTIFIER { 
       if(!isIdentifierExist($2)) {
         String msg = String.format("identifier <%s> not declared\n", $2);
-        System.err.println(msg);
+        yyerror(msg);
       }
       $$ = null; 
     }
-    | RETURN exp      { $$ = null; }
+    | RETURN exp      { $$ = new ReturnNode((NodeAST) $2); }
     | BREAK           { $$ = null; }
     | CONTINUE        { $$ = null; }
+    | PRINT L_BRACE exp R_BRACE {
+        PrintNode node = new PrintNode((NodeAST) $3);
+        $$ = node;
+    }
     ;
 
 assign: 
-    structref ASSIGN exp
-    | IDENTIFIER ASSIGN exp {
+    idref ASSIGN exp {
         if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> not declared\n", $1);
-          System.err.println(msg);
+          yyerror(msg);
         }
-        AssignNode an = new AssignNode(new VariableNode($1, structTable.getSymbolType($1)), 
-            (NodeAST) $3);
+        AssignNode an = new AssignNode((VariableNode) $1, (NodeAST) $3);
         $$ = an;
     }
-    | arrayref ASSIGN exp
+    | arrayref ASSIGN exp {
+        $$ = null;
+    }
     ;
 
 if: IF L_BRACE exp R_BRACE codeblock %prec IFX else {
@@ -312,13 +329,28 @@ else: /* empty */ {
     }
     ;
 
-loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON exp R_BRACE codeblock
-    | WHILE L_BRACE exp R_BRACE codeblock
-    | DO codeblock WHILE L_BRACE exp R_BRACE SEMICOLON
+loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON exp R_BRACE codeblock {
+        ForNode node = new ForNode((DeclarationNode) $3, (NodeAST) $5, (NodeAST) $7, (StatementList) $9);
+        $$ = node;
+    }
+    | WHILE L_BRACE exp R_BRACE codeblock {
+        WhileNode node = new WhileNode((NodeAST) $3, (StatementList) $5);
+        $$ = node;
+    }
+    | DO codeblock WHILE L_BRACE exp R_BRACE SEMICOLON{
+        DoWhileNode node = new DoWhileNode((NodeAST) $5, (StatementList) $2);
+        $$ = node;
+    }
     ;
 
-switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock
-      | SWITCH L_BRACE exp R_BRACE codeblock 
+switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock {
+        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $5, (StatementList) $7);
+        $$ = node;
+      }
+      | SWITCH L_BRACE exp R_BRACE codeblock {
+        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $5, null);
+        $$ = node;
+      }
       ;
 
 exp:
@@ -435,23 +467,23 @@ exp:
         node.type(e.type());
         $$ = node;
     }
-   | IDENTIFIER INCR  { 
+   | IDENTIFIER INCR { 
       if(!isIdentifierExist($1)) {
         String msg = String.format("identifier <%s> not declared\n", $1);
-        System.err.println(msg);
+        yyerror(msg);
       }
       $$ = new PostOpNode(new VariableNode($1), $2); 
    }
-    | NEW IDENTIFIER   { 
+    | NEW IDENTIFIER { 
         if(!isTypeExist($2)) {
             String msg = String.format("unknown type <%s>\n", $2);
-            System.err.println(msg);
+            yyerror(msg);
         }
         $$ = new NewObjectNode($2); 
     }
     | reference        { $$ = $1; }
     | tuple_value      { $$ = $1; }
-    | idref 						{ $$ = $1; }
+    | idref 		   { $$ = $1; }
     | INTEGER          { $$ = new IntegerNode($1); }
     | FLOAT            { $$ = new FloatNode((float)$1); }
     | STRING           { $$ = new StringNode($1); }
@@ -465,7 +497,7 @@ idref:
     | IDENTIFIER { 
 	    if(!isIdentifierExist($1)) {
             String msg = String.format("identifier <%s> not declared\n", $1);
-            System.err.println(msg);
+            yyerror(msg);
         }
 		$$ = new VariableNode($1); 
 	}
@@ -479,7 +511,7 @@ arrayref:
     IDENTIFIER L_SQBRACE exp R_SQBRACE {
         if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> not declared\n", $1);
-          System.err.println(msg);
+          yyerror(msg);
         }
         $$ = new ArrayElementNode(new VariableNode($1), (NodeAST) $3);
     }
@@ -557,7 +589,7 @@ private int yylex() {
 }
 
 public void yyerror(String error) {
-  System.err.println("Error: " + error);
+  System.err.println("Error on line %d, column %d: %s", yyline, yycolumn, error);
 }
 
 public Parser(Reader r, boolean debug) {
