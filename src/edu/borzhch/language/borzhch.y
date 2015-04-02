@@ -232,7 +232,7 @@ decl: TYPE IDENTIFIER {
           yyerror(msg);
         }
         
-        topTable.pushSymbol($5, "ref");
+        topTable.pushSymbol($5, "ref", $1);
 
         DeclarationNode decl = new DeclarationNode($5, BOHelper.getType("ref"));
         NewArrayNode nan = new NewArrayNode($1, (NodeAST) $3);
@@ -531,6 +531,7 @@ arrayref:
           String msg = String.format("identifier <%s> not declared\n", $1);
           yyerror(msg);
         }
+        
         $$ = new ArrayElementNode(
             new VariableNode($1, topTable.getSymbolType($1)),
             (NodeAST) $3

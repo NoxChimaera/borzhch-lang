@@ -9,13 +9,15 @@ import java.util.ArrayList;
  * @author Tursukov A.E. <goldenflame412@gmail.com>
  */
 public class SymTable {
-    private ArrayList<HashMap<String, String>> symbols;
+    private ArrayList<HashMap<String, String>> symbols = null;
+    private ArrayList<HashMap<String, String>> baseTypes = null;
     
-    private SymTable previous;
+    private SymTable previous = null;
     
     public SymTable(SymTable previous) {
         this.previous = previous;
         this.symbols = new ArrayList<>();
+        this.baseTypes = new ArrayList<>();
     }
     
     public SymTable getPrevious() {
@@ -24,6 +26,14 @@ public class SymTable {
     
     public void setPrevious(SymTable value) {
         this.previous = value;
+    }
+    
+    public void pushSymbol(String identifier, String type, String baseType) {
+        this.pushSymbol(identifier, type);
+        
+        HashMap<String, String> bType = new HashMap<>();        
+        bType.put(identifier, baseType);
+        baseTypes.add(bType);
     }
     
     public void pushSymbol(String identifier, String type) {
@@ -43,6 +53,24 @@ public class SymTable {
         if(this.previous != null && !result) {
             result = this.previous.findSymbol(identifier);
         }
+        return result;
+    }
+    
+    /**
+     * Ищет базовый тип ссылочного объекта в таблице baseTypes по идентификатору.
+     * @param identifier
+     * @return Строку, содержащую базовый тип; иначе null.
+     */
+    public String getBaseType(String identifier) {
+        String result = null;
+        
+        if(baseTypes != null) {
+            for(HashMap<String, String> type : baseTypes) {
+                type.get(identifier);
+                if(result != null) break;
+            }
+        }
+        
         return result;
     }
     
