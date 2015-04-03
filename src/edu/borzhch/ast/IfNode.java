@@ -42,6 +42,7 @@ public class IfNode extends NodeAST {
         condition.codegen();
         // 0: ifne 3 // to else
         IFEQ ifeq = JavaCodegen.method().ifeq();
+        
         // 1: if-branch
         statementList.codegen();
         // 2: goto 5 // get off statement

@@ -281,6 +281,9 @@ public class MethodBuilder {
     public void setArray(String arrayRef, Type arrayType) {
         il.append(new IASTORE());
     }
+    public void getArray(String arrayRef, Type arrayType) {
+        il.append(new IALOAD());
+    }
     
     /**
      * Компилирует метод
@@ -288,7 +291,7 @@ public class MethodBuilder {
     public void compile() {
         // MOCK START   
         getStdout();
-        il.append(f.createLoad(Type.INT, 1));
+        il.append(f.createLoad(Type.INT, 2));
         printLine(Type.INT);
         il.append(new RETURN());
         // MOCK END

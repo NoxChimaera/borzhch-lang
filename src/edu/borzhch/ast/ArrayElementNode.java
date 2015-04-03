@@ -5,6 +5,10 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
+
 /**
  *
  * @author Balushkin M.
@@ -12,9 +16,17 @@ package edu.borzhch.ast;
 public class ArrayElementNode extends NodeAST {
     VariableNode ref;
     NodeAST index;
+    
+    boolean load = true;
+    public void setLoad(boolean load) {
+        this.load = load;
+    }
+    
     public ArrayElementNode(VariableNode arrayRef, NodeAST expr) {
         ref = arrayRef;
         index = expr;
+        
+        type = BOHelper.getType(ref.strType());
     }
     
     @Override
@@ -36,5 +48,9 @@ public class ArrayElementNode extends NodeAST {
         ref.codegen();
         // push index
         index.codegen();
+        
+        if (load) {
+            JavaCodegen.method().getArray("", Type.UNKNOWN);
+        }
     }
 }

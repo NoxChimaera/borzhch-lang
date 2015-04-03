@@ -107,7 +107,7 @@ public class CmpOpNode extends OpNode {
         }
         
         // 0: if_icmpeq _ 
-        IfInstruction eq = JavaCodegen.method().icmp(isEqual ? "eq" : "ne");
+        IfInstruction eq = JavaCodegen.method().icmp(isEqual ? "eq" : "eq");
         // 1: iconst_0
         if (isEqual)
             JavaCodegen.method().push(0);

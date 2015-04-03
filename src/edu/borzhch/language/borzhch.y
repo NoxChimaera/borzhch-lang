@@ -207,21 +207,6 @@ decl: TYPE IDENTIFIER {
         DeclarationNode decl = new DeclarationNode($2, $1);
         $$ = decl;
     }
-    /*| TYPE L_SQBRACE R_SQBRACE IDENTIFIER { 
-        if(!isTypeExist($1)) {
-          String msg = String.format("unknown type <%s>\n", $1);
-          yyerror(msg);
-        }
-        if(isIdentifierExist($4)) {
-          String msg = String.format("identifier <%s> already in use\n", $4);
-          yyerror(msg);
-        }
-        
-        topTable.pushSymbol($4, "ref");
-        
-        DeclarationNode decl = new DeclarationNode($4, BOHelper.getType("ref"));
-        $$ = decl;
-    }*/
     | TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
@@ -234,9 +219,12 @@ decl: TYPE IDENTIFIER {
         
         topTable.pushSymbol($5, "ref", $1);
 
-        DeclarationNode decl = new DeclarationNode($5, BOHelper.getType("ref"));
+        DeclarationNode decl = new DeclarationNode($5, $1);
         NewArrayNode nan = new NewArrayNode($1, (NodeAST) $3);
-        AssignNode store = new AssignNode(new VariableNode($5, "ref"), nan);
+        VariableNode var = new VariableNode($5, "ref");
+        var.strType($1);
+
+        AssignNode store = new AssignNode(var, nan);
 
         StatementList node = new StatementList();
         node.add(decl);
@@ -247,8 +235,19 @@ decl: TYPE IDENTIFIER {
 
 decl_assign: 
     decl ASSIGN exp {
+
         DeclarationNode decl = (DeclarationNode) $1;
         String name = decl.getName();
+
+        BOType infer = InferenceTypeTable.inferType(
+            decl.type(),
+            ((NodeAST) $3).type()
+        );
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(decl.type(), 
+            (((NodeAST) $3).type())));
+        }
+
 
         AssignNode an = new AssignNode(new VariableNode(name, topTable.getSymbolType(name)), 
                 (NodeAST) val_peek(0).obj);
@@ -307,19 +306,28 @@ stmt: decl            { $$ = $1; }
     ;
 
 assign: 
-    structref ASSIGN exp
-    | IDENTIFIER ASSIGN exp {
+    IDENTIFIER ASSIGN exp {
         if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> not declared\n", $1);
           System.err.println(msg);
         }
+        
+        BOType infer = InferenceTypeTable.inferType(
+            BOHelper.getType(topTable.getSymbolType($1)),
+            ((NodeAST) $3).type()
+        );
+        if (BOType.VOID == infer) {
+            yyerror(ErrorHelper.incompatibleTypes(BOHelper.getType(topTable.getSymbolType($1)), 
+            (((NodeAST) $3).type())));
+        }
+
         AssignNode an = new AssignNode(new VariableNode($1, topTable.getSymbolType($1)), 
             (NodeAST) $3);
         $$ = an;
     }
     | arrayref ASSIGN exp {
         /*arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode*/
-
+        
         ArrayElementNode index = (ArrayElementNode) $1;
         NodeAST value = (NodeAST) $3;
         SetArrayNode node = new SetArrayNode(index, value);
@@ -327,11 +335,13 @@ assign:
     }
     ;
 
-if: IF L_BRACE exp R_BRACE codeblock %prec IFX else {
-    IfNode node = new IfNode((NodeAST) $3, (StatementList) $5, (IfNode) $6);
-    $$ = node;
-  }
-  ;
+
+if: 
+    IF L_BRACE exp R_BRACE codeblock %prec IFX else {
+        IfNode node = new IfNode((NodeAST) $3, (StatementList) $5, (IfNode) $6);
+        $$ = node;
+    }
+    ;
 
 else: /* empty */ {
       $$ = null;
@@ -531,11 +541,11 @@ arrayref:
           String msg = String.format("identifier <%s> not declared\n", $1);
           yyerror(msg);
         }
-        
-        $$ = new ArrayElementNode(
-            new VariableNode($1, topTable.getSymbolType($1)),
-            (NodeAST) $3
-        );
+
+        VariableNode var = new VariableNode($1, topTable.getBaseType($1));
+        var.type(BOType.REF);
+        ArrayElementNode node = new ArrayElementNode(var, (NodeAST) $3);
+        $$ = node;
     }
     ;
 

@@ -15,8 +15,17 @@ import edu.borzhch.helpers.BOHelper;
  */
 public class VariableNode extends NodeAST {
     String id;
+    public String id() {
+        return id;
+    }
     // ???
     String varTypeName;
+    public String strType() {
+        return varTypeName;
+    }
+    public void strType(String newType) {
+        varTypeName = newType;
+    }
     
     // test
     public VariableNode(String identifier) {

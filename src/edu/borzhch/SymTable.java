@@ -66,7 +66,7 @@ public class SymTable {
         
         if(baseTypes != null) {
             for(HashMap<String, String> type : baseTypes) {
-                type.get(identifier);
+                result = type.get(identifier);
                 if(result != null) break;
             }
         }

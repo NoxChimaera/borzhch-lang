@@ -5,6 +5,10 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
+
 /**
  *
  * @author Balushkin M.
@@ -16,6 +20,8 @@ public class SetArrayNode extends NodeAST {
     public SetArrayNode(ArrayElementNode elementNode, NodeAST valueExpr) {
         element = elementNode;
         value = valueExpr;
+        
+        element.setLoad(false);
     }
 
     @Override
@@ -38,7 +44,8 @@ public class SetArrayNode extends NodeAST {
         // compute value
         value.codegen();
         // iastore
-        
+        JavaCodegen.method().setArray(element.ref.id(), 
+                BOHelper.toJVMType(BOHelper.getType(element.ref.strType())));
     }
     
 }
