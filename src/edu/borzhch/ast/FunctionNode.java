@@ -97,9 +97,11 @@ public class FunctionNode extends NodeAST {
     @Override
     public void codegen() {
         ArrayList<NodeAST> args = this.getArguments();
-        String[] argsNames = new String[args.size()];
-        Type[] argsTypes = new Type[args.size()];
+        String[] argsNames = null;
+        Type[] argsTypes = null;
         if(args != null && args.size() != 0) {
+            argsNames = new String[args.size()];
+            argsTypes = new Type[args.size()];
             int i = 0;
             for(NodeAST arg : args) {
                 DeclarationNode decl = ((DeclarationNode) arg);

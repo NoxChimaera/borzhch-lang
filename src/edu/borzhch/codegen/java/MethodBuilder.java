@@ -330,8 +330,10 @@ public class MethodBuilder {
         il.append(f.createReturn(type));
     }
     
-    public void createSwitch(int[] match, InstructionHandle[] targets, InstructionHandle default_target) {
-        il.append(new SWITCH(match, targets, default_target));
+    public SWITCH createSwitch(int[] match, InstructionHandle[] targets, InstructionHandle default_target) {
+        SWITCH sw = new SWITCH(match, targets, default_target);
+        il.append(sw);
+        return sw;
     }
     
     public void newObject(String structId) {

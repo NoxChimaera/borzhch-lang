@@ -25,8 +25,10 @@ public class CaseNode extends NodeAST {
         
         ++lvl;
         System.out.println(String.format("Condition: %d", condition));
-        System.out.println("Body:");
-        body.debug(lvl);
+        if(body != null) {
+            System.out.println("Body:");
+            body.debug(lvl);
+        }
     }
     
     public InstructionHandle getPosition() {
@@ -37,6 +39,6 @@ public class CaseNode extends NodeAST {
     
     @Override
     public void codegen() {
-        body.codegen();
+        if(body != null) body.codegen();
     }
 }

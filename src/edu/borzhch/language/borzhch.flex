@@ -96,7 +96,7 @@ BooleanLiteral = "true" | "false"
 <YYINITIAL> {
   ","   { return Parser.COMMA; }
   "."   { return Parser.DOT; }
-  ":"   { return Parser.COLON }
+  ":"   { return Parser.COLON; }
   ";"   { return Parser.SEMICOLON; }
   "{"   { return Parser.L_CURBRACE; }
   "}"   { return Parser.R_CURBRACE; }

@@ -6,6 +6,7 @@ import edu.borzhch.WaitingTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import java.util.ArrayList;
 import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.SWITCH;
 
 /**
  *
@@ -14,9 +15,9 @@ import org.apache.bcel.generic.InstructionHandle;
 public class SwitchNode extends NodeAST {
     NodeAST input;
     StatementList cases;
-    CaseNode defaultCase;
+    StatementList defaultCase;
     
-    public SwitchNode(NodeAST input, StatementList cases, CaseNode defaultCase) {
+    public SwitchNode(NodeAST input, StatementList cases, StatementList defaultCase) {
         this.input = input;
         this.cases = cases;
         this.defaultCase = defaultCase;
@@ -28,39 +29,65 @@ public class SwitchNode extends NodeAST {
         System.out.println("Switch: ");
         
         ++lvl;
+        printLevel(lvl);
+        System.out.println("Input:");
         input.debug(lvl);
-        cases.debug(lvl);
-        if(defaultCase != null) defaultCase.debug(lvl);
+        if(cases != null) {
+            printLevel(lvl);
+            System.out.println("Case:");
+            cases.debug(lvl);
+        }
+        if(defaultCase != null) {
+            printLevel(lvl);
+            System.out.println("Default:");
+            defaultCase.debug(lvl);
+        }
     }
 
     @Override
     public void codegen() {
-        ArrayList<NodeAST> nodes = this.cases.nodes;
-        int caseCount = nodes.size();
+        //Берём все ноды с кейсами
+        ArrayList<NodeAST> nodes = this.cases == null? null : this.cases.nodes;
+        
+        //Считаем их
+        int caseCount = 0;
+        if(nodes != null) {
+            caseCount = nodes.size();
+        }
+        
+        //Инициализируем переменные для создания SWITCH
+        int[] conds = new int[caseCount];
         InstructionHandle[] caseList = new InstructionHandle[caseCount];
         InstructionHandle defCase = null;
-        int[] conds = new int[caseCount];
         
-        int i = 0;
-        for(NodeAST node : nodes) {
-            CaseNode caseNode = (CaseNode) node;
-            conds[i] = caseNode.condition;
-            i++;
+        //Берём числа из условных частей CASE
+        if(nodes != null) {
+            int i = 0;
+            for(NodeAST node : nodes) {
+                CaseNode caseNode = (CaseNode) node;
+                conds[i] = caseNode.condition;
+                i++;
+            }
         }
         
         //switch head
-        JavaCodegen.method().createSwitch(conds, caseList, defCase);
+        SWITCH sw = JavaCodegen.method().createSwitch(conds, caseList, defCase);
         //cases
-        i = 0;
-        for(NodeAST node : nodes) {
-            CaseNode caseNode = (CaseNode) node;
-            caseList[i] = caseNode.getPosition();
-            caseNode.codegen();
-            i++;
+        if(nodes != null) {
+            int i = 0;
+            for(NodeAST node : nodes) {
+                CaseNode caseNode = (CaseNode) node;
+                caseList[i] = caseNode.getPosition();
+                caseNode.codegen();
+                i++;
+            }
         }
         //default
-        defCase = defaultCase.getPosition();
-        defaultCase.codegen();
+        if(defaultCase != null) {
+            JavaCodegen.method().nop();
+            defCase = JavaCodegen.method().getLastHandler();
+            defaultCase.codegen();
+        }
         
         //resolve cases breaks
         JavaCodegen.method().nop();

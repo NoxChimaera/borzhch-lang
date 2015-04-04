@@ -41,7 +41,7 @@
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref idref_tail
-%type <obj> switch switchblock structref builtin
+%type <obj> switch case switchblock structref builtin
 %%
 
 start: 
@@ -441,10 +441,12 @@ loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON assign R_BRACE codeblock {
     ;
 
 switch: SWITCH L_BRACE exp R_BRACE L_CURBRACE switchblock R_CURBRACE ELSE L_CURBRACE stmt_list R_CURBRACE {
-        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $6, (StatementList) $9);
+        //TODO: exp should be of INTEGER type
+        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $6, (StatementList) $10);
         $$ = node;
       }
-      | SWITCH L_BRACE exp R_BRACE L_CURBRACE codeblock R_CURBRACE {
+      | SWITCH L_BRACE exp R_BRACE L_CURBRACE switchblock R_CURBRACE {
+        //TODO: exp should be of INTEGER type
         SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $6, null);
         $$ = node;
       }
