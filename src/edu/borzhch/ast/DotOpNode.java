@@ -9,9 +9,11 @@ package edu.borzhch.ast;
  *
  * @author Balushkin M.
  */
-public class DotOpNode extends NodeAST {
+public class DotOpNode extends NodeAST implements IDotNode {
     NodeAST l;
     NodeAST r;
+    
+    String struct;
     
     boolean generateLastNode = true;
     public void generateLastNode(boolean generate) {
@@ -33,6 +35,8 @@ public class DotOpNode extends NodeAST {
     public DotOpNode(NodeAST left, NodeAST right) {
         l = left;
         r = right;
+        
+        type = r.type;
     }
     
     @Override
@@ -51,8 +55,17 @@ public class DotOpNode extends NodeAST {
     @Override
     public void codegen() {
         l.codegen();
-        if (generateLastNode) {
+        FieldNode last = getLastNode();
+        if (r != last) {
+            r.codegen();
+        } else if (generateLastNode) {
             r.codegen();
         }
+    }
+
+    @Override
+    public void setStructName(String name) {
+        struct = name;
+        ((IDotNode) r).setStructName(struct);
     }
 }

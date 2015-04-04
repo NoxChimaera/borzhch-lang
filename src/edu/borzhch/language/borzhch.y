@@ -59,7 +59,6 @@ init: /* empty */ {
     }
     ;
 
-
 global_list: /* empty */ { 
            $$ = null; 
     }
@@ -384,7 +383,10 @@ assign:
 idref:
     IDENTIFIER DOT idref_tail {
         VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
-        $$ = new DotOpNode(var, (NodeAST) $3);
+        DotOpNode node = new DotOpNode(var, (NodeAST) $3);
+        ((IDotNode) node).setStructName(var.strType());
+        node.type(node.getLastNode().type());
+        $$ = node;
     }
     ;
 
@@ -399,7 +401,6 @@ idref_tail:
         $$ = node;
     }
     ;
-
 
 if: 
     IF L_BRACE exp R_BRACE codeblock %prec IFX else {
