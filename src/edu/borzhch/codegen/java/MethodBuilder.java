@@ -24,17 +24,20 @@ public class MethodBuilder {
     
     HashMap<String, LocalVariableGen> localVariables;
     
-    public MethodBuilder(String name, BOType returnType, ClassGen cg) {
+    public MethodBuilder(String name, BOType returnType, Type[] argsTypes, String[] argsNames, ClassGen cg) {
         il = new InstructionList();
         this.cg = cg;
         mg = new MethodGen(ACC_STATIC | ACC_PUBLIC, 
                 BOHelper.toJVMType(returnType), 
-                new Type[] { new ArrayType(Type.STRING, 1) },
-                new String[] { "argv" }, name, cg.getClassName(),
+                argsTypes,
+                argsNames, name, cg.getClassName(),
                 il, cg.getConstantPool()
         );
         f = new InstructionFactory(cg);
         localVariables = new HashMap<>();
+        for (LocalVariableGen localVar : mg.getLocalVariables()) {
+            localVariables.put(localVar.getName(), localVar);
+        }
     }
     
     public int getLastIndex() {
@@ -311,14 +314,18 @@ public class MethodBuilder {
         il.append(f.createArrayLoad(arrayType));
     }
     
+    public void funCall(String class_name, String func_name, Type ret_type, Type[] arg_types) {
+        il.append(f.createInvoke(class_name, func_name, ret_type, arg_types, INVOKESPECIAL));
+    }
+    
+    public void createReturn(Type type) {
+        il.append(f.createReturn(type));
+    }
+    
     /**
      * Компилирует метод
      */
     public void compile() {
-        // MOCK START   
-        il.append(new RETURN());
-        // MOCK END
-        
         mg.setMaxStack();
         cg.addMethod(mg.getMethod());
         il.dispose();

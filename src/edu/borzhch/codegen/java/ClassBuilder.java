@@ -8,8 +8,10 @@ package edu.borzhch.codegen.java;
 import edu.borzhch.constants.BOType;
 import java.util.HashMap;
 import static org.apache.bcel.Constants.*;
+import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.Type;
 
 /**
  * Конструктор классов
@@ -53,8 +55,8 @@ public class ClassBuilder {
      * @param retType Возвращаемый тип
      * @return MethodGen созданного метода
      */
-    public MethodBuilder newMethod(String name, BOType retType) {
-        MethodBuilder mb = new MethodBuilder(name, retType, cg);
+    public MethodBuilder newMethod(String name, BOType retType, Type[] argsTypes, String[] argsNames) {
+        MethodBuilder mb = new MethodBuilder(name, retType, argsTypes, argsNames, cg);
         methods.put(name, mb);
         return mb;
     }

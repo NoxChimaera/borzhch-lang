@@ -8,6 +8,7 @@
   import edu.borzhch.ast.*;
   import edu.borzhch.helpers.*;
   import edu.borzhch.SymTable;
+  import edu.borzhch.FuncTable;
   import edu.borzhch.constants.*;
 %}
 
@@ -52,8 +53,7 @@ start:
 init: /* empty */ {
         topTable = new SymTable(null);
         
-        funcTable = new SymTable(null);
-        funcTable.pushSymbol("print", "void");
+        funcTable = new FuncTable();
 
         structTable = new SymTable(null);
     }
@@ -105,7 +105,7 @@ function:
         func.setArguments((NodeList) $5);
         func.setStatements((StatementList) $7);
 
-        funcTable.pushSymbol($3, $2);
+        funcTable.push(func);
 
         $$ = func;
     }
@@ -115,9 +115,10 @@ function:
           yyerror(msg);
         }
         FunctionNode func = new FunctionNode($2, BOType.VOID);
+        func.setArguments((StatementList) $4);
         func.setStatements((StatementList) $6);
 
-        funcTable.pushSymbol($2, "void");
+        funcTable.push(func);
     
         $$ = func;
     }
@@ -140,7 +141,9 @@ param_tail: COMMA decl param_tail {
             $$ = node; 
           }
           | COMMA decl {
-            $$ = $2;
+            StatementList node = new StatementList();
+            node.add((NodeAST) $2);
+            $$ = node;
           }
           ;
 
@@ -297,7 +300,7 @@ stmt: decl            { $$ = $1; }
     | assign          { $$ = $1; }
     | GOTO IDENTIFIER { 
       if(!isIdentifierExist($2)) {
-        String msg = String.format("identifier <%s> not declared\n", $2);
+        String msg = String.format("identifier <%s> is not declared\n", $2);
         yyerror(msg);
       }
       $$ = null; 
@@ -311,7 +314,7 @@ stmt: decl            { $$ = $1; }
 assign: 
     IDENTIFIER ASSIGN exp {
         if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> not declared\n", $1);
+          String msg = String.format("identifier <%s> is not declared\n", $1);
           System.err.println(msg);
         }
         
@@ -501,8 +504,8 @@ exp:
         $$ = node;
     }
    | IDENTIFIER INCR { 
-      if(!isIdentifierExist($1)) {
-        String msg = String.format("identifier <%s> not declared\n", $1);
+      if(!isIdentifierExist($1)) { 
+        String msg = String.format("identifier <%s> is not declared\n", $1);
         yyerror(msg);
       }
       $$ = new PostOpNode(new VariableNode($1), $2); 
@@ -515,6 +518,14 @@ exp:
             yyerror(msg);
         }
         $$ = new NewObjectNode($2); 
+    }
+    | IDENTIFIER L_BRACE exp_list R_BRACE {
+        if(!isIdentifierExist($1)) {
+            String msg = String.format("identifier <%s> is not declared\n", $1);
+            yyerror(msg);
+        }
+        FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
+        $$ = node;
     }
     | reference        { $$ = $1; }
     | tuple_value      { $$ = $1; }
@@ -531,7 +542,7 @@ idref:
     }
     | IDENTIFIER { 
 	    if(!isIdentifierExist($1)) {
-            String msg = String.format("identifier <%s> not declared\n", $1);
+            String msg = String.format("identifier <%s> is not declared\n", $1);
             yyerror(msg);
         }
         $$ = new VariableNode($1, topTable.getSymbolType($1)); 
@@ -545,7 +556,7 @@ reference:
 arrayref: 
     IDENTIFIER L_SQBRACE exp R_SQBRACE {
         if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> not declared\n", $1);
+          String msg = String.format("identifier <%s> is not declared\n", $1);
           yyerror(msg);
         }
 
@@ -566,7 +577,9 @@ exp_list: /* empty */ {
           $$ = null;
         }
         | exp {
-          $$ = $1;
+            StatementList node = new StatementList();
+            node.add((NodeAST) $1);
+            $$ = node;
         }
         | exp exp_tail {
           StatementList node = new StatementList();
@@ -583,15 +596,21 @@ exp_tail: COMMA exp exp_tail {
           $$ = node;
         }
         | COMMA exp {
-          $$ = $2;
+            StatementList node = new StatementList();
+            node.add((NodeAST) $2);
+            $$ = node;
         }
         ;
 
 %%
 
 private SymTable topTable = null;
-private SymTable funcTable = null;
+private static FuncTable funcTable = null;
 private SymTable structTable = null;
+
+public static FuncTable getFuncTable() {
+    return funcTable;
+}
 
 private boolean isTypeExist(String type) {
   Boolean result = false;
@@ -607,7 +626,7 @@ private boolean isIdentifierExist(String identifier) {
   boolean result = false;
 
   result = topTable.findSymbol(identifier);
-  if(!result) result = funcTable.findSymbol(identifier);
+  if(!result) result = funcTable.find(identifier);
   if(!result) result = structTable.findSymbol(identifier);
 
   return result;

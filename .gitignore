@@ -26,3 +26,7 @@ yacc.*
 vendors/bcel-5.2/docs
 make.bat
 .gitignore
+
+#build script
+jarbuild/test.jar
+jarbuild/Program.class

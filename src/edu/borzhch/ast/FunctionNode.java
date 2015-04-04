@@ -8,6 +8,9 @@ package edu.borzhch.ast;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import java.util.ArrayList;
+import org.apache.bcel.generic.ArrayType;
+import org.apache.bcel.generic.Type;
 
 /**
  * Функция
@@ -61,6 +64,18 @@ public class FunctionNode extends NodeAST {
     public StatementList getStatements() {
         return statements;
     }
+    public String getFuncName() {
+        return this.funcName;
+    }
+    public Integer getArgumentsCount() {
+        return this.args.nodes.size();
+    }
+    public ArrayList<NodeAST> getArguments() {
+        return this.args.nodes;
+    }
+    public String getReturnTypeName() {
+        return this.returnTypeName;
+    }
     
     @Override
     public void debug(int lvl) {
@@ -81,11 +96,26 @@ public class FunctionNode extends NodeAST {
 
     @Override
     public void codegen() {
-        JavaCodegen.newMethod(funcName, returnType, "Program");
-        // TODO: args
+        ArrayList<NodeAST> args = this.getArguments();
+        String[] argsNames = new String[args.size()];
+        Type[] argsTypes = new Type[args.size()];
+        if(args != null && args.size() != 0) {
+            int i = 0;
+            for(NodeAST arg : args) {
+                DeclarationNode decl = ((DeclarationNode) arg);
+                argsNames[i] = decl.varName;
+                argsTypes[i] = BOHelper.toJVMType(decl.varType);
+                i++;
+            }
+        }
+        
+        JavaCodegen.newMethod(funcName, returnType, argsTypes, argsNames, "Program");
+        
         if (statements != null) {
             statements.codegen();
         }
         JavaCodegen.compileMethod("Program", funcName);
+        
+        if(returnType == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
     }
 }

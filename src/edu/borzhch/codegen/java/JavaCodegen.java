@@ -56,8 +56,8 @@ public class JavaCodegen {
      * @param returnType Возвращаемый тип
      * @param className Имя класса
      */
-    public static void newMethod(String name, BOType returnType, String className) {
-        currentMethod = classes.get(className).newMethod(name, returnType);
+    public static void newMethod(String name, BOType returnType, Type[] argsTypes, String[] argsNames, String className) {
+        currentMethod = classes.get(className).newMethod(name, returnType, argsTypes, argsNames);
     }
     /**
      * Компилирует метод

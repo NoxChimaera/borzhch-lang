@@ -6,6 +6,8 @@
 package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
 
 /**
  * Узел конструкции return
@@ -30,10 +32,11 @@ public class ReturnNode extends NodeAST {
 
     @Override
     public void codegen() {
-//        JavaCodegen.returnVoid();
-        
-//        JavaCodegen.add("return ");
-//        expr.codegen();
-//        JavaCodegen.add(";");
+        Type type = Type.VOID;
+        if(expr != null) {
+            expr.codegen();
+            type = BOHelper.toJVMType(expr.type);
+        }
+        JavaCodegen.method().createReturn(type);
     }
 }
