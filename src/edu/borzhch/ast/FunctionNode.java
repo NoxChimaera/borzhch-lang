@@ -71,7 +71,7 @@ public class FunctionNode extends NodeAST {
         return this.args.nodes.size();
     }
     public ArrayList<NodeAST> getArguments() {
-        return this.args.nodes;
+        return this.args == null ? null : this.args.nodes;
     }
     public String getReturnTypeName() {
         return this.returnTypeName;
@@ -114,8 +114,9 @@ public class FunctionNode extends NodeAST {
         if (statements != null) {
             statements.codegen();
         }
-        JavaCodegen.compileMethod("Program", funcName);
         
         if(returnType == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
+        
+        JavaCodegen.compileMethod("Program", funcName);
     }
 }

@@ -8,6 +8,7 @@ package edu.borzhch.codegen.java;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.HashMap;
+import org.apache.bcel.generic.Type;
 
 /**
  * Кодогенератор Java Bytecode

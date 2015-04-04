@@ -20,7 +20,7 @@
 %token IF L_BRACE R_BRACE ELSE FOR WHILE DO SWITCH NEW
 %token <sval> STRING 
 %token <ival> BOOLEAN 
-%token COMMA ASSIGN DOT SEMICOLON PRINT
+%token COMMA ASSIGN DOT SEMICOLON PRINT COLON
 %token CASE TUPLE INCLUDE UN_MINUS UN_PLUS
 %token <sval> INCR MUL_ARITHM ADD_ARITHM MORELESS EQ
 
@@ -41,7 +41,7 @@
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref idref_tail
-%type <obj> switch structref builtin
+%type <obj> switch switchblock structref builtin
 %%
 
 start: 
@@ -310,6 +310,7 @@ stmt: decl            { $$ = $1; }
       $$ = null; 
     }
     | RETURN exp      { $$ = new ReturnNode((NodeAST) $2); }
+    | RETURN          { $$ = new ReturnNode(null); }
     | BREAK           { $$ = new BreakNode(); }
     | CONTINUE        { $$ = new ContinueNode(); }
     | builtin         { $$ = $1; }
@@ -408,15 +409,29 @@ loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON assign R_BRACE codeblock {
     }
     ;
 
-switch: SWITCH L_BRACE exp R_BRACE codeblock ELSE codeblock {
-        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $5, (StatementList) $7);
+switch: SWITCH L_BRACE exp R_BRACE L_CURBRACE switchblock R_CURBRACE ELSE L_CURBRACE stmt_list R_CURBRACE {
+        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $6, (StatementList) $9);
         $$ = node;
       }
-      | SWITCH L_BRACE exp R_BRACE codeblock {
-        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $5, null);
+      | SWITCH L_BRACE exp R_BRACE L_CURBRACE codeblock R_CURBRACE {
+        SwitchNode node = new SwitchNode((NodeAST) $3, (StatementList) $6, null);
         $$ = node;
       }
       ;
+
+switchblock: /*empty*/ { $$ = null; }
+        | case switchblock {
+            StatementList node = new StatementList();
+            node.add((NodeAST) $1);
+            node.addAll((StatementList) $2);
+            $$ = node;
+        };
+
+case: CASE INTEGER COLON stmt_list {
+        CaseNode node = new CaseNode($2, (StatementList) $4);
+        $$ = node;
+    }
+    ;
 
 exp:
    exp ADD_ARITHM exp { 
