@@ -40,7 +40,7 @@
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref
-%type <obj> switch structref
+%type <obj> switch structref builtin
 %%
 
 start: 
@@ -269,20 +269,26 @@ stmt_list: /* empty */ { $$ = null; }
     | if stmt_list { 
         StatementList node = new StatementList();
         node.add((NodeAST) $1);
-        node.addAll((NodeList) $2);
+        if ($2 != null) node.addAll((NodeList) $2);
         $$ = node; 
     }
     | loop stmt_list { 
         StatementList node = new StatementList();
         node.add((NodeAST) $1);
-        node.addAll((NodeList) $2);
+        if ($2 != null) node.addAll((NodeList) $2);
         $$ = node; 
     }
     | switch stmt_list { 
         StatementList node = new StatementList();
         node.add((NodeAST) $1);
-        node.addAll((NodeList) $2);
+        if ($2 != null) node.addAll((NodeList) $2);
         $$ = node; 
+    }
+    ;
+
+builtin:
+    PRINT exp {
+        $$ = new PrintNode((NodeAST) $2);
     }
     ;
 
@@ -297,12 +303,9 @@ stmt: decl            { $$ = $1; }
       $$ = null; 
     }
     | RETURN exp      { $$ = new ReturnNode((NodeAST) $2); }
-    | BREAK           { $$ = null; }
-    | CONTINUE        { $$ = null; }
-    | PRINT L_BRACE exp R_BRACE {
-        PrintNode node = new PrintNode((NodeAST) $3);
-        $$ = node;
-    }
+    | BREAK           { $$ = new BreakNode(); }
+    | CONTINUE        { $$ = new ContinueNode(); }
+    | builtin         { $$ = $1; }
     ;
 
 assign: 
@@ -355,8 +358,12 @@ else: /* empty */ {
     }
     ;
 
-loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON exp R_BRACE codeblock {
-        ForNode node = new ForNode((DeclarationNode) $3, (NodeAST) $5, (NodeAST) $7, (StatementList) $9);
+loop: FOR L_BRACE decl_assign SEMICOLON exp SEMICOLON assign R_BRACE codeblock {
+        NodeAST decl = (NodeAST) $3;
+        NodeAST counter = (NodeAST) $5;
+        NodeAST step = (NodeAST) $7;
+        NodeAST statements = (NodeAST) $9; 
+        ForNode node = new ForNode(decl, counter, step, statements);
         $$ = node;
     }
     | WHILE L_BRACE exp R_BRACE codeblock {

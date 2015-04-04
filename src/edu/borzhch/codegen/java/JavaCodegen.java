@@ -36,7 +36,7 @@ public class JavaCodegen {
         classes.put(name, cb);
     }
     /**
-     * Устанавливает запеускаемый класс
+     * Устанавливает запускаемый класс
      * @param name 
      */
     public static void setMainClass(String name) {

@@ -14,8 +14,7 @@ import org.apache.bcel.generic.Type;
  * @author Balushkin M.
  */
 public class PrintNode extends NodeAST {
-    NodeAST node = null;
-
+    NodeAST node;
     public PrintNode(NodeAST node) {
         this.node = node;
     }
@@ -31,6 +30,7 @@ public class PrintNode extends NodeAST {
 
     @Override
     public void codegen() {
+        JavaCodegen.method().getStdout();
         node.codegen();
         JavaCodegen.method().printLine(BOHelper.toJVMType(node.type));
     }

@@ -5,7 +5,7 @@ package edu.borzhch.ast;
 import edu.borzhch.WaitingTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import org.apache.bcel.generic.GOTO;
-import org.apache.bcel.generic.IFNE;
+import org.apache.bcel.generic.IfInstruction;
 import org.apache.bcel.generic.InstructionHandle;
 
 /**
@@ -13,15 +13,15 @@ import org.apache.bcel.generic.InstructionHandle;
  * @author Tursukov A.E. <goldenflame412@gmail.com>
  */
 public class ForNode extends NodeAST {
-    DeclarationNode declaration = null;
+    NodeAST declaration = null;
     NodeAST condition;
     NodeAST operation;
-    StatementList codeblock;
+    NodeAST codeblock;
     
-    public ForNode(DeclarationNode declaration, 
+    public ForNode(NodeAST declaration, 
                     NodeAST condition,
                     NodeAST operation,
-                    StatementList codeblock) {
+                    NodeAST codeblock) {
         this.declaration = declaration;
         this.condition = condition;
         this.operation = operation;
@@ -34,16 +34,20 @@ public class ForNode extends NodeAST {
         System.out.println("For: ");
         
         ++lvl;
-        System.out.println("Decl: ");
+        printLevel(lvl);
+        System.out.println("Iterator: ");
         declaration.debug(lvl + 1);
         
-        System.out.println("Cond: ");
+        printLevel(lvl);
+        System.out.println("End condition: ");
         condition.debug(lvl + 1);
-        
-        System.out.println("Oper: ");
+                
+        printLevel(lvl);
+        System.out.println("Counter: ");
         operation.debug(lvl + 1);
-        
-        System.out.println("Block: ");
+                
+        printLevel(lvl);
+        System.out.println("Statement list: ");
         codeblock.debug(lvl + 1);
     }
 
@@ -59,8 +63,8 @@ public class ForNode extends NodeAST {
         //2: cond
         condition.codegen();
         
-        //3: ifne goto Label2
-        IFNE ifne = JavaCodegen.method().ifne();
+        //3: ifne goto bottom
+        IfInstruction ifeq = JavaCodegen.method().zcmp("eq");
         //nop
         
         //4: codeblock
@@ -77,7 +81,7 @@ public class ForNode extends NodeAST {
         //7: label bottom
         JavaCodegen.method().nop();
         InstructionHandle bottom = JavaCodegen.method().getLastHandler();
-        ifne.setTarget(bottom);
+        ifeq.setTarget(bottom);
         WaitingTable.resolveWaitingEnd(bottom);
     }
     

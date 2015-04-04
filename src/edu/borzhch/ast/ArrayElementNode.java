@@ -10,7 +10,7 @@ import edu.borzhch.helpers.BOHelper;
 import org.apache.bcel.generic.Type;
 
 /**
- *
+ * Узел AST, представляющий выражение array[index]
  * @author Balushkin M.
  */
 public class ArrayElementNode extends NodeAST {
@@ -18,10 +18,18 @@ public class ArrayElementNode extends NodeAST {
     NodeAST index;
     
     boolean load = true;
+    /**
+     * Загрузить элемент из ячейки?
+     * @param load 
+     */
     public void setLoad(boolean load) {
         this.load = load;
     }
     
+    /**
+     * @param arrayRef Идентификатор массива
+     * @param expr Индекс
+     */
     public ArrayElementNode(VariableNode arrayRef, NodeAST expr) {
         ref = arrayRef;
         index = expr;
@@ -50,7 +58,7 @@ public class ArrayElementNode extends NodeAST {
         index.codegen();
         
         if (load) {
-            JavaCodegen.method().getArray("", Type.UNKNOWN);
+            JavaCodegen.method().getArray("", BOHelper.toJVMType(type));
         }
     }
 }

@@ -32,5 +32,4 @@ public class SwitchNode extends NodeAST {
     public void codegen() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
 }

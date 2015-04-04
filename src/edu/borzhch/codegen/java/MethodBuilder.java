@@ -168,6 +168,31 @@ public class MethodBuilder {
     public void fcmpl() {
         il.append(new FCMPL());
     }
+    public IfInstruction zcmp(String opcode) {
+        IfInstruction zcmp = null;
+        switch (opcode) {
+            case "eq":
+                zcmp = new IFEQ(null);
+                break;
+            case "ne":
+                zcmp = new IFNE(null);
+                break;
+            case "gt":
+                zcmp = new IFGT(null);
+                break;
+            case "ge":
+                zcmp = new IFGE(null);
+                break;
+            case "lt":
+                zcmp = new IFLT(null);
+                break;
+            case "le":
+                zcmp = new IFLE(null);
+                break;
+        }
+        il.append(zcmp);
+        return zcmp;
+    }
     public IfInstruction icmp(String opcode) {
         IfInstruction icmp = null;
         switch (opcode) {
@@ -271,18 +296,19 @@ public class MethodBuilder {
         il.append(f.createInvoke("java.io.PrintStream", "println", 
             Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
     }
-    public void printLine(String str) {
-        il.append(f.createPrintln(str));
-    }
+//    public void printLine(String str) {
+//        getStdout();
+//        il.append(f.createPrintln(str));
+//    }
    
     public void newArray(Type type) {
-        il.append(new NEWARRAY((BasicType) type));
+        il.append(f.createNewArray(type, (short) 1));
     }
     public void setArray(String arrayRef, Type arrayType) {
-        il.append(new IASTORE());
+        il.append(f.createArrayStore(arrayType));
     }
     public void getArray(String arrayRef, Type arrayType) {
-        il.append(new IALOAD());
+        il.append(f.createArrayLoad(arrayType));
     }
     
     /**
@@ -290,9 +316,6 @@ public class MethodBuilder {
      */
     public void compile() {
         // MOCK START   
-        getStdout();
-        il.append(f.createLoad(Type.INT, 2));
-        printLine(Type.INT);
         il.append(new RETURN());
         // MOCK END
         

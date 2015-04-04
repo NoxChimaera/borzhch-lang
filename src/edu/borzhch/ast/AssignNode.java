@@ -9,7 +9,7 @@ import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.helpers.BOHelper;
 
 /**
- * Присваивание
+ * Узел AST, представляющий присваивание
  * @author Balushkin M.
  */
 public class AssignNode extends NodeAST {
@@ -50,7 +50,7 @@ public class AssignNode extends NodeAST {
         // e.g.:
         // 0:   bipush 42
         right.codegen();
-        // And convert it to veriable type
+        // And convert it to variable type
         JavaCodegen.method().convert(right.type, left.type);
         // 1:   istore var_index
         // TODO: types. It works only with integers just now

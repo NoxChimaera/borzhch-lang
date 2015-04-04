@@ -43,6 +43,9 @@ public class SetArrayNode extends NodeAST {
         element.codegen();
         // compute value
         value.codegen();
+        
+        JavaCodegen.method().convert(value.type, element.type);
+        
         // iastore
         JavaCodegen.method().setArray(element.ref.id(), 
                 BOHelper.toJVMType(BOHelper.getType(element.ref.strType())));

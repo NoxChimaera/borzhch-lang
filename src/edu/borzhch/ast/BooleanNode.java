@@ -9,7 +9,7 @@ import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 
 /**
- *
+ * Узел AST, представляющий логическую константу
  * @author Balushkin M.
  */
 public class BooleanNode extends ConstantNode {
@@ -28,6 +28,5 @@ public class BooleanNode extends ConstantNode {
     @Override
     public void codegen() {
         JavaCodegen.method().push(bval);
-    }
-    
+    }  
 }

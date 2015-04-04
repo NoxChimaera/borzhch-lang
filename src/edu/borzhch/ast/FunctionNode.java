@@ -74,14 +74,18 @@ public class FunctionNode extends NodeAST {
         printLevel(lvl);
         System.out.println("Statement List:");
         ++lvl;
-        statements.debug(lvl);
+        if (statements != null) {
+            statements.debug(lvl);
+        }
     }
 
     @Override
     public void codegen() {
         JavaCodegen.newMethod(funcName, returnType, "Program");
         // TODO: args
-        statements.codegen();
+        if (statements != null) {
+            statements.codegen();
+        }
         JavaCodegen.compileMethod("Program", funcName);
     }
 }
