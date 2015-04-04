@@ -28,5 +28,7 @@ public class NewObjectNode extends NodeAST {
     @Override
     public void codegen() {
         JavaCodegen.method().newObject(identifier);
+        JavaCodegen.method().dup();
+        JavaCodegen.method().invokeInit(identifier);
     }
 }

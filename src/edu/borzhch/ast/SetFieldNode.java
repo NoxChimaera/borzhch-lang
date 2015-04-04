@@ -5,6 +5,11 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.StructTable;
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
+
 /**
  *
  * @author Balushkin M.
@@ -13,10 +18,16 @@ public class SetFieldNode extends NodeAST {
     DotOpNode dot;
     NodeAST value;
     
+    String struct;
+    
     public SetFieldNode(DotOpNode left, NodeAST value) {
+//        struct = structName;
         dot = left;
         dot.generateLastNode(false);
         this.value = value;
+        
+        VariableNode var = dot.getFirstNode();
+        struct = var.varTypeName;
     }
 
     @Override
@@ -32,5 +43,11 @@ public class SetFieldNode extends NodeAST {
         dot.codegen();
         value.codegen();
         FieldNode field = dot.getLastNode();
+        
+        JavaCodegen.method().putField(struct, field.id, 
+                BOHelper.toJVMType(BOHelper.getType(
+                        StructTable.getFieldType(struct, field.id))
+                )
+        );
     }
 }

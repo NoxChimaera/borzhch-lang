@@ -65,6 +65,10 @@ public class MethodBuilder {
         return localVariables.get(id).getIndex();
     }
     
+    public void dup() {
+        il.append(new DUP());
+    }
+    
     /**
      * Сохраняет значение в переменную
      * @param name Имя переменной
@@ -288,6 +292,10 @@ public class MethodBuilder {
                     new Type[] { Type.DOUBLE, Type.DOUBLE }, INVOKESTATIC));
                 break;
         }
+    }
+    
+    public void invokeInit(String structName) {
+        il.append(f.createInvoke(structName, "<init>", Type.VOID, new Type[0], INVOKESPECIAL));
     }
     
     public void getStdout() {

@@ -1,5 +1,6 @@
 package edu.borzhch.ast;
 
+import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 
 /**
@@ -13,6 +14,11 @@ public class StructDeclarationNode extends NodeAST {
     public StructDeclarationNode(String identifier, FieldList statementList) {
         this.identifier = identifier;
         fields = statementList;
+        
+        StructTable.addStruct(identifier);
+        fields.nodes.stream().map((field) -> (DeclarationNode) field).forEach((d) -> {
+            StructTable.putField(identifier, d.getName(), d.varTypeName);
+        });
     }
     
     @Override

@@ -23,6 +23,12 @@ public class DotOpNode extends NodeAST {
         else
             return ((DotOpNode) r).getLastNode();
     }
+    public VariableNode getFirstNode() {
+        if (VariableNode.class == l.getClass())
+            return (VariableNode) l;
+        else
+            return ((DotOpNode) l).getFirstNode();
+    }
     
     public DotOpNode(NodeAST left, NodeAST right) {
         l = left;

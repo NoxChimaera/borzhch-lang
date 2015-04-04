@@ -157,7 +157,7 @@ struct_decl:
             String msg = String.format("identifier <%s> is already defined\n", $2);
             yyerror(msg);
         }
-        structTable.pushSymbol($2, "ref");
+        structTable.pushSymbol($2, "ref");;
 
         StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3);
         $$ = node;
