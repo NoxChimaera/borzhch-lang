@@ -104,7 +104,12 @@ public class FunctionNode extends NodeAST {
             for(NodeAST arg : args) {
                 DeclarationNode decl = ((DeclarationNode) arg);
                 argsNames[i] = decl.varName;
-                argsTypes[i] = BOHelper.toJVMType(decl.varType);
+                
+                if (BOType.REF == decl.type() && BOHelper.isType(decl.varTypeName)) {
+                    argsTypes[i] = BOHelper.toJVMArrayType(decl.varTypeName);
+                } else {
+                    argsTypes[i] = BOHelper.toJVMType(decl.varType);
+                }
                 i++;
             }
         }

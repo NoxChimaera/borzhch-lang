@@ -96,4 +96,21 @@ public class BOHelper {
                 return Type.OBJECT;
         }
     }
+    
+    public static ArrayType toJVMArrayType(String type) {
+        switch (type) {
+            case "void":
+                return null;
+            case "bool":
+                return new ArrayType(Type.BOOLEAN, 1);
+            case "int":
+                return new ArrayType(Type.INT, 1);
+            case "float":
+                return new ArrayType(Type.FLOAT, 1);
+            case "string":
+                return new ArrayType(Type.STRING, 1);
+            default:
+                return new ArrayType(type, 1);
+        }
+    }
 }

@@ -5,12 +5,19 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.StructTable;
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
+
 /**
  *
  * @author Balushkin M.
  */
-public class FieldNode extends NodeAST {
+public class FieldNode extends NodeAST implements IDotNode {
     String id;
+    String structName;
+    
     public FieldNode(String identifier) {
         id = identifier;
     }
@@ -23,5 +30,14 @@ public class FieldNode extends NodeAST {
 
     @Override
     public void codegen() {
+        JavaCodegen.method().getField(structName, id, 
+                BOHelper.toJVMType(BOHelper.getType(StructTable.getFieldType(structName, id))));
+    }
+
+    @Override
+    public void setStructName(String name) {
+        structName = name;
+        
+        type = BOHelper.getType(StructTable.getFieldType(structName, id));
     }
 }

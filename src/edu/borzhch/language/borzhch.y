@@ -59,7 +59,6 @@ init: /* empty */ {
     }
     ;
 
-
 global_list: /* empty */ { 
            $$ = null; 
     }
@@ -125,14 +124,18 @@ function:
     ;
 
 param_list: /* empty */ { $$ = null; }
-          | decl { $$ = $1; }
-          | decl param_tail { 
-            StatementList node = new StatementList();
-            node.add((NodeAST) $1);
-            node.addAll((NodeList) $2);
-            $$ = node; 
-          }
-          ;
+    | decl { 
+        StatementList node = new StatementList();
+        node.add((NodeAST) $1);
+        $$ = node; 
+    }
+    | decl param_tail { 
+        StatementList node = new StatementList();
+        node.add((NodeAST) $1);
+        node.addAll((NodeList) $2);
+        $$ = node; 
+        }
+    ;
 
 param_tail: COMMA decl param_tail {
             StatementList node = new StatementList();
@@ -157,7 +160,7 @@ struct_decl:
             String msg = String.format("identifier <%s> is already defined\n", $2);
             yyerror(msg);
         }
-        structTable.pushSymbol($2, "ref");
+        structTable.pushSymbol($2, "ref");;
 
         StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3);
         $$ = node;
@@ -213,7 +216,22 @@ decl:
         DeclarationNode decl = new DeclarationNode($2, $1);
         $$ = decl;
     }
-    | TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
+    | TYPE L_SQBRACE R_SQBRACE IDENTIFIER {
+        if(!isTypeExist($1)) {
+          String msg = String.format("unknown type <%s>\n", $1);
+          yyerror(msg);
+        }
+        if(isIdentifierExist($4)) {
+          String msg = String.format("identifier <%s> is already defined\n", $4);
+          yyerror(msg);
+        }
+        
+        topTable.pushSymbol($4, "ref", $1);
+                
+        DeclarationNode node = new DeclarationNode($4, $1);
+        $$ = node;
+    }
+    /*| TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
         if(!isTypeExist($1)) {
           String msg = String.format("unknown type <%s>\n", $1);
           yyerror(msg);
@@ -236,11 +254,22 @@ decl:
         node.add(decl);
         node.add(store);
         $$ = node;
-    }
+    }*/
     ;
 
 decl_assign: 
-    decl ASSIGN exp {
+    decl ASSIGN NEW TYPE L_SQBRACE exp R_SQBRACE {
+        DeclarationNode decl = (DeclarationNode) $1;
+        NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
+        VariableNode var = new VariableNode(decl.getName(), "ref");
+        var.strType($4);
+        AssignNode store = new AssignNode(var, nan);
+        StatementList node = new StatementList();
+        node.add(decl);
+        node.add(store);
+        $$ = node;
+    }
+    | decl ASSIGN exp {
         DeclarationNode decl = (DeclarationNode) $1;
         String name = decl.getName();
 
@@ -355,7 +384,10 @@ assign:
 idref:
     IDENTIFIER DOT idref_tail {
         VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
-        $$ = new DotOpNode(var, (NodeAST) $3);
+        DotOpNode node = new DotOpNode(var, (NodeAST) $3);
+        ((IDotNode) node).setStructName(var.strType());
+        node.type(node.getLastNode().type());
+        $$ = node;
     }
     ;
 
@@ -370,7 +402,6 @@ idref_tail:
         $$ = node;
     }
     ;
-
 
 if: 
     IF L_BRACE exp R_BRACE codeblock %prec IFX else {

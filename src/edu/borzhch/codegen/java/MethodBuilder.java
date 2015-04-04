@@ -65,6 +65,10 @@ public class MethodBuilder {
         return localVariables.get(id).getIndex();
     }
     
+    public void dup() {
+        il.append(new DUP());
+    }
+    
     /**
      * Сохраняет значение в переменную
      * @param name Имя переменной
@@ -290,6 +294,10 @@ public class MethodBuilder {
         }
     }
     
+    public void invokeInit(String structName) {
+        il.append(f.createInvoke(structName, "<init>", Type.VOID, new Type[0], INVOKESPECIAL));
+    }
+    
     public void getStdout() {
         il.append(f.createGetStatic("java.lang.System", 
             "out", new ObjectType("java.io.PrintStream")));
@@ -340,6 +348,8 @@ public class MethodBuilder {
      * Компилирует метод
      */
     public void compile() {
+        il.append(new RETURN());
+        
         mg.setMaxStack();
         cg.addMethod(mg.getMethod());
         il.dispose();
