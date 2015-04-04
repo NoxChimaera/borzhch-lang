@@ -5,28 +5,23 @@
  */
 package edu.borzhch.ast;
 
-import edu.borzhch.codegen.java.JavaCodegen;
-import edu.borzhch.constants.BOType;
-
 /**
  *
  * @author Balushkin M.
  */
-public class NewObjectNode extends NodeAST {
-    String identifier;
-    public NewObjectNode(String id) {
-        identifier = id;
-        type = BOType.REF;
+public class FieldNode extends NodeAST {
+    String id;
+    public FieldNode(String identifier) {
+        id = identifier;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println("New: " + identifier);
+        System.out.println("Field: " + id);
     }
 
     @Override
     public void codegen() {
-        JavaCodegen.method().newObject(identifier);
     }
 }

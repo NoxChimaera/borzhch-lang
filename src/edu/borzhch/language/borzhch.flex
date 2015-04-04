@@ -6,6 +6,8 @@ package edu.borzhch.language;
 %class Lexer
 %byaccj
 %unicode
+%line
+%column
 
 %{
   private static final int BUFSIZE = 8192;

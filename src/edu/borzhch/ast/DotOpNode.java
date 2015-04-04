@@ -12,6 +12,18 @@ package edu.borzhch.ast;
 public class DotOpNode extends NodeAST {
     NodeAST l;
     NodeAST r;
+    
+    boolean generateLastNode = true;
+    public void generateLastNode(boolean generate) {
+        generateLastNode = generate;
+    }
+    public FieldNode getLastNode() {
+        if (FieldNode.class == r.getClass())
+            return (FieldNode) r;
+        else
+            return ((DotOpNode) r).getLastNode();
+    }
+    
     public DotOpNode(NodeAST left, NodeAST right) {
         l = left;
         r = right;
@@ -32,7 +44,9 @@ public class DotOpNode extends NodeAST {
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        l.codegen();
+        if (generateLastNode) {
+            r.codegen();
+        }
     }
-    
 }

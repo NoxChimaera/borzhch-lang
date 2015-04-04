@@ -28,6 +28,14 @@ public class InferenceTypeTable {
             else
                 table[ref][i] = BOType.REF;
         }
+        // STRING - ANY -> VOID, STRING - STRING -> STRING
+        int str = BOType.STRING.ordinal();
+        for (int i = 0; i < l; ++i) {
+            if (ref != i)
+                table[str][i] = BOType.VOID;
+            else
+                table[str][i] = BOType.STRING;
+        }
         // BOOL - BOOL -> BOOL, BOOL - ANY -> VOID
         int b = BOType.BOOL.ordinal();
         for (int i = 0; i < l; i++) {

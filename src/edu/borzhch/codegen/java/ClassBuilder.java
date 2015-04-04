@@ -8,8 +8,11 @@ package edu.borzhch.codegen.java;
 import edu.borzhch.constants.BOType;
 import java.util.HashMap;
 import static org.apache.bcel.Constants.*;
+import org.apache.bcel.classfile.Field;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.FieldGen;
+import org.apache.bcel.generic.Type;
 
 /**
  * Конструктор классов
@@ -41,10 +44,15 @@ public class ClassBuilder {
         cg.addEmptyConstructor(ACC_PUBLIC);
         // This is test feature
         try {
-            cg.getJavaClass().dump(name + ".class");
+            cg.getJavaClass().dump("jarbuild\\" + name + ".class");
         } catch (java.io.IOException e) {
             System.err.println(e);
         }
+    }
+ 
+    public void addField(String name, Type type) {
+        FieldGen fg = new FieldGen(ACC_PUBLIC, type, name, cp);
+        cg.addField(fg.getField());
     }
     
     /**
