@@ -2,6 +2,7 @@
 /nbproject/private/*
 /build/*
 /dist/*
+/jarbuild/*
 
 #vim
 *~

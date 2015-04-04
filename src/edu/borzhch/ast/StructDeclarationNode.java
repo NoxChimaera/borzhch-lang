@@ -1,28 +1,36 @@
-/*
- */
 package edu.borzhch.ast;
+
+import edu.borzhch.codegen.java.JavaCodegen;
 
 /**
  *
  * @author Tursukov A.E. <goldenflame412@gmail.com>
  */
 public class StructDeclarationNode extends NodeAST {
-    String identifier = null;
-    StatementList statementList = null;
+    String identifier;
+    FieldList fields;
     
-    public StructDeclarationNode(String identifier, StatementList statementList) {
+    public StructDeclarationNode(String identifier, FieldList statementList) {
         this.identifier = identifier;
-        this.statementList = statementList;
+        fields = statementList;
     }
     
     @Override
     public void debug(int lvl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        printLevel(lvl);
+        System.out.println("Struct " + identifier);
+        ++lvl;
+        fields.debug(lvl);
     }
 
     @Override
     public void codegen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JavaCodegen.newClass(identifier);
+        JavaCodegen.switchClass(identifier);
+        
+        fields.codegen();
+        
+        JavaCodegen.compileClass(identifier);
+        JavaCodegen.switchClass("Program");
     }
-    
 }

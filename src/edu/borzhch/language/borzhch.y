@@ -40,7 +40,7 @@
 %type <obj> global_list global exp_list exp_tail param_tail loop
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference arrayref param_list decl_block idref
+%type <obj> reference arrayref param_list decl_block idref idref_tail
 %type <obj> switch structref builtin
 %%
 
@@ -72,7 +72,7 @@ global_list: /* empty */ {
     ;
 
 global: function { $$ = $1; }
-    | struct_decl { $$ = null; }
+    | struct_decl { $$ = $1; }
     ;
 
 openblock: L_CURBRACE {
@@ -98,7 +98,7 @@ function:
             yyerror(msg);
         }
         if(isIdentifierExist($3)) {
-          String msg = String.format("identifier <%s> already in use\n", $3);
+          String msg = String.format("identifier <%s> is already defined\n", $3);
           yyerror(msg);
         }
 
@@ -111,7 +111,7 @@ function:
     }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if(isIdentifierExist($2)) {
-          String msg = String.format("identifier <%s> already in use\n", $2);
+          String msg = String.format("identifier <%s> is already defined\n", $2);
           yyerror(msg);
         }
         FunctionNode func = new FunctionNode($2, BOType.VOID);
@@ -151,37 +151,40 @@ codeblock:
     openblock stmt_list endblock { $$ = $2; }
     ;
 
-struct_decl: STRUCT IDENTIFIER decl_block {
-              if(isIdentifierExist($2)) {
-                String msg = String.format("identifier <%s> already in use\n", $2);
-                yyerror(msg);
-              }
-              structTable.pushSymbol($2, "ref");
-
-              StructDeclarationNode node = new StructDeclarationNode($2, (StatementList) $3);
-              $$ = node;
-           }
-           ;
-
-decl_block: L_CURBRACE decl_list R_CURBRACE {
-            $$ = $2;
-          }
-          ;
-
-decl_list: /* empty*/ {
-          $$ = null;
-         }
-         | decl SEMICOLON decl_list {
-          StatementList node = new StatementList();
-          node.add((NodeAST) $1);
-          node.addAll((NodeList) $3);
-          $$ = node;
-         }
-         ;
-
-decl: TYPE IDENTIFIER { 
+struct_decl: 
+    STRUCT IDENTIFIER decl_block {
         if(isIdentifierExist($2)) {
-          String msg = String.format("identifier <%s> already in use\n", $2);
+            String msg = String.format("identifier <%s> is already defined\n", $2);
+            yyerror(msg);
+        }
+        structTable.pushSymbol($2, "ref");
+
+        StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3);
+        $$ = node;
+    }
+    ;
+
+decl_block: 
+    L_CURBRACE decl_list R_CURBRACE {
+        $$ = $2;
+    }
+    ;
+
+decl_list: /* empty*/ { $$ = null; }
+    | decl SEMICOLON decl_list {
+        FieldList node = new FieldList();
+        DeclarationNode ldecl = (DeclarationNode) $1;
+        ldecl.isField(true);
+        node.add(ldecl);
+        if ($3 != null) node.addAll((NodeList) $3);
+        $$ = node;
+    }
+    ;
+
+decl: 
+    TYPE IDENTIFIER { 
+        if(isIdentifierExist($2)) {
+          String msg = String.format("identifier <%s> is already defined\n", $2);
           yyerror(msg);
         }
         if(!isTypeExist($1)) {
@@ -201,7 +204,7 @@ decl: TYPE IDENTIFIER {
           yyerror(msg);
         }
         if(isIdentifierExist($2)) {
-          String msg = String.format("identifier <%s> already in use\n", $2);
+          String msg = String.format("identifier <%s> is already defined\n", $2);
           yyerror(msg);
         }
 
@@ -216,7 +219,7 @@ decl: TYPE IDENTIFIER {
           yyerror(msg);
         }
         if(isIdentifierExist($5)) {
-          String msg = String.format("identifier <%s> already in use\n", $5);
+          String msg = String.format("identifier <%s> is already defined\n", $5);
           yyerror(msg);
         }
         
@@ -238,13 +241,14 @@ decl: TYPE IDENTIFIER {
 
 decl_assign: 
     decl ASSIGN exp {
-
         DeclarationNode decl = (DeclarationNode) $1;
         String name = decl.getName();
 
+        NodeAST exp = (NodeAST) $3;
+
         BOType infer = InferenceTypeTable.inferType(
             decl.type(),
-            ((NodeAST) $3).type()
+            exp.type()
         );
         if (BOType.VOID == infer) {
             yyerror(ErrorHelper.incompatibleTypes(decl.type(), 
@@ -312,7 +316,13 @@ stmt: decl            { $$ = $1; }
     ;
 
 assign: 
-    IDENTIFIER ASSIGN exp {
+    idref ASSIGN exp {
+        DotOpNode dot = (DotOpNode) $1;
+        NodeAST exp = (NodeAST) $3;
+        SetFieldNode node = new SetFieldNode(dot, exp);
+        $$ = node;
+    }
+    | IDENTIFIER ASSIGN exp {
         if(!isIdentifierExist($1)) {
           String msg = String.format("identifier <%s> is not declared\n", $1);
           System.err.println(msg);
@@ -337,6 +347,25 @@ assign:
         ArrayElementNode index = (ArrayElementNode) $1;
         NodeAST value = (NodeAST) $3;
         SetArrayNode node = new SetArrayNode(index, value);
+        $$ = node;
+    }
+    ;
+	 
+idref:
+    IDENTIFIER DOT idref_tail {
+        VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
+        $$ = new DotOpNode(var, (NodeAST) $3);
+    }
+    ;
+
+idref_tail:
+    IDENTIFIER {
+        FieldNode node = new FieldNode($1);
+        $$ = node;
+    }
+    | IDENTIFIER DOT idref_tail {
+        FieldNode field = new FieldNode($1);
+        DotOpNode node = new DotOpNode(field, (NodeAST) $3);
         $$ = node;
     }
     ;
@@ -504,7 +533,7 @@ exp:
         $$ = node;
     }
    | IDENTIFIER INCR { 
-      if(!isIdentifierExist($1)) { 
+      if(!isIdentifierExist($1)) {
         String msg = String.format("identifier <%s> is not declared\n", $1);
         yyerror(msg);
       }
@@ -529,17 +558,11 @@ exp:
     }
     | reference        { $$ = $1; }
     | tuple_value      { $$ = $1; }
-    | idref 		   { $$ = $1; }
+    | idref            { $$ = $1; }
     | INTEGER          { $$ = new IntegerNode($1); }
     | FLOAT            { $$ = new FloatNode((float)$1); }
     | STRING           { $$ = new StringNode($1); }
     | BOOLEAN          { $$ = new BooleanNode($1); }
-    ;
-	 
-idref:
-    idref DOT idref {
-        $$ = new DotOpNode((NodeAST) $1, (NodeAST) $3);
-    }
     | IDENTIFIER { 
 	    if(!isIdentifierExist($1)) {
             String msg = String.format("identifier <%s> is not declared\n", $1);

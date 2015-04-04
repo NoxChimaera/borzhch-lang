@@ -8,6 +8,7 @@ package edu.borzhch.ast;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
 
 /**
  * Объявление переменной
@@ -17,6 +18,12 @@ public class DeclarationNode extends NodeAST {
     BOType varType;
     String varTypeName;
     String varName;
+    
+    boolean isField = false;
+    public void isField(boolean is) {
+        isField = is;
+    }
+    
     public String getName() {
         return varName;
     }
@@ -40,6 +47,7 @@ public class DeclarationNode extends NodeAST {
     public DeclarationNode(String name, String typeName) {
         varName = name;
         varType = BOType.REF;
+        type = BOType.REF;
         varTypeName = typeName;
     }
 
@@ -58,7 +66,11 @@ public class DeclarationNode extends NodeAST {
 
     @Override
     public void codegen() {
-        // Associate variable name with LocalVariableGen-object
-        JavaCodegen.method().addLocalVariable(varName, varType);
+        if (isField) {
+            JavaCodegen.struct().addField(varName, BOHelper.toJVMType(varType));
+        } else {
+            // Associate variable name with LocalVariableGen-object
+            JavaCodegen.method().addLocalVariable(varName, varType);
+        }
     }
 }

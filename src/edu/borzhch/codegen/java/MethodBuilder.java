@@ -322,6 +322,16 @@ public class MethodBuilder {
         il.append(f.createReturn(type));
     }
     
+    public void newObject(String structId) {
+        il.append(f.createNew(structId));
+    }
+    public void getField(String className, String field, Type type) {
+        il.append(f.createGetField(className, field, type));
+    }
+    public void putField(String className, String field, Type type) {
+        il.append(f.createPutField(className, field, type));
+    }
+    
     /**
      * Компилирует метод
      */

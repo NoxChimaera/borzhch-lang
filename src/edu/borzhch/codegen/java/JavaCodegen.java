@@ -8,8 +8,6 @@ package edu.borzhch.codegen.java;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.HashMap;
-import org.apache.bcel.generic.*;
-import static org.apache.bcel.Constants.*;
 
 /**
  * Кодогенератор Java Bytecode
@@ -18,6 +16,10 @@ import static org.apache.bcel.Constants.*;
 public class JavaCodegen {
     static HashMap<String, ClassBuilder> classes = new HashMap<>();
     static ClassBuilder programClass;
+    static ClassBuilder currentClass;
+    public static ClassBuilder struct() {
+        return currentClass;
+    }
 
     static MethodBuilder currentMethod;
     /**
@@ -34,6 +36,10 @@ public class JavaCodegen {
     public static void newClass(String name) {
         ClassBuilder cb = new ClassBuilder(name);
         classes.put(name, cb);
+    }
+    
+    public static void switchClass(String name) {
+        currentClass = classes.get(name);
     }
     /**
      * Устанавливает запускаемый класс
