@@ -344,6 +344,8 @@ public class MethodBuilder {
      * Компилирует метод
      */
     public void compile() {
+        il.append(new RETURN());
+        
         mg.setMaxStack();
         cg.addMethod(mg.getMethod());
         il.dispose();
