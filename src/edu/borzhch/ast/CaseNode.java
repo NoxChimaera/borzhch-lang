@@ -31,12 +31,6 @@ public class CaseNode extends NodeAST {
         }
     }
     
-    public InstructionHandle getPosition() {
-        JavaCodegen.method().nop();
-        InstructionHandle caseStart = JavaCodegen.method().getLastHandler();
-        return caseStart;
-    }
-    
     @Override
     public void codegen() {
         if(body != null) body.codegen();

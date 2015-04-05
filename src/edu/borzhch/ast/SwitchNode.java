@@ -6,6 +6,8 @@ import edu.borzhch.WaitingTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import java.util.ArrayList;
 import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.NOP;
 import org.apache.bcel.generic.SWITCH;
 
 /**
@@ -46,6 +48,9 @@ public class SwitchNode extends NodeAST {
 
     @Override
     public void codegen() {
+        //switch key
+        input.codegen();
+        
         //Берём все ноды с кейсами
         ArrayList<NodeAST> nodes = this.cases == null? null : this.cases.nodes;
         
@@ -60,34 +65,27 @@ public class SwitchNode extends NodeAST {
         InstructionHandle[] caseList = new InstructionHandle[caseCount];
         InstructionHandle defCase = null;
         
-        //Берём числа из условных частей CASE
+        //cases
         if(nodes != null) {
-            int i = 0;
-            for(NodeAST node : nodes) {
-                CaseNode caseNode = (CaseNode) node;
+            int end = nodes.size();
+            for(int i = 0; i < end; i++) {
+                CaseNode caseNode = (CaseNode) nodes.get(i);
                 conds[i] = caseNode.condition;
-                i++;
+                NOP nop = JavaCodegen.method().nop();
+                caseList[i] = JavaCodegen.method().getLastHandler();
+                caseNode.codegen();
             }
         }
         
-        //switch head
-        SWITCH sw = JavaCodegen.method().createSwitch(conds, caseList, defCase);
-        //cases
-        if(nodes != null) {
-            int i = 0;
-            for(NodeAST node : nodes) {
-                CaseNode caseNode = (CaseNode) node;
-                caseList[i] = caseNode.getPosition();
-                caseNode.codegen();
-                i++;
-            }
-        }
         //default
         if(defaultCase != null) {
-            JavaCodegen.method().nop();
+            NOP nop = JavaCodegen.method().nop();
             defCase = JavaCodegen.method().getLastHandler();
             defaultCase.codegen();
         }
+        
+        //switch head
+        JavaCodegen.method().createSwitch(conds, caseList, defCase);
         
         //resolve cases breaks
         JavaCodegen.method().nop();

@@ -243,9 +243,10 @@ public class MethodBuilder {
         return go;
     }
     
-    public void nop() {
+    public NOP nop() {
         NOP nop = new NOP();
         il.append(nop);
+        return nop;
     }
     
     public void convertToDouble(BOType from) {
@@ -330,10 +331,13 @@ public class MethodBuilder {
         il.append(f.createReturn(type));
     }
     
-    public SWITCH createSwitch(int[] match, InstructionHandle[] targets, InstructionHandle default_target) {
+    public void createSwitch(int[] match, InstructionHandle[] targets, InstructionHandle default_target) {
         SWITCH sw = new SWITCH(match, targets, default_target);
-        il.append(sw);
-        return sw;
+        if(targets.length != 0) {
+            il.insert(targets[0], sw);
+        } else if(default_target != null) {
+            il.insert(default_target, sw);
+        }
     }
     
     public void newObject(String structId) {
@@ -350,7 +354,7 @@ public class MethodBuilder {
      * Компилирует метод
      */
     public void compile() {
-        il.append(new RETURN());
+//        il.append(new RETURN());
         
         mg.setMaxStack();
         cg.addMethod(mg.getMethod());
