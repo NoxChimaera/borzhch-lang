@@ -58,15 +58,17 @@ public class SymTable {
         String result = null;
         
         if(baseTypes != null) {
-                result = baseTypes.get(identifier);
+            result = baseTypes.get(identifier);
         }
-        
+        if(previous != null && result == null) {
+            result = this.previous.getBaseType(identifier);
+        }
         return result;
     }
     
     public String getSymbolType(String identifier) {
         String result = null;
-            result = symbols.get(identifier);
+        result = symbols.get(identifier);
         if (result == null && null != previous) {
             result = previous.getSymbolType(identifier);
         }
