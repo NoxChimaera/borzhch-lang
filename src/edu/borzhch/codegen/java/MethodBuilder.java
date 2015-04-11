@@ -324,7 +324,7 @@ public class MethodBuilder {
     }
     
     public void funCall(String class_name, String func_name, Type ret_type, Type[] arg_types) {
-        il.append(f.createInvoke(class_name, func_name, ret_type, arg_types, INVOKESPECIAL));
+        il.append(f.createInvoke(class_name, func_name, ret_type, arg_types, INVOKESTATIC));
     }
     
     public void createReturn(Type type) {
