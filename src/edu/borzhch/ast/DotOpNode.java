@@ -5,6 +5,8 @@
  */
 package edu.borzhch.ast;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Balushkin M.
@@ -39,6 +41,21 @@ public class DotOpNode extends NodeAST implements IDotNode {
         type = r.type;
     }
     
+    ArrayList<FieldNode> fields;
+    public ArrayList<FieldNode> reduce() {
+        fields = new ArrayList<>();
+        if (FieldNode.class == l.getClass()) {
+            fields.add((FieldNode) l);
+        }
+        
+        if (FieldNode.class == r.getClass()) {
+            fields.add((FieldNode) r);
+        } else {
+            fields.addAll(((DotOpNode) r).reduce());
+        }
+        return fields;
+    }
+    
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
@@ -65,6 +82,8 @@ public class DotOpNode extends NodeAST implements IDotNode {
 
     @Override
     public void setStructName(String name) {
+//        fields = reduce();
+        
         struct = name;
         ((IDotNode) r).setStructName(struct);
     }

@@ -345,9 +345,18 @@ public class MethodBuilder {
     }
     public void getField(String className, String field, Type type) {
         il.append(f.createGetField(className, field, type));
+        
+//        il.append(f.createGetField(className, field, new ObjectType(className)))
     }
+    public void getFieldClass(String className, String field, String fieldClass) {
+        il.append(f.createGetField(className, field, new ObjectType(fieldClass)));
+    }
+    
     public void putField(String className, String field, Type type) {
         il.append(f.createPutField(className, field, type));
+    }
+    public void putFieldClass(String className, String field, String fieldClass) {
+        il.append(f.createPutField(className, field, new ObjectType(fieldClass)));
     }
     
     /**

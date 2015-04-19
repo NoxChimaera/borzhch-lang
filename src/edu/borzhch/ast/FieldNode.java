@@ -7,8 +7,8 @@ package edu.borzhch.ast;
 
 import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
-import org.apache.bcel.generic.Type;
 
 /**
  *
@@ -30,14 +30,17 @@ public class FieldNode extends NodeAST implements IDotNode {
 
     @Override
     public void codegen() {
-        JavaCodegen.method().getField(structName, id, 
+        if (BOType.REF == type) {
+            JavaCodegen.method().getFieldClass(structName, id, StructTable.getFieldType(structName, id));
+        } else {
+            JavaCodegen.method().getField(structName, id, 
                 BOHelper.toJVMType(BOHelper.getType(StructTable.getFieldType(structName, id))));
+        }
     }
 
     @Override
     public void setStructName(String name) {
         structName = name;
-        
         type = BOHelper.getType(StructTable.getFieldType(structName, id));
     }
 }

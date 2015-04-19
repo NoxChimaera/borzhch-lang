@@ -10,5 +10,4 @@ package edu.borzhch.ast;
  * @author Balushkin M.
  */
 public class StatementList extends NodeList {
-    
 }

@@ -5,10 +5,11 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
-import org.apache.bcel.generic.Type;
+import org.apache.bcel.generic.ObjectType;
 
 /**
  * Объявление переменной
@@ -67,7 +68,11 @@ public class DeclarationNode extends NodeAST {
     @Override
     public void codegen() {
         if (isField) {
-            JavaCodegen.struct().addField(varName, BOHelper.toJVMType(varType));
+            if (StructTable.isDefined(varTypeName)) {
+                JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
+            } else {
+                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(varType));
+            }
         } else {
             // Associate variable name with LocalVariableGen-object
             JavaCodegen.method().addLocalVariable(varName, varType);

@@ -347,9 +347,13 @@ stmt: decl            { $$ = $1; }
 
 assign: 
     idref ASSIGN exp {
-        DotOpNode dot = (DotOpNode) $1;
+        /*DotOpNode dot = (DotOpNode) $1;
+        dot.reduce();*/
+        GetFieldNode get = (GetFieldNode) $1;
+
         NodeAST exp = (NodeAST) $3;
-        SetFieldNode node = new SetFieldNode(dot, exp);
+        SetFieldNode node = new SetFieldNode(get, exp);
+        //SetFieldNode node = new SetFieldNode(dot, exp);
         $$ = node;
     }
     | IDENTIFIER ASSIGN exp {
@@ -384,9 +388,10 @@ assign:
 idref:
     IDENTIFIER DOT idref_tail {
         VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
-        DotOpNode node = new DotOpNode(var, (NodeAST) $3);
-        ((IDotNode) node).setStructName(var.strType());
-        node.type(node.getLastNode().type());
+        DotOpNode dot = new DotOpNode(var, (NodeAST) $3);
+        //((IDotNode) node).setStructName(var.strType());
+        //node.type(node.getLastNode().type());
+        GetFieldNode node = new GetFieldNode(var, dot.reduce());
         $$ = node;
     }
     ;

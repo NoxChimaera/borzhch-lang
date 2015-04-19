@@ -11,14 +11,9 @@
 #ctags
 tags
 
-#flex
-Lexer.java
-
 #yacc
 *.output
 *.tab.c
-Parser.java
-ParserVal.java
 yacc.*
 
 #yacc 'n flex generics
@@ -31,3 +26,4 @@ make.bat
 #build script
 jarbuild/test.jar
 jarbuild/Program.class
+/vendors/jcommander/target/
