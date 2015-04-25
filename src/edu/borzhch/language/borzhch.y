@@ -300,13 +300,9 @@ stmt: decl            { $$ = $1; }
 
 assign: 
     idref ASSIGN exp {
-        /*DotOpNode dot = (DotOpNode) $1;
-        dot.reduce();*/
         GetFieldNode get = (GetFieldNode) $1;
-
-        NodeAST exp = (NodeAST) $3;
-        SetFieldNode node = new SetFieldNode(get, exp);
-        //SetFieldNode node = new SetFieldNode(dot, exp);
+        NodeAST expr = (NodeAST) $3;
+        SetFieldNode node = new SetFieldNode(get, expr);
         $$ = node;
     }
     | IDENTIFIER ASSIGN exp {
@@ -353,7 +349,16 @@ arrayref:
     ;
  
 idref:
-    IDENTIFIER DOT idref_tail {
+    dynamic_value DOT dynamic_value {
+        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $3);
+        GetFieldNode node = new GetFieldNode(dot.reduce());
+        $$ = node;
+    }
+    ;
+
+
+/*idref:
+    dynamic_value DOT idref_tail {
         VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
         DotOpNode dot = new DotOpNode(var, (NodeAST) $3);
         //((IDotNode) node).setStructName(var.strType());
@@ -373,7 +378,7 @@ idref_tail:
         DotOpNode node = new DotOpNode(field, (NodeAST) $3);
         $$ = node;
     }
-    ;
+    ;*/
 
 if: 
     IF L_BRACE exp R_BRACE codeblock %prec IFX else {
@@ -573,15 +578,16 @@ exp:
     ;
 
 constant:
-    INTEGER          { $$ = new IntegerNode($1); }
-    | FLOAT            { $$ = new FloatNode((float)$1); }
-    | STRING           { $$ = new StringNode($1); }
-    | BOOLEAN          { $$ = new BooleanNode($1); }
+    INTEGER { $$ = new IntegerNode($1); }
+    | FLOAT { $$ = new FloatNode((float)$1); }
+    | STRING    { $$ = new StringNode($1); }
+    | BOOLEAN   { $$ = new BooleanNode($1); }
+    | NULL  { $$ = new NullNode(); }
+    | idref { $$ = $1; }
     ;
 
 dynamic_value:
     arrayref { $$ = $1; }
-    | idref { $$ = $1; }
     | IDENTIFIER { 
 	    if(!isIdentifierExist($1)) {
             String msg = String.format("identifier <%s> is not declared\n", $1);

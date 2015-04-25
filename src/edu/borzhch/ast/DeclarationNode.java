@@ -83,7 +83,8 @@ public class DeclarationNode extends NodeAST {
             } else if (StructTable.isDefined(varTypeName)) {
                 JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
             } else {
-                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(type));
+                JavaCodegen.struct().addField(varName, 
+                        BOHelper.toJVMType(BOHelper.getType(varTypeName)));
             }
         } else {
             // Associate variable name with LocalVariableGen-object

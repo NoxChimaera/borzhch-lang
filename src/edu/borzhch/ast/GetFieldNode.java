@@ -6,65 +6,74 @@
 package edu.borzhch.ast;
 
 import edu.borzhch.StructTable;
+import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.helpers.BOHelper;
 import java.util.ArrayList;
+import org.apache.bcel.generic.Type;
 
 /**
  *
  * @author Balushkin M.
  */
 public class GetFieldNode extends NodeAST {
-    VariableNode var;
-    ArrayList<FieldNode> fields;
-    boolean generateLast = true;
-    public void generateLastNode(boolean generate) {
-        generateLast = generate;
+    private boolean generateLast = true;
+    public void generateLast(boolean val) {
+        generateLast = val;
     }
     
-    public GetFieldNode(VariableNode variable, ArrayList<FieldNode> nodes) {
-        var = variable;
+    ArrayList<NodeAST> fields;
+    public GetFieldNode(ArrayList<NodeAST> nodes){
         fields = nodes;
-        
-        foo();
-        type = getLastNode().type;
     }
     
-    public FieldNode getLastNode() {
+    public NodeAST getLast() {
         return fields.get(fields.size() - 1);
     }
     
-    private void foo() {
-        String struct = var.strType();
-        fields.get(0).setStructName(struct);
-        
-        for (int i = 1; i < fields.size(); ++i) {
-            String type = StructTable.getFieldType(
-                    fields.get(i - 1).structName, 
-                    fields.get(i - 1).id
-            );
-            
-//            String type = StructTable.getFieldType(field, fields.get(i).structName);
-            fields.get(i).setStructName(type);
-        }
-    }
-
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
         System.out.println("Get Field: ");
-        var.debug(lvl + 1);
         fields.stream().forEach((f) -> {
             f.debug(lvl + 1);
         });
     }
 
+    public String schema;
+    private void load(NodeAST node) {
+        if (ArrayElementNode.class == node.getClass()) {
+            GetArrayNode getItem = new GetArrayNode((ArrayElementNode) node);
+            getItem.codegen();
+            schema = getItem.arrayRef.ref.strType();
+            type = getItem.arrayRef.ref.type;
+        }
+    }
+    private void getField(NodeAST node) {
+        if (VariableNode.class == node.getClass()) {
+            VariableNode field = (VariableNode) node;
+            switch (field.type) {
+                case REF:
+                    JavaCodegen.method().getFieldClass(schema, field.id, 
+                            StructTable.getFieldType(schema, field.id));
+                    schema = field.strType();
+                    type = field.type;
+                    break;
+                default:
+                    JavaCodegen.method().getField(schema, field.id, 
+                            BOHelper.toJVMType(field.type));
+                    type = field.type;
+                    break;
+            }
+        }
+    }
+    
     @Override
     public void codegen() {
-        var.codegen();
-        for (int i = 0; i < fields.size() - 1; ++i) {
-            fields.get(i).codegen();
-        }
-        if (generateLast) {
-            fields.get(fields.size() - 1).codegen();
+        load(fields.get(0));
+        
+        int last = generateLast ? fields.size() : fields.size() - 1;
+        for (int i = 1; i < last; ++i) {
+            getField(fields.get(i));
         }
     }
 }
