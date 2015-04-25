@@ -8,6 +8,7 @@ package edu.borzhch.ast;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.ObjectType;
 
 /**
  *
@@ -15,12 +16,15 @@ import edu.borzhch.helpers.BOHelper;
  */
 public class NewArrayNode extends NodeAST {
     BOType arrayType;
+    String arrayObjectType;
+    
     NodeAST size;
 
-    public NewArrayNode(String elementsType, NodeAST sizeExpression) {
-        arrayType = BOHelper.getType(elementsType);
+    public NewArrayNode(String itemsType, NodeAST sizeExpression) {
+        arrayType = BOHelper.getType(itemsType);
+        arrayObjectType = itemsType;
         size = sizeExpression;
-        type = BOType.REF;
+        type = BOType.ARRAY;
     }
     
     @Override
@@ -29,7 +33,8 @@ public class NewArrayNode extends NodeAST {
         System.out.println("New Array:");
         ++lvl;
         printLevel(lvl);
-        System.out.println("Array Type: " + BOHelper.toString(arrayType));
+        System.out.println(String.format("Array Type: %s (%s)", 
+                BOHelper.toString(arrayType), arrayObjectType));
         printLevel(lvl);
         System.out.println("Size:");
         size.debug(lvl + 1);
@@ -38,6 +43,10 @@ public class NewArrayNode extends NodeAST {
     @Override
     public void codegen() {
         size.codegen();
-        JavaCodegen.method().newArray(BOHelper.toJVMType(arrayType));
+        if (BOType.REF == arrayType) {
+            JavaCodegen.method().newArray(new ObjectType(arrayObjectType));
+        } else {
+            JavaCodegen.method().newArray(BOHelper.toJVMType(arrayType));
+        }
     }
 }

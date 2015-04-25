@@ -110,7 +110,7 @@ public class FunctionNode extends NodeAST {
                 if (BOType.REF == decl.type() && BOHelper.isType(decl.varTypeName)) {
                     argsTypes[i] = BOHelper.toJVMArrayType(decl.varTypeName);
                 } else {
-                    argsTypes[i] = BOHelper.toJVMType(decl.varType);
+                    argsTypes[i] = BOHelper.toJVMType(decl.type);
                 }
                 i++;
             }

@@ -37,6 +37,7 @@
 %left UN_ARITHM NOT
 %right INCR DOT
 
+%type <sval> type
 %type <obj> global_list global exp_list exp_tail param_tail loop
 %type <obj> function struct_decl decl_list if else tuple_value
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
@@ -86,27 +87,28 @@ endblock: R_CURBRACE {
             oldTable.clear();
         }
         ;
+
+type:
+    TYPE { $$ = $1; }
+    | IDENTIFIER { 
+        if (!isTypeExist($1)) {
+            yyerror(String.format("can not resolve symbol <%s>\n", $1));
+        }
+        $$ = $1; 
+    }
+    ;
+
 function:
-    DEFUN TYPE IDENTIFIER L_BRACE param_list R_BRACE codeblock {
-        FunctionNode func = null;
-
-        if (isTypeExist($2)) {
-            func = new FunctionNode($3, $2);
-        } else {
-            String msg = String.format("unknown type <%s>\n", $2);
-            yyerror(msg);
+    DEFUN type IDENTIFIER L_BRACE param_list R_BRACE codeblock {
+        if (isIdentifierExist($3)) {
+            yyerror(String.format("identifier <%s> is already defined", $3));
         }
-        if(isIdentifierExist($3)) {
-          String msg = String.format("identifier <%s> is already defined\n", $3);
-          yyerror(msg);
-        }
+        FunctionNode node = new FunctionNode($3, $2);
+        node.setArguments((NodeList) $5);
+        node.setStatements((StatementList) $7);
 
-        func.setArguments((NodeList) $5);
-        func.setStatements((StatementList) $7);
-
-        funcTable.push(func);
-
-        $$ = func;
+        funcTable.push(node);
+        $$ = node;
     }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if(isIdentifierExist($2)) {
@@ -185,83 +187,32 @@ decl_list: /* empty*/ { $$ = null; }
     ;
 
 decl: 
-    TYPE IDENTIFIER { 
-        if(isIdentifierExist($2)) {
-          String msg = String.format("identifier <%s> is already defined\n", $2);
-          yyerror(msg);
+    type IDENTIFIER {
+        if (isIdentifierExist($2)) {
+            yyerror(String.format("identifier <%s> is already defined\n", $2));
         }
-        if(!isTypeExist($1)) {
-          String msg = String.format("unknown type <%s>\n", $1);
-          yyerror(msg);
-        }
-
         topTable.pushSymbol($2, $1);
-        
-        DeclarationNode node = new DeclarationNode($2, BOHelper.getType($1));
-        node.type(BOHelper.getType($1));
-        $$ = node;  
-    }
-    | IDENTIFIER IDENTIFIER {
-        if(!isTypeExist($1)) {
-          String msg = String.format("unknown type <%s>\n", $1);
-          yyerror(msg);
-        }
-        if(isIdentifierExist($2)) {
-          String msg = String.format("identifier <%s> is already defined\n", $2);
-          yyerror(msg);
-        }
-
-        topTable.pushSymbol($2, $1);
-
-        DeclarationNode decl = new DeclarationNode($2, $1);
-        $$ = decl;
-    }
-    | TYPE L_SQBRACE R_SQBRACE IDENTIFIER {
-        if(!isTypeExist($1)) {
-          String msg = String.format("unknown type <%s>\n", $1);
-          yyerror(msg);
-        }
-        if(isIdentifierExist($4)) {
-          String msg = String.format("identifier <%s> is already defined\n", $4);
-          yyerror(msg);
-        }
-        
-        topTable.pushSymbol($4, "ref", $1);
-                
-        DeclarationNode node = new DeclarationNode($4, $1);
+        DeclarationNode node = new DeclarationNode($2, $1);
         $$ = node;
     }
-    /*| TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
-        if(!isTypeExist($1)) {
-          String msg = String.format("unknown type <%s>\n", $1);
-          yyerror(msg);
+    | type IDENTIFIER L_SQBRACE R_SQBRACE {
+        if (isIdentifierExist($2)) {
+            yyerror(String.format("identifier <%s> is already defined\n", $2));
         }
-        if(isIdentifierExist($5)) {
-          String msg = String.format("identifier <%s> is already defined\n", $5);
-          yyerror(msg);
-        }
-        
-        topTable.pushSymbol($5, "ref", $1);
-
-        DeclarationNode decl = new DeclarationNode($5, $1);
-        NewArrayNode nan = new NewArrayNode($1, (NodeAST) $3);
-        VariableNode var = new VariableNode($5, "ref");
-        var.strType($1);
-
-        AssignNode store = new AssignNode(var, nan);
-
-        StatementList node = new StatementList();
-        node.add(decl);
-        node.add(store);
+        topTable.pushSymbol($2, "$array", $1);
+        DeclarationNode node = new DeclarationNode($2, $1);
+        node.type(BOType.ARRAY);
         $$ = node;
-    }*/
+    }
     ;
 
 decl_assign: 
-    decl ASSIGN NEW TYPE L_SQBRACE exp R_SQBRACE {
+    decl ASSIGN NEW type L_SQBRACE exp R_SQBRACE {
         DeclarationNode decl = (DeclarationNode) $1;
+
+        decl.type(BOType.ARRAY);
         NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
-        VariableNode var = new VariableNode(decl.getName(), "ref");
+        VariableNode var = new VariableNode(decl.getName(), "$array");
         var.strType($4);
         AssignNode store = new AssignNode(var, nan);
         StatementList node = new StatementList();
@@ -376,7 +327,7 @@ assign:
         $$ = an;
     }
     | arrayref ASSIGN exp {
-        /*arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode*/
+        //arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode
         
         ArrayElementNode index = (ArrayElementNode) $1;
         NodeAST value = (NodeAST) $3;
@@ -384,7 +335,21 @@ assign:
         $$ = node;
     }
     ;
-	 
+	
+arrayref: 
+    IDENTIFIER L_SQBRACE exp R_SQBRACE {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> is not declared\n", $1);
+          yyerror(msg);
+        }
+
+        VariableNode var = new VariableNode($1, topTable.getBaseType($1));
+        var.type(BOType.REF);
+        ArrayElementNode node = new ArrayElementNode(var, (NodeAST) $3);
+        $$ = node;
+    }
+    ;
+ 
 idref:
     IDENTIFIER DOT idref_tail {
         VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
@@ -628,26 +593,6 @@ exp:
 reference: 
     arrayref { $$ = $1; }
     ;
-
-arrayref: 
-    IDENTIFIER L_SQBRACE exp R_SQBRACE {
-        if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> is not declared\n", $1);
-          yyerror(msg);
-        }
-
-        VariableNode var = new VariableNode($1, topTable.getBaseType($1));
-        var.type(BOType.REF);
-        ArrayElementNode node = new ArrayElementNode(var, (NodeAST) $3);
-        $$ = node;
-    }
-    ;
-
-tuple_value: L_CURBRACE exp_list R_CURBRACE {
-            TupleNode node = new TupleNode((StatementList) $2);
-            $$ = node;
-           }
-           ;
 
 exp_list: /* empty */ {
           $$ = null;

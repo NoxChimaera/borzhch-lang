@@ -9,6 +9,7 @@ import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ObjectType;
 
 /**
@@ -16,7 +17,7 @@ import org.apache.bcel.generic.ObjectType;
  * @author Balushkin M.
  */
 public class DeclarationNode extends NodeAST {
-    BOType varType;
+//    BOType varType;
     String varTypeName;
     String varName;
     
@@ -36,7 +37,8 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, BOType type) {
         varName = name;
-        varType = type;
+        this.type = type;
+//        varType = type;
         varTypeName = BOHelper.toString(type);
     }
     
@@ -47,7 +49,8 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, String typeName) {
         varName = name;
-        varType = BOType.REF;
+        this.type = BOType.REF;
+//        varType = BOType.REF;
         type = BOType.REF;
         varTypeName = typeName;
     }
@@ -62,20 +65,29 @@ public class DeclarationNode extends NodeAST {
         System.out.println("Variable: " + varName);
         printLevel(lvl);
         System.out.println("Type: " + varTypeName + " (" 
-                + BOHelper.toString(varType) + ")");
+                + BOHelper.toString(type) + ")");
     }
 
     @Override
     public void codegen() {
         if (isField) {
-            if (StructTable.isDefined(varTypeName)) {
+            if (BOType.ARRAY == type) {
+                if (StructTable.isDefined(varName)){
+                    JavaCodegen.struct().addField(varName, 
+                            new ArrayType(new ObjectType(varTypeName), 1));
+                } else {
+                    JavaCodegen.struct().addField(varName, 
+                            BOHelper.toJVMArrayType(varTypeName));
+                }
+//                JavaCodegen.struct().addField(varName, new ArrayType);
+            } else if (StructTable.isDefined(varTypeName)) {
                 JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
             } else {
-                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(varType));
+                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(type));
             }
         } else {
             // Associate variable name with LocalVariableGen-object
-            JavaCodegen.method().addLocalVariable(varName, varType);
+            JavaCodegen.method().addLocalVariable(varName, type);
         }
     }
 }

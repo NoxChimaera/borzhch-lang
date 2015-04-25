@@ -33,7 +33,8 @@ public enum BOType {
     /**
      * Ссылочный тип
      */
-    REF
+    REF,
+    ARRAY
 }
 
 //public class BOType {
