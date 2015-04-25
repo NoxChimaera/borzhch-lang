@@ -106,6 +106,12 @@ BooleanLiteral = "true" | "false"
   "]"   { return Parser.R_SQBRACE; }
 }
 
+<YYINITIAL> { 
+    "null" {
+        return Parser.NULL;
+    }
+}
+
 <YYINITIAL> {BooleanLiteral}    { 
     if (yytext().equals("true")) { yyparser.yylval = new ParserVal(1); }
     else { yyparser.yylval = new ParserVal(0); } 

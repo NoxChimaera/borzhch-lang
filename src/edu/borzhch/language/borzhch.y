@@ -23,6 +23,7 @@
 %token COMMA ASSIGN DOT SEMICOLON PRINT COLON
 %token CASE TUPLE INCLUDE UN_MINUS UN_PLUS
 %token <sval> INCR MUL_ARITHM ADD_ARITHM MORELESS EQ
+%token NULL
 
 %nonassoc IFX
 
@@ -43,6 +44,7 @@
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref idref_tail
 %type <obj> switch case switchblock structref builtin
+%type <obj> constant dynamic_value
 %%
 
 start: 
@@ -566,6 +568,27 @@ exp:
         }
         $$ = new NewObjectNode($2); 
     }
+    | constant { $$ = $1; }
+    | dynamic_value { $$ = $1; }
+    ;
+
+constant:
+    INTEGER          { $$ = new IntegerNode($1); }
+    | FLOAT            { $$ = new FloatNode((float)$1); }
+    | STRING           { $$ = new StringNode($1); }
+    | BOOLEAN          { $$ = new BooleanNode($1); }
+    ;
+
+dynamic_value:
+    arrayref { $$ = $1; }
+    | idref { $$ = $1; }
+    | IDENTIFIER { 
+	    if(!isIdentifierExist($1)) {
+            String msg = String.format("identifier <%s> is not declared\n", $1);
+            yyerror(msg);
+        }
+        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
+    }
     | IDENTIFIER L_BRACE exp_list R_BRACE {
         if(!isIdentifierExist($1)) {
             String msg = String.format("identifier <%s> is not declared\n", $1);
@@ -574,24 +597,6 @@ exp:
         FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
         $$ = node;
     }
-    | reference        { $$ = $1; }
-    | tuple_value      { $$ = $1; }
-    | idref            { $$ = $1; }
-    | INTEGER          { $$ = new IntegerNode($1); }
-    | FLOAT            { $$ = new FloatNode((float)$1); }
-    | STRING           { $$ = new StringNode($1); }
-    | BOOLEAN          { $$ = new BooleanNode($1); }
-    | IDENTIFIER { 
-	    if(!isIdentifierExist($1)) {
-            String msg = String.format("identifier <%s> is not declared\n", $1);
-            yyerror(msg);
-        }
-        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
-    }
-    ;
-
-reference: 
-    arrayref { $$ = $1; }
     ;
 
 exp_list: /* empty */ {
