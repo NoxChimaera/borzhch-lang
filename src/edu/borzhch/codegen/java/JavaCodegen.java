@@ -42,6 +42,11 @@ public class JavaCodegen {
     public static void switchClass(String name) {
         currentClass = classes.get(name);
     }
+    
+    public static void switchToMainClass() {
+        currentClass = programClass;
+    }
+    
     /**
      * Устанавливает запускаемый класс
      * @param name 
@@ -61,6 +66,8 @@ public class JavaCodegen {
      * Создаёт метод
      * @param name Имя метода
      * @param returnType Возвращаемый тип
+     * @param argsTypes
+     * @param argsNames
      * @param className Имя класса
      */
     public static void newMethod(String name, BOType returnType, Type[] argsTypes, String[] argsNames, String className) {

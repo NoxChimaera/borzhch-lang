@@ -21,6 +21,8 @@ public class FunctionNode extends NodeAST {
     BOType returnType;
     String returnTypeName;
     
+    String className;
+    
     NodeList args;
     StatementList statements;
     
@@ -28,10 +30,12 @@ public class FunctionNode extends NodeAST {
      * Функция, возвращающая примитивный тип
      * @param name Идентификатор функции
      * @param returnType Вовзращаемый тип
+     * @param className Имя класса, которому принадлежит функция
      */
-    public FunctionNode(String name, BOType returnType) {
+    public FunctionNode(String name, BOType returnType, String className) {
         funcName = name;
         this.returnType = returnType;
+        this.className = className;
         returnTypeName = BOHelper.toString(returnType);
         args = new ArgumentList();
         statements = new StatementList();
@@ -41,10 +45,12 @@ public class FunctionNode extends NodeAST {
      * Функция, возвращающая ссылочный тип
      * @param name Идентификатор фукнции
      * @param returnTypeName Идентификатор типа
+     * @param className Имя класса, которому принадлежит функция
      */
-    public FunctionNode(String name, String returnTypeName) {
+    public FunctionNode(String name, String returnTypeName, String className) {
         funcName = name;
         this.returnTypeName = returnTypeName;
+        this.className = className;
         if (BOHelper.isType(returnTypeName)) {
             returnType = BOHelper.getType(returnTypeName);
         } else {
@@ -110,13 +116,13 @@ public class FunctionNode extends NodeAST {
                 if (BOType.REF == decl.type() && BOHelper.isType(decl.varTypeName)) {
                     argsTypes[i] = BOHelper.toJVMArrayType(decl.varTypeName);
                 } else {
-                    argsTypes[i] = BOHelper.toJVMType(decl.varType);
+                    argsTypes[i] = BOHelper.toJVMType(decl.type);
                 }
                 i++;
             }
         }
         
-        JavaCodegen.newMethod(funcName, returnType, argsTypes, argsNames, "Program");
+        JavaCodegen.newMethod(funcName, returnType, argsTypes, argsNames, className);
         
         if (statements != null) {
             statements.codegen();
@@ -124,6 +130,6 @@ public class FunctionNode extends NodeAST {
         
         if(returnType == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
         
-        JavaCodegen.compileMethod("Program", funcName);
+        JavaCodegen.compileMethod(className, funcName);
     }
 }

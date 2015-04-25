@@ -24,8 +24,10 @@ public class CaseNode extends NodeAST {
         System.out.println("Case:");
         
         ++lvl;
+        printLevel(lvl);
         System.out.println(String.format("Condition: %d", condition));
         if(body != null) {
+            printLevel(lvl);
             System.out.println("Body:");
             body.debug(lvl);
         }

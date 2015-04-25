@@ -16,7 +16,6 @@ import org.apache.bcel.generic.ObjectType;
  * @author Balushkin M.
  */
 public class DeclarationNode extends NodeAST {
-    BOType varType;
     String varTypeName;
     String varName;
     
@@ -36,7 +35,7 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, BOType type) {
         varName = name;
-        varType = type;
+        this.type = type;
         varTypeName = BOHelper.toString(type);
     }
     
@@ -47,8 +46,7 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, String typeName) {
         varName = name;
-        varType = BOType.REF;
-        type = BOType.REF;
+        this.type = BOType.REF;
         varTypeName = typeName;
     }
 
@@ -62,7 +60,7 @@ public class DeclarationNode extends NodeAST {
         System.out.println("Variable: " + varName);
         printLevel(lvl);
         System.out.println("Type: " + varTypeName + " (" 
-                + BOHelper.toString(varType) + ")");
+                + BOHelper.toString(this.type) + ")");
     }
 
     @Override
@@ -71,11 +69,11 @@ public class DeclarationNode extends NodeAST {
             if (StructTable.isDefined(varTypeName)) {
                 JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
             } else {
-                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(varType));
+                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(this.type));
             }
         } else {
             // Associate variable name with LocalVariableGen-object
-            JavaCodegen.method().addLocalVariable(varName, varType);
+            JavaCodegen.method().addLocalVariable(varName, this.type);
         }
     }
 }
