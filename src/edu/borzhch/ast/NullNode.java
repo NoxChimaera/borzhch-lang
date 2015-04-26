@@ -5,29 +5,25 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.constants.BOType;
+
 /**
- *
+ * NULL
  * @author Balushkin M.
  */
-public class TupleNode extends NodeAST {
-    StatementList statementList = null;    
-    
-    public TupleNode(StatementList statementList) {
-        this.statementList = statementList;
+public class NullNode extends NodeAST {
+    public NullNode() {
+        type = BOType.VOID;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println("Tuple:");
-        
-        ++lvl;
-        statementList.debug(lvl);
+        System.out.printf("NULL\n");
     }
 
     @Override
     public void codegen() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
 }

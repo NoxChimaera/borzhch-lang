@@ -48,6 +48,8 @@ public class BOHelper {
                 return BOType.FLOAT;
             case "string":
                 return BOType.STRING;
+            case "$array":
+                return BOType.ARRAY;
             default:
                 return BOType.REF;
         }
@@ -70,6 +72,8 @@ public class BOHelper {
                 return "float";
             case STRING:
                 return "string";
+            case ARRAY:
+                return "$array";
             default:
                 return "ref";
         }

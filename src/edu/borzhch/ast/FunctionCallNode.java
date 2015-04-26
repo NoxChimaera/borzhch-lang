@@ -37,7 +37,7 @@ public class FunctionCallNode extends NodeAST {
 
     @Override
     public void codegen() {
-        if(args != null && args.nodes.size() != 0) args.codegen();
+        if(args != null && !args.nodes.isEmpty()) args.codegen();
         
         FuncTable funcTable = Parser.getFuncTable();
         Type retType = BOHelper.toJVMType(BOHelper.getType(funcTable.getType(identifier)));

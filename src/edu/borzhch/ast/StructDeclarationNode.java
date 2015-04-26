@@ -16,6 +16,8 @@ public class StructDeclarationNode extends NodeAST {
         fields = statementList;
         
         StructTable.addStruct(identifier);
+        
+        if (fields == null) return;
         fields.nodes.stream().map((field) -> (DeclarationNode) field).forEach((d) -> {
             StructTable.putField(identifier, d.getName(), d.varTypeName);
         });
@@ -26,6 +28,7 @@ public class StructDeclarationNode extends NodeAST {
         printLevel(lvl);
         System.out.println("Struct " + identifier);
         ++lvl;
+        if (null == fields) return;
         fields.debug(lvl);
     }
 
@@ -34,7 +37,9 @@ public class StructDeclarationNode extends NodeAST {
         JavaCodegen.newClass(identifier);
         JavaCodegen.switchClass(identifier);
         
-        fields.codegen();
+        if (null != fields) {
+            fields.codegen();
+        }
         
         JavaCodegen.compileClass(identifier);
         JavaCodegen.switchClass("Program");

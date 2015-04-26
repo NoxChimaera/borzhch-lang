@@ -10,11 +10,17 @@ import edu.borzhch.helpers.BOHelper;
 import org.apache.bcel.generic.Type;
 
 /**
- *
+ * Запись элемента массива
  * @author Balushkin M.
  */
 public class SetArrayNode extends NodeAST {
+    /**
+     * Элемент массива
+     */
     ArrayElementNode element;
+    /**
+     * Значение
+     */
     NodeAST value;
     
     public SetArrayNode(ArrayElementNode elementNode, NodeAST valueExpr) {

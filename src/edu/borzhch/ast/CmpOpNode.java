@@ -20,6 +20,13 @@ public class CmpOpNode extends OpNode {
     NodeAST l;
     NodeAST r;
     String op;
+    
+    /**
+     * Операция сравнения
+     * @param left Левое выражение
+     * @param right Правое вырадение
+     * @param operator Оператор { >, <, >=, <=, ==, != }
+     */
     public CmpOpNode(NodeAST left, NodeAST right, String operator) {
         l = left;
         r = right;
@@ -60,6 +67,10 @@ public class CmpOpNode extends OpNode {
         }
     }
    
+    /**
+     * Сравнение чисел с плавающей точкой (неравенство)
+     * @param isRight isRight ? >, >= : <, <=
+     */
     private void fineq(boolean isRight) {
         l.codegen();
         if (BOType.FLOAT == l.type) {
@@ -103,9 +114,10 @@ public class CmpOpNode extends OpNode {
         JavaCodegen.method().nop();
         go.setTarget(JavaCodegen.method().getLastHandler());
     }
+    
     /**
      * Сравнение чисел с плавающей точкой (либо INT - FLOAT)
-     * @param isEqual 
+     * @param isEqual isEqual ? == : !=
      */
     private void feq(boolean isEqual) {
         l.codegen();

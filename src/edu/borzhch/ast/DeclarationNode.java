@@ -9,6 +9,7 @@ import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ObjectType;
 
 /**
@@ -46,7 +47,7 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, String typeName) {
         varName = name;
-        this.type = BOType.REF;
+        this.type = BOHelper.getType(typeName);
         varTypeName = typeName;
     }
 
@@ -60,13 +61,21 @@ public class DeclarationNode extends NodeAST {
         System.out.println("Variable: " + varName);
         printLevel(lvl);
         System.out.println("Type: " + varTypeName + " (" 
-                + BOHelper.toString(this.type) + ")");
+                + BOHelper.toString(type) + ")");
     }
 
     @Override
     public void codegen() {
         if (isField) {
-            if (StructTable.isDefined(varTypeName)) {
+            if (BOType.ARRAY == type) {
+                if (StructTable.isDefined(varName)){
+                    JavaCodegen.struct().addField(varName, 
+                            new ArrayType(new ObjectType(varTypeName), 1));
+                } else {
+                    JavaCodegen.struct().addField(varName, 
+                            BOHelper.toJVMArrayType(varTypeName));
+                }
+            } else if (StructTable.isDefined(varTypeName)) {
                 JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
             } else {
                 JavaCodegen.struct().addField(varName, BOHelper.toJVMType(this.type));

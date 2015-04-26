@@ -31,7 +31,7 @@ public class InferenceTypeTable {
         // STRING - ANY -> VOID, STRING - STRING -> STRING
         int str = BOType.STRING.ordinal();
         for (int i = 0; i < l; ++i) {
-            if (ref != i)
+            if (str != i)
                 table[str][i] = BOType.VOID;
             else
                 table[str][i] = BOType.STRING;

@@ -7,7 +7,7 @@ package edu.borzhch.ast;
 
 
 /**
- *
+ * Получение элемента массива
  * @author Balushkin M.
  */
 public class GetArrayNode extends NodeAST {

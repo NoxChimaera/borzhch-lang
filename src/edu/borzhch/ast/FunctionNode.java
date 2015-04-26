@@ -10,6 +10,7 @@ import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.ArrayList;
 import org.apache.bcel.generic.ArrayType;
+import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.Type;
 
 /**
@@ -113,11 +114,21 @@ public class FunctionNode extends NodeAST {
                 DeclarationNode decl = ((DeclarationNode) arg);
                 argsNames[i] = decl.varName;
                 
-                if (BOType.REF == decl.type() && BOHelper.isType(decl.varTypeName)) {
-                    argsTypes[i] = BOHelper.toJVMArrayType(decl.varTypeName);
-                } else {
-                    argsTypes[i] = BOHelper.toJVMType(decl.type);
+                switch (decl.type) {
+                    case ARRAY:
+                        if (BOHelper.isType(decl.varTypeName)) {
+                            argsTypes[i] = BOHelper.toJVMArrayType(decl.varTypeName);
+                        } else {
+                            argsTypes[i] = new ArrayType(decl.varTypeName, 1);
+                        }
+                        break;
+                    case REF:
+                        argsTypes[i] = new ObjectType(decl.varTypeName);
+                        break;
+                    default:
+                        argsTypes[i] = BOHelper.toJVMType(decl.type);
                 }
+                
                 i++;
             }
         }

@@ -11,49 +11,25 @@ import java.util.ArrayList;
  *
  * @author Balushkin M.
  */
-public class DotOpNode extends NodeAST implements IDotNode {
-    NodeAST l;
-    NodeAST r;
-    
-    String struct;
-    
-    boolean generateLastNode = true;
-    public void generateLastNode(boolean generate) {
-        generateLastNode = generate;
-    }
-    public FieldNode getLastNode() {
-        if (FieldNode.class == r.getClass())
-            return (FieldNode) r;
-        else
-            return ((DotOpNode) r).getLastNode();
-    }
-    public VariableNode getFirstNode() {
-        if (VariableNode.class == l.getClass())
-            return (VariableNode) l;
-        else
-            return ((DotOpNode) l).getFirstNode();
-    }
-    
+public class DotOpNode extends NodeAST {
+    NodeAST left;
+    NodeAST right;
+
     public DotOpNode(NodeAST left, NodeAST right) {
-        l = left;
-        r = right;
-        
-        type = r.type;
+        this.left = left;
+        this.right = right;
     }
     
-    ArrayList<FieldNode> fields;
-    public ArrayList<FieldNode> reduce() {
-        fields = new ArrayList<>();
-        if (FieldNode.class == l.getClass()) {
-            fields.add((FieldNode) l);
-        }
-        
-        if (FieldNode.class == r.getClass()) {
-            fields.add((FieldNode) r);
+    public ArrayList<NodeAST> reduce() {
+        ArrayList<NodeAST> tmp = new ArrayList<>();
+        tmp.add(left);
+
+        if (DotOpNode.class == right.getClass()) {
+            tmp.addAll(((DotOpNode) right).reduce());
         } else {
-            fields.addAll(((DotOpNode) r).reduce());
+            tmp.add(right);
         }
-        return fields;
+        return tmp;
     }
     
     @Override
@@ -63,28 +39,14 @@ public class DotOpNode extends NodeAST implements IDotNode {
         ++lvl;
         printLevel(lvl);
         System.out.println("Left: ");
-        l.debug(lvl + 1);
+        left.debug(lvl + 1);
         printLevel(lvl);
         System.out.println("Right: ");
-        r.debug(lvl + 1);
+        right.debug(lvl + 1);
     }
 
     @Override
     public void codegen() {
-        l.codegen();
-        FieldNode last = getLastNode();
-        if (r != last) {
-            r.codegen();
-        } else if (generateLastNode) {
-            r.codegen();
-        }
-    }
-
-    @Override
-    public void setStructName(String name) {
-//        fields = reduce();
-        
-        struct = name;
-        ((IDotNode) r).setStructName(struct);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

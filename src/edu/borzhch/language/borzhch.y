@@ -23,6 +23,7 @@
 %token COMMA ASSIGN DOT SEMICOLON PRINT COLON
 %token CASE TUPLE INCLUDE UN_MINUS UN_PLUS
 %token <sval> INCR MUL_ARITHM ADD_ARITHM MORELESS EQ
+%token NULL
 
 %nonassoc IFX
 
@@ -47,9 +48,10 @@
 %type <obj> function builtin
 %type <obj> codeblock assign
 %type <obj> reference arrayref
-%type <obj> idref idref_tail
+%type <obj> idref idref_tail type
 %type <obj> switch switchblock case 
 %type <obj> class_list class_decl class_block class_identifier
+%type <obj> constant dynamic_value
 %%
 
 start: 
@@ -97,27 +99,28 @@ endblock: R_CURBRACE {
             oldTable.clear();
         }
         ;
+
+type:
+    TYPE { $$ = $1; }
+    | IDENTIFIER { 
+        if (!isTypeExist($1)) {
+            yyerror(String.format("can not resolve symbol <%s>\n", $1));
+        }
+        $$ = $1; 
+    }
+    ;
+
 function:
-    DEFUN TYPE IDENTIFIER L_BRACE param_list R_BRACE codeblock {
-        FunctionNode func = null;
-
-        if (isTypeExist($2)) {
-            func = new FunctionNode($3, $2, currentClass);
-        } else {
-            String msg = ErrorHelper.unknownType($2);
-            yyerror(msg);
+    DEFUN type IDENTIFIER L_BRACE param_list R_BRACE codeblock {
+        if (isIdentifierExist($3)) {
+            yyerror(String.format("identifier <%s> is already defined", $3));
         }
-        if(isIdentifierExist($3)) {
-          String msg = ErrorHelper.identifierExists($3);
-          yyerror(msg);
-        }
+        FunctionNode node = new FunctionNode($3, $2);
+        node.setArguments((NodeList) $5);
+        node.setStatements((StatementList) $7);
 
-        func.setArguments((NodeList) $5);
-        func.setStatements((StatementList) $7);
-
-        funcTable.push(func);
-
-        $$ = func;
+        funcTable.push(node);
+        $$ = node;
     }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if(isIdentifierExist($2)) {
@@ -254,83 +257,32 @@ decl_list: /* empty*/ { $$ = null; }
     ;
 
 decl: 
-    TYPE IDENTIFIER { 
-        if(isIdentifierExist($2)) {
-          String msg = ErrorHelper.identifierExists($2);
-          yyerror(msg);
+    type IDENTIFIER {
+        if (isIdentifierExist($2)) {
+            yyerror(String.format("identifier <%s> is already defined\n", $2));
         }
-        if(!isTypeExist($1)) {
-          String msg = ErrorHelper.unknownType($1);
-          yyerror(msg);
-        }
-
         topTable.pushSymbol($2, $1);
-        
-        DeclarationNode node = new DeclarationNode($2, BOHelper.getType($1));
-        node.type(BOHelper.getType($1));
-        $$ = node;  
-    }
-    | IDENTIFIER IDENTIFIER {
-        if(!isTypeExist($1)) {
-          String msg = ErrorHelper.unknownType($1);
-          yyerror(msg);
-        }
-        if(isIdentifierExist($2)) {
-          String msg = ErrorHelper.identifierExists($2);
-          yyerror(msg);
-        }
-
-        topTable.pushSymbol($2, $1);
-
-        DeclarationNode decl = new DeclarationNode($2, $1);
-        $$ = decl;
-    }
-    | TYPE L_SQBRACE R_SQBRACE IDENTIFIER {
-        if(!isTypeExist($1)) {
-          String msg = ErrorHelper.unknownType($1);
-          yyerror(msg);
-        }
-        if(isIdentifierExist($4)) {
-          String msg = ErrorHelper.identifierExists($4);
-          yyerror(msg);
-        }
-        
-        topTable.pushSymbol($4, "ref", $1);
-                
-        DeclarationNode node = new DeclarationNode($4, $1);
+        DeclarationNode node = new DeclarationNode($2, $1);
         $$ = node;
     }
-    /*| TYPE L_SQBRACE exp R_SQBRACE IDENTIFIER { 
-        if(!isTypeExist($1)) {
-          String msg = ErrorHelper.unknownType($1);
-          yyerror(msg);
+    | type IDENTIFIER L_SQBRACE R_SQBRACE {
+        if (isIdentifierExist($2)) {
+            yyerror(String.format("identifier <%s> is already defined\n", $2));
         }
-        if(isIdentifierExist($5)) {
-          String msg = ErrorHelper.identifierExists($5);
-          yyerror(msg);
-        }
-        
-        topTable.pushSymbol($5, "ref", $1);
-
-        DeclarationNode decl = new DeclarationNode($5, $1);
-        NewArrayNode nan = new NewArrayNode($1, (NodeAST) $3);
-        VariableNode var = new VariableNode($5, "ref");
-        var.strType($1);
-
-        AssignNode store = new AssignNode(var, nan);
-
-        StatementList node = new StatementList();
-        node.add(decl);
-        node.add(store);
+        topTable.pushSymbol($2, "$array", $1);
+        DeclarationNode node = new DeclarationNode($2, $1);
+        node.type(BOType.ARRAY);
         $$ = node;
-    }*/
+    }
     ;
 
 decl_assign: 
-    decl ASSIGN NEW TYPE L_SQBRACE exp R_SQBRACE {
+    decl ASSIGN NEW type L_SQBRACE exp R_SQBRACE {
         DeclarationNode decl = (DeclarationNode) $1;
+
+        decl.type(BOType.ARRAY);
         NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
-        VariableNode var = new VariableNode(decl.getName(), "ref");
+        VariableNode var = new VariableNode(decl.getName(), "$array");
         var.strType($4);
         AssignNode store = new AssignNode(var, nan);
         StatementList node = new StatementList();
@@ -415,13 +367,9 @@ stmt: decl            { $$ = $1; }
 
 assign: 
     idref ASSIGN exp {
-        /*DotOpNode dot = (DotOpNode) $1;
-        dot.reduce();*/
         GetFieldNode get = (GetFieldNode) $1;
-
-        NodeAST exp = (NodeAST) $3;
-        SetFieldNode node = new SetFieldNode(get, exp);
-        //SetFieldNode node = new SetFieldNode(dot, exp);
+        NodeAST expr = (NodeAST) $3;
+        SetFieldNode node = new SetFieldNode(get, expr);
         $$ = node;
     }
     | IDENTIFIER ASSIGN exp {
@@ -444,7 +392,7 @@ assign:
         $$ = an;
     }
     | arrayref ASSIGN exp {
-        /*arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode*/
+        //arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode
         
         ArrayElementNode index = (ArrayElementNode) $1;
         NodeAST value = (NodeAST) $3;
@@ -452,9 +400,32 @@ assign:
         $$ = node;
     }
     ;
-	 
+	
+arrayref: 
+    IDENTIFIER L_SQBRACE exp R_SQBRACE {
+        if(!isIdentifierExist($1)) {
+          String msg = String.format("identifier <%s> is not declared\n", $1);
+          yyerror(msg);
+        }
+
+        VariableNode var = new VariableNode($1, topTable.getBaseType($1));
+        var.type(BOType.REF);
+        ArrayElementNode node = new ArrayElementNode(var, (NodeAST) $3);
+        $$ = node;
+    }
+    ;
+ 
 idref:
-    IDENTIFIER DOT idref_tail {
+    dynamic_value DOT dynamic_value {
+        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $3);
+        GetFieldNode node = new GetFieldNode(dot.reduce());
+        $$ = node;
+    }
+    ;
+
+
+/*idref:
+    dynamic_value DOT idref_tail {
         VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
         DotOpNode dot = new DotOpNode(var, (NodeAST) $3);
         //((IDotNode) node).setStructName(var.strType());
@@ -474,7 +445,7 @@ idref_tail:
         DotOpNode node = new DotOpNode(field, (NodeAST) $3);
         $$ = node;
     }
-    ;
+    ;*/
 
 if: 
     IF L_BRACE exp R_BRACE codeblock %prec IFX else {
@@ -669,21 +640,21 @@ exp:
         }
         $$ = new NewObjectNode($2); 
     }
-    | IDENTIFIER L_BRACE exp_list R_BRACE {
-        if(!isIdentifierExist($1)) {
-            String msg = ErrorHelper.notDeclared($1);
-            yyerror(msg);
-        }
-        FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
-        $$ = node;
-    }
-    | reference        { $$ = $1; }
-    | tuple_value      { $$ = $1; }
-    | idref            { $$ = $1; }
-    | INTEGER          { $$ = new IntegerNode($1); }
-    | FLOAT            { $$ = new FloatNode((float)$1); }
-    | STRING           { $$ = new StringNode($1); }
-    | BOOLEAN          { $$ = new BooleanNode($1); }
+    | constant { $$ = $1; }
+    | dynamic_value { $$ = $1; }
+    ;
+
+constant:
+    INTEGER { $$ = new IntegerNode($1); }
+    | FLOAT { $$ = new FloatNode((float)$1); }
+    | STRING    { $$ = new StringNode($1); }
+    | BOOLEAN   { $$ = new BooleanNode($1); }
+    | NULL  { $$ = new NullNode(); }
+    | idref { $$ = $1; }
+    ;
+
+dynamic_value:
+    arrayref { $$ = $1; }
     | IDENTIFIER { 
 	    if(!isIdentifierExist($1)) {
             String msg = ErrorHelper.notDeclared($1);
@@ -691,31 +662,15 @@ exp:
         }
         $$ = new VariableNode($1, topTable.getSymbolType($1)); 
     }
-    ;
-
-reference: 
-    arrayref { $$ = $1; }
-    ;
-
-arrayref: 
-    IDENTIFIER L_SQBRACE exp R_SQBRACE {
+    | IDENTIFIER L_BRACE exp_list R_BRACE {
         if(!isIdentifierExist($1)) {
           String msg = ErrorHelper.notDeclared($1);
           yyerror(msg);
         }
-
-        VariableNode var = new VariableNode($1, topTable.getBaseType($1));
-        var.type(BOType.REF);
-        ArrayElementNode node = new ArrayElementNode(var, (NodeAST) $3);
+        FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
         $$ = node;
     }
     ;
-
-tuple_value: L_CURBRACE exp_list R_CURBRACE {
-            TupleNode node = new TupleNode((StatementList) $2);
-            $$ = node;
-           }
-           ;
 
 exp_list: /* empty */ {
           $$ = null;
