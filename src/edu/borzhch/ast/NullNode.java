@@ -8,7 +8,7 @@ package edu.borzhch.ast;
 import edu.borzhch.constants.BOType;
 
 /**
- *
+ * NULL
  * @author Balushkin M.
  */
 public class NullNode extends NodeAST {

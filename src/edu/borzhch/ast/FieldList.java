@@ -6,7 +6,7 @@
 package edu.borzhch.ast;
 
 /**
- *
+ * Список полей класса
  * @author Balushkin M.
  */
 public class FieldList extends NodeList {

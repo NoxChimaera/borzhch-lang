@@ -9,11 +9,18 @@ import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 
 /**
- *
+ * Инстанцирование объекта
  * @author Balushkin M.
  */
 public class NewObjectNode extends NodeAST {
+    /**
+     * Идентификатор класс/структуры инстанцируемого объекта
+     */
     String identifier;
+    /**
+     * Инстанцирование объекта
+     * @param id Идентификатор класса/структуры
+     */
     public NewObjectNode(String id) {
         identifier = id;
         type = BOType.REF;

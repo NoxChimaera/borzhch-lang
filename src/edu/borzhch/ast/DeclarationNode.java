@@ -17,7 +17,6 @@ import org.apache.bcel.generic.ObjectType;
  * @author Balushkin M.
  */
 public class DeclarationNode extends NodeAST {
-//    BOType varType;
     String varTypeName;
     String varName;
     
@@ -38,7 +37,6 @@ public class DeclarationNode extends NodeAST {
     public DeclarationNode(String name, BOType type) {
         varName = name;
         this.type = type;
-//        varType = type;
         varTypeName = BOHelper.toString(type);
     }
     
@@ -49,9 +47,8 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, String typeName) {
         varName = name;
-        this.type = BOType.REF;
-//        varType = BOType.REF;
-        type = BOType.REF;
+        
+        this.type = BOHelper.getType(typeName);
         varTypeName = typeName;
     }
 
@@ -79,7 +76,6 @@ public class DeclarationNode extends NodeAST {
                     JavaCodegen.struct().addField(varName, 
                             BOHelper.toJVMArrayType(varTypeName));
                 }
-//                JavaCodegen.struct().addField(varName, new ArrayType);
             } else if (StructTable.isDefined(varTypeName)) {
                 JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
             } else {

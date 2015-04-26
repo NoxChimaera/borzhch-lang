@@ -10,11 +10,17 @@ import edu.borzhch.helpers.BOHelper;
 import org.apache.bcel.generic.Type;
 
 /**
- *
+ * Запись в поле объекта
  * @author Balushkin M.
  */
 public class SetFieldNode extends NodeAST {
+    /**
+     * Поле объекта
+     */
     GetFieldNode field;
+    /**
+     * Значение
+     */
     NodeAST value;
 
     public SetFieldNode(GetFieldNode field, NodeAST value) {
@@ -27,7 +33,6 @@ public class SetFieldNode extends NodeAST {
         printLevel(lvl);
         System.out.println("Set Field: ");
         field.debug(lvl + 1);
-//        dot.debug(lvl + 1);
         value.debug(lvl + 1);
     }
 
@@ -37,7 +42,6 @@ public class SetFieldNode extends NodeAST {
         field.codegen();
         value.codegen();
         
-//        NodeAST last = field.getLast();
         VariableNode last = (VariableNode) field.getLast();
         switch (last.type) {
             case REF:

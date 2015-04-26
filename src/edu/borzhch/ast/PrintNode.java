@@ -10,11 +10,18 @@ import edu.borzhch.helpers.BOHelper;
 import org.apache.bcel.generic.Type;
 
 /**
- *
+ * Печать на stdout
  * @author Balushkin M.
  */
 public class PrintNode extends NodeAST {
+    /**
+     * Выражение
+     */
     NodeAST node;
+    /**
+     * Печать на стандартный вывод
+     * @param node Выражение для печати
+     */
     public PrintNode(NodeAST node) {
         this.node = node;
     }

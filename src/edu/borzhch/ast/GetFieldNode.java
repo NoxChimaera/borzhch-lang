@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import org.apache.bcel.generic.Type;
 
 /**
- *
+ * Получение поля объекта
  * @author Balushkin M.
  */
 public class GetFieldNode extends NodeAST {
@@ -21,11 +21,24 @@ public class GetFieldNode extends NodeAST {
         generateLast = val;
     }
     
+    /**
+     * Класс объекта (зачем-то)
+     */
+    public String schema;
     ArrayList<NodeAST> fields;
+    /**
+     * Получение поля объекта
+     * @param nodes Последовательность операндов (foo . bar . baz)
+     */
     public GetFieldNode(ArrayList<NodeAST> nodes){
         fields = nodes;
+        get(false);
     }
     
+    /**
+     * Возвращает последний узел
+     * @return Последний узел
+     */
     public NodeAST getLast() {
         return fields.get(fields.size() - 1);
     }
@@ -39,41 +52,63 @@ public class GetFieldNode extends NodeAST {
         });
     }
 
-    public String schema;
-    private void load(NodeAST node) {
+    /**
+     * Загружает значение (вычисляет)
+     * @param node Узел
+     * @param genCode Генерировать код?
+     */
+    private void load(NodeAST node, boolean genCode) {
         if (ArrayElementNode.class == node.getClass()) {
             GetArrayNode getItem = new GetArrayNode((ArrayElementNode) node);
-            getItem.codegen();
+            if (genCode) {
+                getItem.codegen();
+            }
             schema = getItem.arrayRef.ref.strType();
             type = getItem.arrayRef.ref.type;
         }
     }
-    private void getField(NodeAST node) {
+    /**
+     * Получает поле объекта
+     * @param node Узел
+     * @param genCode Генерировать код?
+     */
+    private void getField(NodeAST node, boolean genCode) {
         if (VariableNode.class == node.getClass()) {
             VariableNode field = (VariableNode) node;
             switch (field.type) {
                 case REF:
-                    JavaCodegen.method().getFieldClass(schema, field.id, 
-                            StructTable.getFieldType(schema, field.id));
+                    
+                    if (genCode)
+                        JavaCodegen.method().getFieldClass(schema, field.id, 
+                                StructTable.getFieldType(schema, field.id));
                     schema = field.strType();
                     type = field.type;
                     break;
                 default:
-                    JavaCodegen.method().getField(schema, field.id, 
-                            BOHelper.toJVMType(field.type));
+                    if (genCode)
+                        JavaCodegen.method().getField(schema, field.id, 
+                                BOHelper.toJVMType(field.type));
                     type = field.type;
                     break;
             }
         }
     }
     
-    @Override
-    public void codegen() {
-        load(fields.get(0));
+    /**
+     * Вывод типа узла
+     * @param generateCode Генерировать код?
+     */
+    private void get(boolean generateCode) {
+        load(fields.get(0), generateCode);
         
         int last = generateLast ? fields.size() : fields.size() - 1;
         for (int i = 1; i < last; ++i) {
-            getField(fields.get(i));
+            getField(fields.get(i), generateCode);
         }
+    }
+    
+    @Override
+    public void codegen() {
+        get(true);
     }
 }

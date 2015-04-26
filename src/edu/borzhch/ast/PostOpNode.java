@@ -10,13 +10,27 @@ import edu.borzhch.helpers.BOHelper;
 import org.apache.bcel.generic.Type;
 
 /**
- *
+ * Пост-оператор
  * @author Balushkin M.
  */
 public class PostOpNode extends OpNode {
+    /**
+     * Переменная
+     */
     VariableNode var;
+    /**
+     * Оператор { @, # }
+     */
     String op;
+    
+    /**
+     * Записывать на стек?
+     */
     boolean needPush = false;
+    /**
+     * Записывать на стек
+     * @param push Значение
+     */
     public void setPush(boolean push) {
         needPush = push;
     }

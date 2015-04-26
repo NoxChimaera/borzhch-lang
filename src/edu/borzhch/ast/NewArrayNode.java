@@ -11,15 +11,29 @@ import edu.borzhch.helpers.BOHelper;
 import org.apache.bcel.generic.ObjectType;
 
 /**
- *
+ * Инстанцирование массива
  * @author Balushkin M.
  */
 public class NewArrayNode extends NodeAST {
+    /**
+     * BO-тип элементов массива
+     */
     BOType arrayType;
+    /**
+     * STR-тип элементов массива
+     */
     String arrayObjectType;
     
+    /**
+     * Размер массива
+     */
     NodeAST size;
 
+    /**
+     * Инстанцирование массива
+     * @param itemsType Тип элементов
+     * @param sizeExpression Размер массива
+     */
     public NewArrayNode(String itemsType, NodeAST sizeExpression) {
         arrayType = BOHelper.getType(itemsType);
         arrayObjectType = itemsType;
