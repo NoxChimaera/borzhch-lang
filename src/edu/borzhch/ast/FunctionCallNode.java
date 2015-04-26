@@ -32,12 +32,12 @@ public class FunctionCallNode extends NodeAST {
         ++lvl;
         System.out.println(String.format("Identifier: %s", identifier));
         System.out.println("Arguments:");
-        args.debug(lvl);
+        if(args != null) args.debug(lvl);
     }
 
     @Override
     public void codegen() {
-        if(args.nodes.size() != 0) args.codegen();
+        if(args != null && args.nodes.size() != 0) args.codegen();
         
         FuncTable funcTable = Parser.getFuncTable();
         Type retType = BOHelper.toJVMType(BOHelper.getType(funcTable.getType(identifier)));

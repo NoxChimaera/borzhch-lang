@@ -74,7 +74,7 @@ public class FunctionNode extends NodeAST {
         return this.funcName;
     }
     public Integer getArgumentsCount() {
-        return this.args.nodes.size();
+        return this.args == null ? 0 : this.args.nodes.size();
     }
     public ArrayList<NodeAST> getArguments() {
         return this.args == null ? null : this.args.nodes;

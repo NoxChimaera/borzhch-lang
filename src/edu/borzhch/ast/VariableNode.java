@@ -8,6 +8,7 @@ package edu.borzhch.ast;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
 
 /**
  * Узел переменной
@@ -63,6 +64,10 @@ public class VariableNode extends NodeAST {
     @Override
     public void codegen() {
         // iload var_index
-        JavaCodegen.method().load(id, BOHelper.toJVMType(type));
+        if(JavaCodegen.struct().hasField(id)) {
+            JavaCodegen.method().getField(JavaCodegen.struct().getName(), id, BOHelper.toJVMType(type));
+        } else {
+            JavaCodegen.method().load(id, BOHelper.toJVMType(type));
+        }
     }
 }

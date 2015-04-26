@@ -28,7 +28,6 @@ public class ClassNode extends NodeAST {
 
     @Override
     public void codegen() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         //Создаём новый класс
         JavaCodegen.newClass(identifier);
         
@@ -36,7 +35,9 @@ public class ClassNode extends NodeAST {
         JavaCodegen.switchClass(identifier);
         
         //Генерим нутро класса
-        body.codegen();
+        if(body != null) body.codegen();
+        
+        JavaCodegen.struct().compile();
         
         //Возвращаемся к главному классу
         JavaCodegen.switchToMainClass();

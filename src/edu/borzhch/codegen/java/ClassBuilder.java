@@ -49,10 +49,27 @@ public class ClassBuilder {
             System.err.println(e);
         }
     }
+    
+    /**
+     * Возвращает имя класса.
+     * @return Имя класса.
+     */
+    public String getName() {
+        return name;
+    }
  
     public void addField(String name, Type type) {
         FieldGen fg = new FieldGen(ACC_PUBLIC, type, name, cp);
         cg.addField(fg.getField());
+    }
+    
+    /**
+     * Проверяет, есть ли у текущего класса поле с указанным идентификатором.
+     * @param name Идентификатор поля.
+     * @return true, если поле есть в классе; иначе - false.
+     */
+    public boolean hasField(String name) {
+        return cg.containsField(name) != null;
     }
     
     /**

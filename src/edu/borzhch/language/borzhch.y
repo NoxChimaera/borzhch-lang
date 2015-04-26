@@ -195,6 +195,7 @@ class_decl:
 
 class_identifier:
     IDENTIFIER {
+        funcTable = new FuncTable(funcTable);
         currentClass = $1; 
         $$ = $1;
     }
@@ -209,7 +210,9 @@ class_block:
 class_list:
     decl { 
         StatementList node = new StatementList();
-        node.add((NodeAST) $1);
+        DeclarationNode decl = (DeclarationNode) $1;
+        decl.isField(true);
+        node.add((NodeAST) decl);
         $$ = node; 
     }
     | function {
@@ -219,7 +222,9 @@ class_list:
     }
     | decl SEMICOLON class_list {
         StatementList node = new StatementList();
-        node.add((NodeAST) $1);
+        DeclarationNode decl = (DeclarationNode) $1;
+        decl.isField(true);
+        node.add((NodeAST) decl);
         node.addAll((NodeList) $3);
         $$ = node; 
     }
