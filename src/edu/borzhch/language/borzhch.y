@@ -48,7 +48,8 @@
 %type <obj> function builtin
 %type <obj> codeblock assign
 %type <obj> reference arrayref
-%type <obj> idref idref_tail type
+%type <obj> idref idref_tail 
+%type <sval> type
 %type <obj> switch switchblock case 
 %type <obj> class_list class_decl class_block class_identifier
 %type <obj> constant dynamic_value
@@ -115,7 +116,7 @@ function:
         if (isIdentifierExist($3)) {
             yyerror(String.format("identifier <%s> is already defined", $3));
         }
-        FunctionNode node = new FunctionNode($3, $2);
+        FunctionNode node = new FunctionNode($3, $2, currentClass);
         node.setArguments((NodeList) $5);
         node.setStatements((StatementList) $7);
 
@@ -176,7 +177,7 @@ struct_decl:
         }
         structTable.pushSymbol($2, "ref");;
 
-        StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3);
+        StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3, false);
         $$ = node;
     }
     ;
@@ -188,10 +189,10 @@ class_decl:
             String msg = ErrorHelper.identifierExists(identifier);
             yyerror(msg);
         }
-        structTable.pushSymbol(identifier, "class");
+        structTable.pushSymbol(identifier, "ref");
 
         currentClass = mainClass;
-        ClassNode node = new ClassNode(identifier, (StatementList) $3);
+        StructDeclarationNode node = new StructDeclarationNode(identifier, (FieldList) $3, true);
         $$ = node;
     }
     ;
@@ -206,25 +207,25 @@ class_identifier:
 
 class_block:
     openblock class_list endblock {
-        StatementList node = (StatementList) $2;
+        FieldList node = (FieldList) $2;
         $$ = node; 
     };
 
 class_list:
     decl { 
-        StatementList node = new StatementList();
+        FieldList node = new FieldList();
         DeclarationNode decl = (DeclarationNode) $1;
         decl.isField(true);
         node.add((NodeAST) decl);
         $$ = node; 
     }
     | function {
-        StatementList node = new StatementList();
+        FieldList node = new FieldList();
         node.add((NodeAST) $1);
         $$ = node; 
     }
     | decl SEMICOLON class_list {
-        StatementList node = new StatementList();
+        FieldList node = new FieldList();
         DeclarationNode decl = (DeclarationNode) $1;
         decl.isField(true);
         node.add((NodeAST) decl);
@@ -232,7 +233,7 @@ class_list:
         $$ = node; 
     }
     | function class_list {
-        StatementList node = new StatementList();
+        FieldList node = new FieldList();
         node.add((NodeAST) $1);
         node.addAll((NodeList) $2);
         $$ = node; 

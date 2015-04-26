@@ -10,10 +10,12 @@ import edu.borzhch.codegen.java.JavaCodegen;
 public class StructDeclarationNode extends NodeAST {
     String identifier;
     FieldList fields;
+    boolean isClass;
     
-    public StructDeclarationNode(String identifier, FieldList statementList) {
+    public StructDeclarationNode(String identifier, FieldList statementList, boolean isClass) {
         this.identifier = identifier;
         fields = statementList;
+        this.isClass = isClass;
         
         StructTable.addStruct(identifier);
         
@@ -26,7 +28,8 @@ public class StructDeclarationNode extends NodeAST {
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println("Struct " + identifier);
+        String type = isClass? "Class " : "Struct ";
+        System.out.println(type + identifier);
         ++lvl;
         if (null == fields) return;
         fields.debug(lvl);
