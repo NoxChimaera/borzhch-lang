@@ -241,7 +241,7 @@ class_list:
     ;
 
 decl_block: 
-    L_CURBRACE decl_list R_CURBRACE {
+    openblock decl_list endblock {
         $$ = $2;
     }
     ;
