@@ -319,7 +319,14 @@ public class MethodBuilder {
     public void setArray(String arrayRef, Type arrayType) {
         il.append(f.createArrayStore(arrayType));
     }
+    public void setArray(Type arrayType) {
+        il.append(f.createArrayStore(arrayType));
+    }
+    
     public void getArray(String arrayRef, Type arrayType) {
+        il.append(f.createArrayLoad(arrayType));
+    }
+    public void getArray(Type arrayType) {
         il.append(f.createArrayLoad(arrayType));
     }
     

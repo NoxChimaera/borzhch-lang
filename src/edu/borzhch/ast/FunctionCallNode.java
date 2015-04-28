@@ -6,8 +6,10 @@ import edu.borzhch.codegen.java.JavaCodegen;
 import org.apache.bcel.generic.Type;
 import edu.borzhch.language.Parser;
 import edu.borzhch.FuncTable;
+import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.ArrayList;
+import org.apache.bcel.generic.ArrayType;
 
 /**
  *
@@ -30,11 +32,19 @@ public class FunctionCallNode extends NodeAST {
         System.out.println("Funcall:");
         
         ++lvl;
+        printLevel(lvl);
         System.out.println(String.format("Identifier: %s", identifier));
+        printLevel(lvl);
         System.out.println("Arguments:");
-        if(args != null) args.debug(lvl);
+        if(args != null) args.debug(lvl + 1);
     }
 
+    public void foo() {
+        if (!args.nodes.isEmpty()) args.codegen();
+        
+        
+    }
+    
     @Override
     public void codegen() {
         if(args != null && !args.nodes.isEmpty()) args.codegen();

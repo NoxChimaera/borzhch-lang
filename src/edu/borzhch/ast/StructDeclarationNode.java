@@ -2,6 +2,7 @@ package edu.borzhch.ast;
 
 import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.constants.BOType;
 
 /**
  *
@@ -41,7 +42,12 @@ public class StructDeclarationNode extends NodeAST {
             if (node instanceof DeclarationNode) {
                 DeclarationNode declNode = (DeclarationNode) node;
                 newFields.nodes.add(declNode);
-                StructTable.putField(identifier, declNode.getName(), declNode.varTypeName);
+                if (BOType.ARRAY == declNode.type) {
+                    StructTable.putField(identifier, declNode.getName(), "$array");
+                    StructTable.putFieldSub(identifier, declNode.getName(), declNode.varTypeName);
+                } else {
+                    StructTable.putField(identifier, declNode.getName(), declNode.varTypeName);
+                }
             } else if(node instanceof FunctionNode) {
                 FunctionNode funcNode = (FunctionNode) node;
                 newFunctions.nodes.add(funcNode);

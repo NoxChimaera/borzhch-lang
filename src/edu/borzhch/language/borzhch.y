@@ -50,9 +50,18 @@
 %type <obj> reference arrayref
 %type <obj> idref idref_tail 
 %type <sval> type
+<<<<<<< HEAD
 %type <obj> switch switchblock case 
 %type <obj> class_list class_decl class_block class_identifier
 %type <obj> constant dynamic_value
+=======
+%type <obj> global_list global exp_list exp_tail param_tail loop
+%type <obj> function struct_decl decl_list if else tuple_value
+%type <obj> codeblock stmt_list stmt decl decl_assign assign exp
+%type <obj> reference arrayref param_list decl_block idref idref_tail
+%type <obj> switch case switchblock structref builtin
+%type <obj> constant dynamic_value funcall
+>>>>>>> 6f69146436e10ef2db108b32f2e9a43fa2bbab55
 %%
 
 start: 
@@ -175,7 +184,7 @@ struct_decl:
             String msg = ErrorHelper.identifierExists($2);
             yyerror(msg);
         }
-        structTable.pushSymbol($2, "ref");;
+        structTable.pushSymbol($2, "ref");
 
         StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3, false);
         $$ = node;
@@ -364,6 +373,7 @@ stmt: decl            { $$ = $1; }
     | BREAK           { $$ = new BreakNode(); }
     | CONTINUE        { $$ = new ContinueNode(); }
     | builtin         { $$ = $1; }
+    | funcall         { $$ = $1; }
     ;
 
 assign: 
@@ -400,6 +410,12 @@ assign:
         SetArrayNode node = new SetArrayNode(index, value);
         $$ = node;
     }
+    | idref ASSIGN NEW type L_SQBRACE exp R_SQBRACE {
+        GetFieldNode get = (GetFieldNode) $1;
+        NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
+        SetFieldNode node = new SetFieldNode(get, nan);
+        $$ = node;
+    }
     ;
 	
 arrayref: 
@@ -422,31 +438,24 @@ idref:
         GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
     }
-    ;
-
-
-/*idref:
-    dynamic_value DOT idref_tail {
-        VariableNode var = new VariableNode($1, topTable.getSymbolType($1));
-        DotOpNode dot = new DotOpNode(var, (NodeAST) $3);
-        //((IDotNode) node).setStructName(var.strType());
-        //node.type(node.getLastNode().type());
-        GetFieldNode node = new GetFieldNode(var, dot.reduce());
+    | dynamic_value DOT idref {
+        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $3);
+        GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
     }
     ;
 
-idref_tail:
-    IDENTIFIER {
-        FieldNode node = new FieldNode($1);
-        $$ = node;
+dynamic_value:
+    arrayref { $$ = $1; }
+    | IDENTIFIER { 
+	    if(!isIdentifierExist($1)) {
+            String msg = String.format("identifier <%s> is not declared\n", $1);
+            yyerror(msg);
+        }
+        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
     }
-    | IDENTIFIER DOT idref_tail {
-        FieldNode field = new FieldNode($1);
-        DotOpNode node = new DotOpNode(field, (NodeAST) $3);
-        $$ = node;
-    }
-    ;*/
+    | funcall { $$ = $1; }
+    ;
 
 if: 
     IF L_BRACE exp R_BRACE codeblock %prec IFX else {
@@ -654,6 +663,7 @@ constant:
     | idref { $$ = $1; }
     ;
 
+<<<<<<< HEAD
 dynamic_value:
     arrayref { $$ = $1; }
     | IDENTIFIER { 
@@ -664,6 +674,10 @@ dynamic_value:
         $$ = new VariableNode($1, topTable.getSymbolType($1)); 
     }
     | IDENTIFIER L_BRACE exp_list R_BRACE {
+=======
+funcall:
+    IDENTIFIER L_BRACE exp_list R_BRACE {
+>>>>>>> 6f69146436e10ef2db108b32f2e9a43fa2bbab55
         if(!isIdentifierExist($1)) {
           String msg = ErrorHelper.notDeclared($1);
           yyerror(msg);
