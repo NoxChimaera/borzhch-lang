@@ -26,6 +26,8 @@ public class DotOpNode extends NodeAST {
 
         if (DotOpNode.class == right.getClass()) {
             tmp.addAll(((DotOpNode) right).reduce());
+        } else if (GetFieldNode.class == right.getClass()) {
+            tmp.addAll(((GetFieldNode) right).fields);
         } else {
             tmp.add(right);
         }

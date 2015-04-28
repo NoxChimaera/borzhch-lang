@@ -9,7 +9,7 @@ import edu.borzhch.StructTable;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.helpers.BOHelper;
 import java.util.ArrayList;
-import org.apache.bcel.generic.Type;
+import org.apache.bcel.generic.ArrayType;
 
 /**
  * Получение поля объекта
@@ -65,6 +65,13 @@ public class GetFieldNode extends NodeAST {
             }
             schema = getItem.arrayRef.ref.strType();
             type = getItem.arrayRef.ref.type;
+        } else if (VariableNode.class == node.getClass()) {
+            VariableNode var = (VariableNode) node;
+            if (genCode) {
+                node.codegen();
+            }
+            schema = var.varTypeName;
+            type = node.type();
         }
     }
     /**
@@ -72,15 +79,21 @@ public class GetFieldNode extends NodeAST {
      * @param node Узел
      * @param genCode Генерировать код?
      */
-    private void getField(NodeAST node, boolean genCode) {
+    void getField(NodeAST node, boolean genCode) {
         if (VariableNode.class == node.getClass()) {
             VariableNode field = (VariableNode) node;
             switch (field.type) {
                 case REF:
-                    
-                    if (genCode)
+                    if (field.varTypeName.equals("$array") && genCode) {
+                        String t = StructTable.getFieldSub(schema, field.id);
+                        
+//                        JavaCodegen.method().getField(schema, field.id, 
+//                                new ArrayType);
+                    } else if (genCode) {
                         JavaCodegen.method().getFieldClass(schema, field.id, 
                                 StructTable.getFieldType(schema, field.id));
+                    }
+                    
                     schema = field.strType();
                     type = field.type;
                     break;
@@ -91,6 +104,22 @@ public class GetFieldNode extends NodeAST {
                     type = field.type;
                     break;
             }
+        } else if (ArrayElementNode.class == node.getClass()) {
+            // get field
+            ArrayElementNode item = (ArrayElementNode) node;
+            String t = item.ref.varTypeName;
+            if (genCode){
+                JavaCodegen.method().getField(schema, item.ref.id, 
+                    BOHelper.toJVMArrayType(t));
+            }
+            // get from array
+            if (genCode) {
+            item.index.codegen();
+                JavaCodegen.method().getArray(BOHelper.toJVMType(
+                    BOHelper.getType(t)));
+            }
+            schema = item.ref.varTypeName;
+            type = BOHelper.getType(item.ref.varTypeName);
         }
     }
     
