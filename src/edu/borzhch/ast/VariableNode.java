@@ -14,19 +14,13 @@ import org.apache.bcel.generic.Type;
  * Узел переменной
  * @author Balushkin M.
  */
-public class VariableNode extends NodeAST {
+public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     String id;
     public String id() {
         return id;
     }
     // ???
     String varTypeName;
-    public String strType() {
-        return varTypeName;
-    }
-    public void strType(String newType) {
-        varTypeName = newType;
-    }
     
     // test
     public VariableNode(String identifier) {
@@ -44,10 +38,12 @@ public class VariableNode extends NodeAST {
     public VariableNode(String identifier, String typeName) {
         id = identifier;
         varTypeName = typeName;
-        if (BOHelper.isType(typeName)) {
-            type = BOHelper.getType(typeName);
-        } else {
-            type = BOType.REF;
+        if (typeName != null) {
+            if (BOHelper.isType(typeName)) {
+                type = BOHelper.getType(typeName);
+            } else {
+                type = BOType.REF;
+            }
         }
     }
     
@@ -69,5 +65,15 @@ public class VariableNode extends NodeAST {
         } else {
             JavaCodegen.method().load(id, BOHelper.toJVMType(type));
         }
+    }
+
+    @Override
+    public void setVarTypeName(String name) {
+        varTypeName = name;
+    }
+
+    @Override
+    public String getVarTypeName() {
+        return varTypeName;
     }
 }

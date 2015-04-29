@@ -13,7 +13,7 @@ import org.apache.bcel.generic.Type;
  * Узел AST, представляющий выражение array[index]
  * @author Balushkin M.
  */
-public class ArrayElementNode extends NodeAST {
+public class ArrayElementNode extends NodeAST implements INodeWithVarTypeName {
     VariableNode ref;
     NodeAST index;
     
@@ -34,7 +34,7 @@ public class ArrayElementNode extends NodeAST {
         ref = arrayRef;
         index = expr;
         
-        type = BOHelper.getType(ref.strType());
+        type = BOHelper.getType(ref.getVarTypeName());
     }
     
     @Override
@@ -60,5 +60,15 @@ public class ArrayElementNode extends NodeAST {
         if (load) {
             JavaCodegen.method().getArray("", BOHelper.toJVMType(type));
         }
+    }
+
+    @Override
+    public void setVarTypeName(String name) {
+        type = BOHelper.getType(name);
+    }
+
+    @Override
+    public String getVarTypeName() {
+        return type.toString();
     }
 }

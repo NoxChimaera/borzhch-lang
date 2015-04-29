@@ -5,10 +5,15 @@
 %{
   import java.io.IOException;
   import java.io.Reader;
+  import java.util.Queue;
+  import java.util.Stack;
+  import java.util.LinkedList;
+  import java.util.ArrayList;
   import edu.borzhch.ast.*;
   import edu.borzhch.helpers.*;
   import edu.borzhch.SymTable;
   import edu.borzhch.FuncTable;
+  import edu.borzhch.StructTable;
   import edu.borzhch.constants.*;
 %}
 
@@ -50,18 +55,9 @@
 %type <obj> reference arrayref
 %type <obj> idref idref_tail 
 %type <sval> type
-<<<<<<< HEAD
 %type <obj> switch switchblock case 
 %type <obj> class_list class_decl class_block class_identifier
-%type <obj> constant dynamic_value
-=======
-%type <obj> global_list global exp_list exp_tail param_tail loop
-%type <obj> function struct_decl decl_list if else tuple_value
-%type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference arrayref param_list decl_block idref idref_tail
-%type <obj> switch case switchblock structref builtin
 %type <obj> constant dynamic_value funcall
->>>>>>> 6f69146436e10ef2db108b32f2e9a43fa2bbab55
 %%
 
 start: 
@@ -78,6 +74,9 @@ init: /* empty */ {
         structTable = new SymTable(null);
 
         structTable.pushSymbol("Program", "class");
+
+        refQueue = new LinkedList<String>();
+        refTypesStack = new Stack<String>();
     }
     ;
 
@@ -221,7 +220,7 @@ class_block:
     };
 
 class_list:
-    decl { 
+    decl SEMICOLON { 
         FieldList node = new FieldList();
         DeclarationNode decl = (DeclarationNode) $1;
         decl.isField(true);
@@ -293,7 +292,7 @@ decl_assign:
         decl.type(BOType.ARRAY);
         NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
         VariableNode var = new VariableNode(decl.getName(), "$array");
-        var.strType($4);
+        var.setVarTypeName($4);
         AssignNode store = new AssignNode(var, nan);
         StatementList node = new StatementList();
         node.add(decl);
@@ -379,6 +378,8 @@ stmt: decl            { $$ = $1; }
 assign: 
     idref ASSIGN exp {
         GetFieldNode get = (GetFieldNode) $1;
+        get = resolveFieldsTypes(get, refQueue, refTypesStack);
+        
         NodeAST expr = (NodeAST) $3;
         SetFieldNode node = new SetFieldNode(get, expr);
         $$ = node;
@@ -412,6 +413,7 @@ assign:
     }
     | idref ASSIGN NEW type L_SQBRACE exp R_SQBRACE {
         GetFieldNode get = (GetFieldNode) $1;
+        get = resolveFieldsTypes(get, refQueue, refTypesStack);
         NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
         SetFieldNode node = new SetFieldNode(get, nan);
         $$ = node;
@@ -425,6 +427,7 @@ arrayref:
           yyerror(msg);
         }
 
+        refQueue.add($1);
         VariableNode var = new VariableNode($1, topTable.getBaseType($1));
         var.type(BOType.REF);
         ArrayElementNode node = new ArrayElementNode(var, (NodeAST) $3);
@@ -448,11 +451,8 @@ idref:
 dynamic_value:
     arrayref { $$ = $1; }
     | IDENTIFIER { 
-	    if(!isIdentifierExist($1)) {
-            String msg = String.format("identifier <%s> is not declared\n", $1);
-            yyerror(msg);
-        }
-        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
+        refQueue.add($1);
+        $$ = new VariableNode($1, getSymbolType($1)); 
     }
     | funcall { $$ = $1; }
     ;
@@ -660,28 +660,20 @@ constant:
     | STRING    { $$ = new StringNode($1); }
     | BOOLEAN   { $$ = new BooleanNode($1); }
     | NULL  { $$ = new NullNode(); }
-    | idref { $$ = $1; }
+    | idref { 
+        GetFieldNode node = (GetFieldNode) $1;
+        node = resolveFieldsTypes(node, refQueue, refTypesStack);
+        $$ = node;
+    }
     ;
 
-<<<<<<< HEAD
-dynamic_value:
-    arrayref { $$ = $1; }
-    | IDENTIFIER { 
-	    if(!isIdentifierExist($1)) {
-            String msg = ErrorHelper.notDeclared($1);
-            yyerror(msg);
-        }
-        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
-    }
-    | IDENTIFIER L_BRACE exp_list R_BRACE {
-=======
 funcall:
     IDENTIFIER L_BRACE exp_list R_BRACE {
->>>>>>> 6f69146436e10ef2db108b32f2e9a43fa2bbab55
         if(!isIdentifierExist($1)) {
           String msg = ErrorHelper.notDeclared($1);
           yyerror(msg);
         }
+        refQueue.add($1);
         FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
         $$ = node;
     }
@@ -725,6 +717,9 @@ private SymTable structTable = null;
 private String mainClass = "Program";
 private String currentClass = "Program";
 
+private Queue<String> refQueue = null;
+private Stack<String> refTypesStack = null;
+
 public static FuncTable getFuncTable() {
     return funcTable;
 }
@@ -747,6 +742,73 @@ private boolean isIdentifierExist(String identifier) {
   if(!result) result = structTable.findSymbol(identifier);
 
   return result;
+}
+
+private String getSymbolType(String identifier) {
+    String result = topTable.getSymbolType(identifier);
+    
+    return result;
+}
+
+/**
+ * Checks stack to see if it's possible to call resource.
+ * @param stack Identifiers stack.
+ * @param prevVal Previous value. First is always null.
+ * @param prevType Previous value type. First is always null.
+ * @return String Type of last field.
+ */
+private String resolveRefQueueType(Queue<String> queue, String prev, String prevType) {
+    String result = null; //By default it's false.
+    
+    boolean empty = (queue.peek() == null);
+    if (prev == null) {
+        if (empty) {
+            return null;
+        } else {
+            String prevNext = queue.poll();
+            String prevNextType = getSymbolType(prevNext);
+            refTypesStack.push(prevNextType);
+            result = resolveRefQueueType(queue, prevNext, prevNextType);
+        }
+    } else {
+        if (empty) {
+            return prevType;
+        } else {
+            result = StructTable.getFieldType(prevType, queue.peek());
+            if (result != null) {
+                refTypesStack.push(result);
+                result = resolveRefQueueType(queue, queue.poll(), result);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    return result;
+}
+
+private GetFieldNode resolveFieldsTypes(GetFieldNode getNode, Queue<String> ref, Stack<String> types) {
+    GetFieldNode result = getNode;
+
+    String type = null;
+    if ((type = resolveRefQueueType(refQueue, null, null)) == null) {
+        String msg = String.format("Unable to get resource.");
+        yyerror(msg);
+    }
+
+    BOType boType = null;
+    
+    ArrayList<NodeAST> fields = getNode.getFields();
+    int end = fields.size();
+    for (int i = 0; i < end; i++) {
+        type = types.pop();
+        boType = BOHelper.getType(type);
+        fields.get(i).type(boType);
+        //ArrayElementNode, VariableNode, FuncallNode
+        if (fields.get(i) instanceof INodeWithVarTypeName) ((INodeWithVarTypeName) fields.get(i)).setVarTypeName(type);
+    }
+
+    return result;
 }
 
 private Lexer lexer;

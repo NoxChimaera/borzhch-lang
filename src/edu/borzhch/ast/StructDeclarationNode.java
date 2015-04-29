@@ -18,11 +18,11 @@ public class StructDeclarationNode extends NodeAST {
         this.identifier = identifier;
         this.isClass = isClass;
         
+        StructTable.addStruct(identifier);
+        
         try {
             dissectFieldList(fieldList);
         } catch (Exception e) { }
-        
-        StructTable.addStruct(identifier);
     }
     
     /**
@@ -35,7 +35,7 @@ public class StructDeclarationNode extends NodeAST {
      * DeclNode и FuncNode одинаковыми.
      */
     private void dissectFieldList(FieldList fieldList) throws Exception {
-        if (fields == null) return;
+        if (fieldList == null) return;
         FieldList newFields = new FieldList();
         FieldList newFunctions = new FieldList();
         for(NodeAST node : fieldList.nodes) {

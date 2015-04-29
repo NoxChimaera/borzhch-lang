@@ -15,9 +15,10 @@ import org.apache.bcel.generic.ArrayType;
  *
  * @author Tursukov A.E. <goldenflame412@gmail.com>
  */
-public class FunctionCallNode extends NodeAST {
+public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     String identifier;
     StatementList args;
+    String varTypeName;
     
     public FunctionCallNode(String identifier, StatementList args) {
         this.identifier = identifier;
@@ -60,6 +61,16 @@ public class FunctionCallNode extends NodeAST {
         }
         //TODO: first argument is a class
         JavaCodegen.method().funCall("Program", identifier, retType, argTypes); 
+    }
+
+    @Override
+    public void setVarTypeName(String name) {
+        varTypeName = name;
+    }
+
+    @Override
+    public String getVarTypeName() {
+        return varTypeName;
     }
     
 }
