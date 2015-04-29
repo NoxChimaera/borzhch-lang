@@ -52,7 +52,6 @@ public class SetFieldNode extends NodeAST {
 
             switch (var.type) {
                 case REF:
-                    // Why??
                     if (var.varTypeName.equals("$array")) {
                         String t = StructTable.getFieldSub(field.schema, var.id);
                         

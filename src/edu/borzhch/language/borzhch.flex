@@ -81,6 +81,7 @@ BooleanLiteral = "true" | "false"
   "#" | "@"     { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
   "&&" | "and"  { yyparser.yylval = new ParserVal(yytext()); return Parser.AND; }
   "||" | "or"   { yyparser.yylval = new ParserVal(yytext()); return Parser.OR; }
+  "|"   { return Parser.PIPE; }
 }
 
 <YYINITIAL> {

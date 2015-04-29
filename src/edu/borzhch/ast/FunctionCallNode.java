@@ -21,7 +21,7 @@ public class FunctionCallNode extends NodeAST {
     
     public FunctionCallNode(String identifier, StatementList args) {
         this.identifier = identifier;
-        this.args = args;
+        this.args = null == args ? new StatementList() : args;
         
         this.type = BOHelper.getType(Parser.getFuncTable().getType(identifier));
     }
@@ -36,6 +36,7 @@ public class FunctionCallNode extends NodeAST {
         System.out.println(String.format("Identifier: %s", identifier));
         printLevel(lvl);
         System.out.println("Arguments:");
+        if (null == args) return;
         args.debug(lvl + 1);
     }
 

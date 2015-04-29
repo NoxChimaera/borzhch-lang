@@ -23,7 +23,7 @@
 %token COMMA ASSIGN DOT SEMICOLON PRINT COLON
 %token CASE TUPLE INCLUDE UN_MINUS UN_PLUS
 %token <sval> INCR MUL_ARITHM ADD_ARITHM MORELESS EQ
-%token NULL
+%token NULL PIPE
 
 %nonassoc IFX
 
@@ -44,7 +44,7 @@
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref idref_tail
 %type <obj> switch case switchblock structref builtin
-%type <obj> constant dynamic_value funcall
+%type <obj> constant dynamic_value funcall cast
 %%
 
 start: 
@@ -172,7 +172,7 @@ struct_decl:
     ;
 
 decl_block: 
-    L_CURBRACE decl_list R_CURBRACE {
+    openblock decl_list endblock {
         $$ = $2;
     }
     ;
@@ -444,7 +444,7 @@ case: CASE INTEGER COLON stmt_list {
     ;
 
 exp:
-   exp ADD_ARITHM exp { 
+    exp ADD_ARITHM exp { 
         NodeAST l = (NodeAST) $1;
         NodeAST r = (NodeAST) $3;
         BOType infer = InferenceTypeTable.inferType(l.type(), r.type());
@@ -565,7 +565,7 @@ exp:
       $$ = new PostOpNode(new VariableNode($1), $2); 
         ((NodeAST) $$).type(BOType.INT);
         ((PostOpNode) $$).setPush(true);
-   }
+    }
     | NEW IDENTIFIER { 
         if(!isTypeExist($2)) {
             String msg = String.format("unknown type <%s>\n", $2);
@@ -573,8 +573,18 @@ exp:
         }
         $$ = new NewObjectNode($2); 
     }
+    | cast { $$ = $1; }
     | constant { $$ = $1; }
     | dynamic_value { $$ = $1; }
+    ;
+
+cast:
+    PIPE TYPE exp PIPE {
+        BOType type = BOHelper.getType($2);
+        NodeAST exp = (NodeAST) $3;
+        CastNode node = new CastNode(type, exp);
+        $$ = node;
+    }
     ;
 
 constant:
