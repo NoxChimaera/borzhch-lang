@@ -720,6 +720,12 @@ private String currentClass = "Program";
 private Queue<String> refQueue = null;
 private Stack<String> refTypesStack = null;
 
+private static boolean parseError = false;
+
+public static boolean wasParseError() {
+    return parseError;
+}
+
 public static FuncTable getFuncTable() {
     return funcTable;
 }
@@ -826,7 +832,8 @@ private int yylex() {
 }
 
 public void yyerror(String error) {
-  System.err.println(String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error));
+    System.err.println(String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error));
+    parseError = true;
 }
 
 public Parser(Reader r, boolean debug) {
