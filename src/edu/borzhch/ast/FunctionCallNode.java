@@ -15,7 +15,7 @@ import org.apache.bcel.generic.ArrayType;
  *
  * @author Tursukov A.E. <goldenflame412@gmail.com>
  */
-public class FunctionCallNode extends NodeAST {
+public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     String identifier;
     StatementList args;
     
@@ -62,5 +62,9 @@ public class FunctionCallNode extends NodeAST {
         //TODO: first argument is a class
         JavaCodegen.method().funCall("Program", identifier, retType, argTypes); 
     }
-    
+
+    @Override
+    public String getVarTypeName() {
+        return Parser.getFuncTable().getType(identifier);
+    }
 }

@@ -10,6 +10,7 @@
   import edu.borzhch.SymTable;
   import edu.borzhch.FuncTable;
   import edu.borzhch.constants.*;
+  import java.util.HashMap;
 %}
 
 %token <sval> TYPE IDENTIFIER
@@ -44,7 +45,7 @@
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref idref_tail
 %type <obj> switch case switchblock structref builtin
-%type <obj> constant dynamic_value funcall cast
+%type <obj> constant dynamic_value funcall cast dot
 %%
 
 start: 
@@ -83,10 +84,10 @@ openblock: L_CURBRACE {
          ;
 
 endblock: R_CURBRACE {
-            SymTable oldTable = topTable;
+            /*SymTable oldTable = topTable;
             topTable = oldTable.getPrevious();
             oldTable.setPrevious(null);
-            oldTable.clear();
+            oldTable.clear();*/
         }
         ;
 
@@ -109,6 +110,8 @@ function:
         node.setArguments((NodeList) $5);
         node.setStatements((StatementList) $7);
 
+        context.put($3, topTable);
+        restoreContext();
         funcTable.push(node);
         $$ = node;
     }
@@ -121,6 +124,8 @@ function:
         func.setArguments((StatementList) $4);
         func.setStatements((StatementList) $6);
 
+        context.put($2, topTable);
+        restoreContext();
         funcTable.push(func);
     
         $$ = func;
@@ -164,6 +169,9 @@ struct_decl:
             String msg = String.format("identifier <%s> is already defined\n", $2);
             yyerror(msg);
         }
+        
+        context.put($2, topTable);
+        restoreContext();
         structTable.pushSymbol($2, "ref");
 
         StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3);
@@ -356,26 +364,46 @@ arrayref:
     ;
  
 idref:
-    dynamic_value DOT dynamic_value {
-        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $3);
+    dot dynamic_value {
+        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
     }
-    | dynamic_value DOT idref {
-        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $3);
+    | dot idref {
+        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
+
+        fullRestoreContext();
     }
     ;
+
+dot: 
+    dynamic_value DOT {
+        INodeWithVarTypeName tmp = (INodeWithVarTypeName) $1;
+        String schema = tmp.getVarTypeName();
+
+        //SymTable tmpt = topTable;
+        //topTable = context.get(schema);
+        //topTable.setPrevious(tmpt);
+
+        SymTable tmpt = context.get(schema);
+
+        if (tmpt != topTable)
+            tmpt.setPrevious(topTable);
+        topTable = tmpt;
+
+        $$ = $1;
+    }
 
 dynamic_value:
     arrayref { $$ = $1; }
     | IDENTIFIER { 
-	    if(!isIdentifierExist($1)) {
-            String msg = String.format("identifier <%s> is not declared\n", $1);
-            yyerror(msg);
+        if (null == topTable.getSymbolType($1)) {
+            $$ = new VariableNode($1, BOType.VOID);
+        } else {
+            $$ = new VariableNode($1, topTable.getSymbolType($1)); 
         }
-        $$ = new VariableNode($1, topTable.getSymbolType($1)); 
     }
     | funcall { $$ = $1; }
     ;
@@ -641,6 +669,21 @@ exp_tail: COMMA exp exp_tail {
 private SymTable topTable = null;
 private static FuncTable funcTable = null;
 private SymTable structTable = null;
+
+private HashMap<String, SymTable> context = new HashMap<>();
+
+private void fullRestoreContext() {
+    while (null != topTable.getPrevious()) {
+        topTable = topTable.getPrevious();
+    }
+}
+
+private void restoreContext() {
+    SymTable oldTable = topTable;
+    topTable = oldTable.getPrevious();
+    oldTable.setPrevious(null);
+    //oldTable.clear();
+}
 
 public static FuncTable getFuncTable() {
     return funcTable;

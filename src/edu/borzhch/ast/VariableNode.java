@@ -13,7 +13,7 @@ import edu.borzhch.helpers.BOHelper;
  * Узел переменной
  * @author Balushkin M.
  */
-public class VariableNode extends NodeAST {
+public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     String id;
     public String id() {
         return id;
@@ -64,5 +64,10 @@ public class VariableNode extends NodeAST {
     public void codegen() {
         // iload var_index
         JavaCodegen.method().load(id, BOHelper.toJVMType(type));
+    }
+
+    @Override
+    public String getVarTypeName() {
+        return varTypeName;
     }
 }

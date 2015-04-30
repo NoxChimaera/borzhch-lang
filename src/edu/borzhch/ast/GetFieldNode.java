@@ -84,7 +84,7 @@ public class GetFieldNode extends NodeAST {
             VariableNode field = (VariableNode) node;
             switch (field.type) {
                 case REF:
-                    if (field.varTypeName.equals("$array") && genCode) {
+                    if (field.varTypeName.equals("$array") /*&& genCode*/) {
                         String t = StructTable.getFieldSub(schema, field.id);
                         
 //                        JavaCodegen.method().getField(schema, field.id, 
@@ -94,14 +94,27 @@ public class GetFieldNode extends NodeAST {
                                 StructTable.getFieldType(schema, field.id));
                     }
                     
-                    schema = field.strType();
+                    //schema = field.strType();
                     type = field.type;
                     break;
+                case ARRAY:
+                    String subtype = StructTable.getFieldSub(schema, field.id);
+                    type = BOHelper.getType(subtype);
+                    field.varTypeName = subtype;
+                    
+                    break;
+                    
+                    
+                    
                 default:
+                    String t = StructTable.getFieldType(schema, field.id);
+                    type = BOHelper.getType(t);
+                    field.type = type;
+                    field.varTypeName = t;
+                    
                     if (genCode)
                         JavaCodegen.method().getField(schema, field.id, 
-                                BOHelper.toJVMType(field.type));
-                    type = field.type;
+                                BOHelper.toJVMType(type));
                     break;
             }
         } else if (ArrayElementNode.class == node.getClass()) {
@@ -118,8 +131,11 @@ public class GetFieldNode extends NodeAST {
                 JavaCodegen.method().getArray(BOHelper.toJVMType(
                     BOHelper.getType(t)));
             }
-            schema = item.ref.varTypeName;
-            type = BOHelper.getType(item.ref.varTypeName);
+            
+            if (generateLast || genCode) {
+                schema = item.ref.varTypeName;
+                type = BOHelper.getType(item.ref.varTypeName);
+            }
         }
     }
     
@@ -133,6 +149,9 @@ public class GetFieldNode extends NodeAST {
         int last = generateLast ? fields.size() : fields.size() - 1;
         for (int i = 1; i < last; ++i) {
             getField(fields.get(i), generateCode);
+        }
+        if (!generateLast) {
+            getField(getLast(), false);
         }
     }
     

@@ -14,6 +14,7 @@ public class SymTable {
     
     private SymTable previous = null;
     
+    public String contextIdentifier;
     public SymTable(SymTable previous) {
         this.previous = previous;
         this.symbols = new HashMap<>();
@@ -44,6 +45,8 @@ public class SymTable {
             result = symbols.containsKey(identifier);
         }
         if(this.previous != null && !result) {
+            if (this == previous) return result;
+            
             result = this.previous.findSymbol(identifier);
         }
         return result;
@@ -70,6 +73,7 @@ public class SymTable {
         String result = null;
         result = symbols.get(identifier);
         if (result == null && null != previous) {
+            if (this == previous) return result;
             result = previous.getSymbolType(identifier);
         }
         

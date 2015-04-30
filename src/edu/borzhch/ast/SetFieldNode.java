@@ -67,6 +67,10 @@ public class SetFieldNode extends NodeAST {
                                 , new ObjectType(var.varTypeName));
                     }
                     break;
+                case ARRAY:
+                    JavaCodegen.method().putField(field.schema, var.id, 
+                            BOHelper.toJVMArrayType(var.varTypeName));
+                    break;
                 default: 
                     JavaCodegen.method().putField(field.schema, var.id, 
                             BOHelper.toJVMType(var.type));
