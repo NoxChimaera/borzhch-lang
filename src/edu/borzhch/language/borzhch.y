@@ -131,6 +131,17 @@ function:
         funcTable.push(node);
         $$ = node;
     }
+    | DEFUN type L_SQBRACE R_SQBRACE IDENTIFIER L_BRACE param_list R_BRACE codeblock {
+        if (isIdentifierExist($5)) {
+            yyerror(String.format("identifier <%s> is already defined", $5));
+        }
+        FunctionNode node = new FunctionNode($5, "$array", currentClass);
+        node.setArguments((NodeList) $7);
+        node.setStatements((StatementList) $9);
+
+        funcTable.push(node);
+        $$ = node;
+    }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if(isIdentifierExist($2)) {
           String msg = ErrorHelper.identifierExists($2);

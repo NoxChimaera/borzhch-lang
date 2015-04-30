@@ -19,8 +19,7 @@ import org.apache.bcel.generic.Type;
  */
 public class FunctionNode extends NodeAST {
     String funcName;
-    BOType returnType;
-    String returnTypeName;
+    String varTypeName;
     
     String className;
     
@@ -35,9 +34,9 @@ public class FunctionNode extends NodeAST {
      */
     public FunctionNode(String name, BOType returnType, String className) {
         funcName = name;
-        this.returnType = returnType;
+        this.type = returnType;
         this.className = className;
-        returnTypeName = BOHelper.toString(returnType);
+        varTypeName = BOHelper.toString(returnType);
         args = new ArgumentList();
         statements = new StatementList();
     }
@@ -50,12 +49,12 @@ public class FunctionNode extends NodeAST {
      */
     public FunctionNode(String name, String returnTypeName, String className) {
         funcName = name;
-        this.returnTypeName = returnTypeName;
+        this.varTypeName = returnTypeName;
         this.className = className;
         if (BOHelper.isType(returnTypeName)) {
-            returnType = BOHelper.getType(returnTypeName);
+            type = BOHelper.getType(returnTypeName);
         } else {
-            returnType = BOType.REF;
+            type = BOType.REF;
         }
    
         args = new ArgumentList();
@@ -81,7 +80,7 @@ public class FunctionNode extends NodeAST {
         return this.args == null ? null : this.args.nodes;
     }
     public String getReturnTypeName() {
-        return this.returnTypeName;
+        return this.varTypeName;
     }
     
     @Override
@@ -91,8 +90,8 @@ public class FunctionNode extends NodeAST {
 
         ++lvl;
         printLevel(lvl);
-        System.out.println("Type: " + returnTypeName + " ("
-                + BOHelper.toString(returnType) + ")");
+        System.out.println("Type: " + varTypeName + " ("
+                + BOHelper.toString(type) + ")");
         printLevel(lvl);
         System.out.println("Statement List:");
         ++lvl;
@@ -133,13 +132,13 @@ public class FunctionNode extends NodeAST {
             }
         }
         
-        JavaCodegen.newMethod(funcName, returnType, argsTypes, argsNames, className);
+        JavaCodegen.newMethod(funcName, type, argsTypes, argsNames, className);
         
         if (statements != null) {
             statements.codegen();
         }
         
-        if(returnType == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
+        if(type == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
         
         JavaCodegen.compileMethod(className, funcName);
     }

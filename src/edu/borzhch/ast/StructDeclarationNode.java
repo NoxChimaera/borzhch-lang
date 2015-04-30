@@ -81,6 +81,6 @@ public class StructDeclarationNode extends NodeAST {
         }
         
         JavaCodegen.compileClass(identifier);
-        JavaCodegen.switchClass("Program");
+        JavaCodegen.switchToMainClass();
     }
 }

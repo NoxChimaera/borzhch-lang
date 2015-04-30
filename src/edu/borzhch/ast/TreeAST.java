@@ -24,6 +24,7 @@ public class TreeAST {
     public static void codegen() {
         JavaCodegen.newClass("Program");
         JavaCodegen.setMainClass("Program");
+        JavaCodegen.switchToMainClass();
         root.codegen();
         JavaCodegen.compileClass("Program");
     }
