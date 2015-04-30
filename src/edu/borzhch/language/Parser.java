@@ -602,7 +602,7 @@ final static String yyrule[] = {
 "exp_tail : COMMA exp",
 };
 
-//#line 668 "./borzhch.y"
+//#line 676 "./borzhch.y"
 
 private SymTable topTable = null;
 private static FuncTable funcTable = null;
@@ -863,13 +863,13 @@ case 6:
 { yyval.obj = val_peek(0).obj; }
 break;
 case 7:
-//#line 81 "./borzhch.y"
+//#line 82 "./borzhch.y"
 {
-            topTable = new SymTable(topTable);
-         }
+        topTable = new SymTable(topTable);
+    }
 break;
 case 8:
-//#line 86 "./borzhch.y"
+//#line 87 "./borzhch.y"
 {
             /*SymTable oldTable = topTable;
             topTable = oldTable.getPrevious();
@@ -878,11 +878,11 @@ case 8:
         }
 break;
 case 9:
-//#line 95 "./borzhch.y"
+//#line 96 "./borzhch.y"
 { yyval.sval = val_peek(0).sval; }
 break;
 case 10:
-//#line 96 "./borzhch.y"
+//#line 97 "./borzhch.y"
 { 
         if (!isTypeExist(val_peek(0).sval)) {
             yyerror(String.format("can not resolve symbol <%s>\n", val_peek(0).sval));
@@ -891,7 +891,7 @@ case 10:
     }
 break;
 case 11:
-//#line 105 "./borzhch.y"
+//#line 106 "./borzhch.y"
 {
         if (isIdentifierExist(val_peek(4).sval)) {
             yyerror(String.format("identifier <%s> is already defined", val_peek(4).sval));
@@ -907,7 +907,7 @@ case 11:
     }
 break;
 case 12:
-//#line 118 "./borzhch.y"
+//#line 119 "./borzhch.y"
 {
         if(isIdentifierExist(val_peek(4).sval)) {
           String msg = String.format("identifier <%s> is already defined\n", val_peek(4).sval);
@@ -925,11 +925,11 @@ case 12:
     }
 break;
 case 13:
-//#line 135 "./borzhch.y"
+//#line 136 "./borzhch.y"
 { yyval.obj = null; }
 break;
 case 14:
-//#line 136 "./borzhch.y"
+//#line 137 "./borzhch.y"
 { 
         StatementList node = new StatementList();
         node.add((NodeAST) val_peek(0).obj);
@@ -937,7 +937,7 @@ case 14:
     }
 break;
 case 15:
-//#line 141 "./borzhch.y"
+//#line 142 "./borzhch.y"
 { 
         StatementList node = new StatementList();
         node.add((NodeAST) val_peek(1).obj);
@@ -946,7 +946,7 @@ case 15:
         }
 break;
 case 16:
-//#line 149 "./borzhch.y"
+//#line 150 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(1).obj);
@@ -955,7 +955,7 @@ case 16:
           }
 break;
 case 17:
-//#line 155 "./borzhch.y"
+//#line 156 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(0).obj);
@@ -963,11 +963,11 @@ case 17:
           }
 break;
 case 18:
-//#line 163 "./borzhch.y"
+//#line 164 "./borzhch.y"
 { yyval.obj = val_peek(1).obj; }
 break;
 case 19:
-//#line 167 "./borzhch.y"
+//#line 168 "./borzhch.y"
 {
         if(isIdentifierExist(val_peek(1).sval)) {
             String msg = String.format("identifier <%s> is already defined\n", val_peek(1).sval);
@@ -983,17 +983,17 @@ case 19:
     }
 break;
 case 20:
-//#line 183 "./borzhch.y"
+//#line 184 "./borzhch.y"
 {
         yyval.obj = val_peek(1).obj;
     }
 break;
 case 21:
-//#line 188 "./borzhch.y"
+//#line 189 "./borzhch.y"
 { yyval.obj = null; }
 break;
 case 22:
-//#line 189 "./borzhch.y"
+//#line 190 "./borzhch.y"
 {
         FieldList node = new FieldList();
         DeclarationNode ldecl = (DeclarationNode) val_peek(2).obj;
@@ -1004,7 +1004,7 @@ case 22:
     }
 break;
 case 23:
-//#line 200 "./borzhch.y"
+//#line 201 "./borzhch.y"
 {
         if (isIdentifierExist(val_peek(0).sval)) {
             yyerror(String.format("identifier <%s> is already defined\n", val_peek(0).sval));
@@ -1015,7 +1015,7 @@ case 23:
     }
 break;
 case 24:
-//#line 208 "./borzhch.y"
+//#line 209 "./borzhch.y"
 {
         if (isIdentifierExist(val_peek(2).sval)) {
             yyerror(String.format("identifier <%s> is already defined\n", val_peek(2).sval));
@@ -1027,7 +1027,7 @@ case 24:
     }
 break;
 case 25:
-//#line 220 "./borzhch.y"
+//#line 221 "./borzhch.y"
 {
         DeclarationNode decl = (DeclarationNode) val_peek(6).obj;
 
@@ -1043,7 +1043,7 @@ case 25:
     }
 break;
 case 26:
-//#line 233 "./borzhch.y"
+//#line 234 "./borzhch.y"
 {
         DeclarationNode decl = (DeclarationNode) val_peek(2).obj;
         String name = decl.getName();
@@ -1070,11 +1070,11 @@ case 26:
     }
 break;
 case 27:
-//#line 259 "./borzhch.y"
+//#line 260 "./borzhch.y"
 { yyval.obj = null; }
 break;
 case 28:
-//#line 260 "./borzhch.y"
+//#line 261 "./borzhch.y"
 { 
         StatementList list = new StatementList();
         list.add((NodeAST) val_peek(2).obj);
@@ -1083,7 +1083,7 @@ case 28:
     }
 break;
 case 29:
-//#line 266 "./borzhch.y"
+//#line 267 "./borzhch.y"
 { 
         StatementList node = new StatementList();
         node.add((NodeAST) val_peek(1).obj);
@@ -1092,7 +1092,7 @@ case 29:
     }
 break;
 case 30:
-//#line 272 "./borzhch.y"
+//#line 273 "./borzhch.y"
 { 
         StatementList node = new StatementList();
         node.add((NodeAST) val_peek(1).obj);
@@ -1101,7 +1101,7 @@ case 30:
     }
 break;
 case 31:
-//#line 278 "./borzhch.y"
+//#line 279 "./borzhch.y"
 { 
         StatementList node = new StatementList();
         node.add((NodeAST) val_peek(1).obj);
@@ -1110,25 +1110,25 @@ case 31:
     }
 break;
 case 32:
-//#line 287 "./borzhch.y"
+//#line 288 "./borzhch.y"
 {
         yyval.obj = new PrintNode((NodeAST) val_peek(0).obj);
     }
 break;
 case 33:
-//#line 292 "./borzhch.y"
-{ yyval.obj = val_peek(0).obj; }
-break;
-case 34:
 //#line 293 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
-case 35:
+case 34:
 //#line 294 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
-case 36:
+case 35:
 //#line 295 "./borzhch.y"
+{ yyval.obj = val_peek(0).obj; }
+break;
+case 36:
+//#line 296 "./borzhch.y"
 { 
       if(!isIdentifierExist(val_peek(0).sval)) {
         String msg = String.format("identifier <%s> is not declared\n", val_peek(0).sval);
@@ -1138,40 +1138,42 @@ case 36:
     }
 break;
 case 37:
-//#line 302 "./borzhch.y"
+//#line 303 "./borzhch.y"
 { yyval.obj = new ReturnNode((NodeAST) val_peek(0).obj); }
 break;
 case 38:
-//#line 303 "./borzhch.y"
+//#line 304 "./borzhch.y"
 { yyval.obj = new ReturnNode(null); }
 break;
 case 39:
-//#line 304 "./borzhch.y"
+//#line 305 "./borzhch.y"
 { yyval.obj = new BreakNode(); }
 break;
 case 40:
-//#line 305 "./borzhch.y"
+//#line 306 "./borzhch.y"
 { yyval.obj = new ContinueNode(); }
 break;
 case 41:
-//#line 306 "./borzhch.y"
-{ yyval.obj = val_peek(0).obj; }
-break;
-case 42:
 //#line 307 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
+case 42:
+//#line 308 "./borzhch.y"
+{ yyval.obj = val_peek(0).obj; }
+break;
 case 43:
-//#line 311 "./borzhch.y"
+//#line 312 "./borzhch.y"
 {
         GetFieldNode get = (GetFieldNode) val_peek(2).obj;
         NodeAST expr = (NodeAST) val_peek(0).obj;
         SetFieldNode node = new SetFieldNode(get, expr);
         yyval.obj = node;
+
+        /*restoreContext();*/
     }
 break;
 case 44:
-//#line 317 "./borzhch.y"
+//#line 320 "./borzhch.y"
 {
         if(!isIdentifierExist(val_peek(2).sval)) {
           String msg = String.format("identifier <%s> is not declared\n", val_peek(2).sval);
@@ -1193,7 +1195,7 @@ case 44:
     }
 break;
 case 45:
-//#line 336 "./borzhch.y"
+//#line 339 "./borzhch.y"
 {
         /*arrayref := IDENTIFIER L_SQBRACE exp R_SQBRACE => ArrayElementNode*/
         
@@ -1204,16 +1206,18 @@ case 45:
     }
 break;
 case 46:
-//#line 344 "./borzhch.y"
+//#line 347 "./borzhch.y"
 {
         GetFieldNode get = (GetFieldNode) val_peek(6).obj;
         NewArrayNode nan = new NewArrayNode(val_peek(3).sval, (NodeAST) val_peek(1).obj);
         SetFieldNode node = new SetFieldNode(get, nan);
         yyval.obj = node;
+
+        /*restoreContext();*/
     }
 break;
 case 47:
-//#line 353 "./borzhch.y"
+//#line 358 "./borzhch.y"
 {
         if(!isIdentifierExist(val_peek(3).sval)) {
           String msg = String.format("identifier <%s> is not declared\n", val_peek(3).sval);
@@ -1227,25 +1231,26 @@ case 47:
     }
 break;
 case 48:
-//#line 367 "./borzhch.y"
-{
-        DotOpNode dot = new DotOpNode((NodeAST) val_peek(1).obj, (NodeAST) val_peek(0).obj);
-        GetFieldNode node = new GetFieldNode(dot.reduce());
-        yyval.obj = node;
-    }
-break;
-case 49:
 //#line 372 "./borzhch.y"
 {
         DotOpNode dot = new DotOpNode((NodeAST) val_peek(1).obj, (NodeAST) val_peek(0).obj);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         yyval.obj = node;
+        /*restoreContext();*/
+    }
+break;
+case 49:
+//#line 378 "./borzhch.y"
+{
+        DotOpNode dot = new DotOpNode((NodeAST) val_peek(1).obj, (NodeAST) val_peek(0).obj);
+        GetFieldNode node = new GetFieldNode(dot.reduce());
+        yyval.obj = node;
 
-        fullRestoreContext();
+        restoreContext();
     }
 break;
 case 50:
-//#line 382 "./borzhch.y"
+//#line 388 "./borzhch.y"
 {
         INodeWithVarTypeName tmp = (INodeWithVarTypeName) val_peek(1).obj;
         String schema = tmp.getVarTypeName();
@@ -1254,21 +1259,23 @@ case 50:
         /*topTable = context.get(schema);*/
         /*topTable.setPrevious(tmpt);*/
 
-        SymTable tmpt = context.get(schema);
+        /*restoreContext();*/
+        if (!"void".equals(schema)) {
+            SymTable tmpt = context.get(schema);
 
-        if (tmpt != topTable)
-            tmpt.setPrevious(topTable);
-        topTable = tmpt;
-
+            if (tmpt != topTable)
+                tmpt.setPrevious(topTable);
+            topTable = tmpt;
+        }
         yyval.obj = val_peek(1).obj;
     }
 break;
 case 51:
-//#line 400 "./borzhch.y"
+//#line 408 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 52:
-//#line 401 "./borzhch.y"
+//#line 409 "./borzhch.y"
 { 
         if (null == topTable.getSymbolType(val_peek(0).sval)) {
             yyval.obj = new VariableNode(val_peek(0).sval, BOType.VOID);
@@ -1278,37 +1285,37 @@ case 52:
     }
 break;
 case 53:
-//#line 408 "./borzhch.y"
+//#line 416 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 54:
-//#line 412 "./borzhch.y"
+//#line 420 "./borzhch.y"
 {
         IfNode node = new IfNode((NodeAST) val_peek(3).obj, (StatementList) val_peek(1).obj, (IfNode) val_peek(0).obj);
         yyval.obj = node;
     }
 break;
 case 55:
-//#line 418 "./borzhch.y"
+//#line 426 "./borzhch.y"
 {
       yyval.obj = null;
     }
 break;
 case 56:
-//#line 421 "./borzhch.y"
+//#line 429 "./borzhch.y"
 {
       yyval.obj = (IfNode) val_peek(0).obj;
     }
 break;
 case 57:
-//#line 424 "./borzhch.y"
+//#line 432 "./borzhch.y"
 {
       IfNode node = new IfNode(null, (StatementList) val_peek(0).obj, null);
       yyval.obj = node;
     }
 break;
 case 58:
-//#line 430 "./borzhch.y"
+//#line 438 "./borzhch.y"
 {
         NodeAST decl = (NodeAST) val_peek(6).obj;
         NodeAST counter = (NodeAST) val_peek(4).obj;
@@ -1319,21 +1326,21 @@ case 58:
     }
 break;
 case 59:
-//#line 438 "./borzhch.y"
+//#line 446 "./borzhch.y"
 {
         WhileNode node = new WhileNode((NodeAST) val_peek(2).obj, (StatementList) val_peek(0).obj);
         yyval.obj = node;
     }
 break;
 case 60:
-//#line 442 "./borzhch.y"
+//#line 450 "./borzhch.y"
 {
         DoWhileNode node = new DoWhileNode((NodeAST) val_peek(2).obj, (StatementList) val_peek(5).obj);
         yyval.obj = node;
     }
 break;
 case 61:
-//#line 448 "./borzhch.y"
+//#line 456 "./borzhch.y"
 {
         /*TODO: exp should be of INTEGER type*/
         SwitchNode node = new SwitchNode((NodeAST) val_peek(8).obj, (StatementList) val_peek(5).obj, (StatementList) val_peek(1).obj);
@@ -1341,7 +1348,7 @@ case 61:
       }
 break;
 case 62:
-//#line 453 "./borzhch.y"
+//#line 461 "./borzhch.y"
 {
         /*TODO: exp should be of INTEGER type*/
         SwitchNode node = new SwitchNode((NodeAST) val_peek(4).obj, (StatementList) val_peek(1).obj, null);
@@ -1349,11 +1356,11 @@ case 62:
       }
 break;
 case 63:
-//#line 460 "./borzhch.y"
+//#line 468 "./borzhch.y"
 { yyval.obj = null; }
 break;
 case 64:
-//#line 461 "./borzhch.y"
+//#line 469 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(1).obj);
@@ -1362,14 +1369,14 @@ case 64:
         }
 break;
 case 65:
-//#line 468 "./borzhch.y"
+//#line 476 "./borzhch.y"
 {
         CaseNode node = new CaseNode(val_peek(2).ival, (StatementList) val_peek(0).obj);
         yyval.obj = node;
     }
 break;
 case 66:
-//#line 475 "./borzhch.y"
+//#line 483 "./borzhch.y"
 { 
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;
@@ -1383,7 +1390,7 @@ case 66:
     }
 break;
 case 67:
-//#line 486 "./borzhch.y"
+//#line 494 "./borzhch.y"
 { 
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;
@@ -1397,7 +1404,7 @@ case 67:
     }
 break;
 case 68:
-//#line 497 "./borzhch.y"
+//#line 505 "./borzhch.y"
 { 
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;
@@ -1414,7 +1421,7 @@ case 68:
     }
 break;
 case 69:
-//#line 511 "./borzhch.y"
+//#line 519 "./borzhch.y"
 {          
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;     
@@ -1428,7 +1435,7 @@ case 69:
     }
 break;
 case 70:
-//#line 522 "./borzhch.y"
+//#line 530 "./borzhch.y"
 {         
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;     
@@ -1445,7 +1452,7 @@ case 70:
     }
 break;
 case 71:
-//#line 536 "./borzhch.y"
+//#line 544 "./borzhch.y"
 {
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj; 
@@ -1459,7 +1466,7 @@ case 71:
     }
 break;
 case 72:
-//#line 547 "./borzhch.y"
+//#line 555 "./borzhch.y"
 {
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj; 
@@ -1473,7 +1480,7 @@ case 72:
     }
 break;
 case 73:
-//#line 558 "./borzhch.y"
+//#line 566 "./borzhch.y"
 {
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj; 
@@ -1487,11 +1494,11 @@ case 73:
     }
 break;
 case 74:
-//#line 569 "./borzhch.y"
+//#line 577 "./borzhch.y"
 { yyval.obj = val_peek(1).obj; }
 break;
 case 75:
-//#line 570 "./borzhch.y"
+//#line 578 "./borzhch.y"
 {
         NodeAST r = (NodeAST) val_peek(0).obj; 
         if (BOType.BOOL != r.type()) {
@@ -1503,7 +1510,7 @@ case 75:
     }
 break;
 case 76:
-//#line 579 "./borzhch.y"
+//#line 587 "./borzhch.y"
 {
         NodeAST e = (NodeAST) val_peek(2).obj; 
         if (!BOHelper.isNumber(e.type())) {
@@ -1515,7 +1522,7 @@ case 76:
     }
 break;
 case 77:
-//#line 588 "./borzhch.y"
+//#line 596 "./borzhch.y"
 { 
       if(!isIdentifierExist(val_peek(1).sval)) {
         String msg = String.format("identifier <%s> is not declared\n", val_peek(1).sval);
@@ -1527,7 +1534,7 @@ case 77:
     }
 break;
 case 78:
-//#line 597 "./borzhch.y"
+//#line 605 "./borzhch.y"
 { 
         if(!isTypeExist(val_peek(0).sval)) {
             String msg = String.format("unknown type <%s>\n", val_peek(0).sval);
@@ -1537,19 +1544,19 @@ case 78:
     }
 break;
 case 79:
-//#line 604 "./borzhch.y"
+//#line 612 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 80:
-//#line 605 "./borzhch.y"
+//#line 613 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 81:
-//#line 606 "./borzhch.y"
+//#line 614 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 82:
-//#line 610 "./borzhch.y"
+//#line 618 "./borzhch.y"
 {
         BOType type = BOHelper.getType(val_peek(2).sval);
         NodeAST exp = (NodeAST) val_peek(1).obj;
@@ -1558,31 +1565,31 @@ case 82:
     }
 break;
 case 83:
-//#line 619 "./borzhch.y"
+//#line 627 "./borzhch.y"
 { yyval.obj = new IntegerNode(val_peek(0).ival); }
 break;
 case 84:
-//#line 620 "./borzhch.y"
+//#line 628 "./borzhch.y"
 { yyval.obj = new FloatNode((float)val_peek(0).dval); }
 break;
 case 85:
-//#line 621 "./borzhch.y"
+//#line 629 "./borzhch.y"
 { yyval.obj = new StringNode(val_peek(0).sval); }
 break;
 case 86:
-//#line 622 "./borzhch.y"
+//#line 630 "./borzhch.y"
 { yyval.obj = new BooleanNode(val_peek(0).ival); }
 break;
 case 87:
-//#line 623 "./borzhch.y"
+//#line 631 "./borzhch.y"
 { yyval.obj = new NullNode(); }
 break;
 case 88:
-//#line 624 "./borzhch.y"
+//#line 632 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 89:
-//#line 628 "./borzhch.y"
+//#line 636 "./borzhch.y"
 {
         if(!isIdentifierExist(val_peek(3).sval)) {
             String msg = String.format("identifier <%s> is not declared\n", val_peek(3).sval);
@@ -1593,13 +1600,13 @@ case 89:
     }
 break;
 case 90:
-//#line 638 "./borzhch.y"
+//#line 646 "./borzhch.y"
 {
           yyval.obj = null;
         }
 break;
 case 91:
-//#line 641 "./borzhch.y"
+//#line 649 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(0).obj);
@@ -1607,15 +1614,6 @@ case 91:
         }
 break;
 case 92:
-//#line 646 "./borzhch.y"
-{
-          StatementList node = new StatementList();
-          node.add((NodeAST) val_peek(1).obj);
-          node.addAll((NodeList) val_peek(0).obj);
-          yyval.obj = node;
-        }
-break;
-case 93:
 //#line 654 "./borzhch.y"
 {
           StatementList node = new StatementList();
@@ -1624,15 +1622,24 @@ case 93:
           yyval.obj = node;
         }
 break;
+case 93:
+//#line 662 "./borzhch.y"
+{
+          StatementList node = new StatementList();
+          node.add((NodeAST) val_peek(1).obj);
+          node.addAll((NodeList) val_peek(0).obj);
+          yyval.obj = node;
+        }
+break;
 case 94:
-//#line 660 "./borzhch.y"
+//#line 668 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(0).obj);
             yyval.obj = node;
         }
 break;
-//#line 1558 "Parser.java"
+//#line 1565 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

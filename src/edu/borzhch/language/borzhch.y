@@ -78,10 +78,11 @@ global: function { $$ = $1; }
     | struct_decl { $$ = $1; }
     ;
 
-openblock: L_CURBRACE {
-            topTable = new SymTable(topTable);
-         }
-         ;
+openblock: 
+    L_CURBRACE {
+        topTable = new SymTable(topTable);
+    }
+    ;
 
 endblock: R_CURBRACE {
             /*SymTable oldTable = topTable;
@@ -313,6 +314,8 @@ assign:
         NodeAST expr = (NodeAST) $3;
         SetFieldNode node = new SetFieldNode(get, expr);
         $$ = node;
+
+        //restoreContext();
     }
     | IDENTIFIER ASSIGN exp {
         if(!isIdentifierExist($1)) {
@@ -346,6 +349,8 @@ assign:
         NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
         SetFieldNode node = new SetFieldNode(get, nan);
         $$ = node;
+
+        //restoreContext();
     }
     ;
 	
@@ -368,13 +373,14 @@ idref:
         DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
+        //restoreContext();
     }
     | dot idref {
         DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
 
-        fullRestoreContext();
+        restoreContext();
     }
     ;
 
@@ -387,12 +393,14 @@ dot:
         //topTable = context.get(schema);
         //topTable.setPrevious(tmpt);
 
-        SymTable tmpt = context.get(schema);
+        //restoreContext();
+        if (!"void".equals(schema)) {
+            SymTable tmpt = context.get(schema);
 
-        if (tmpt != topTable)
-            tmpt.setPrevious(topTable);
-        topTable = tmpt;
-
+            if (tmpt != topTable)
+                tmpt.setPrevious(topTable);
+            topTable = tmpt;
+        }
         $$ = $1;
     }
 

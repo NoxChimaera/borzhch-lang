@@ -43,7 +43,10 @@ public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     public VariableNode(String identifier, String typeName) {
         id = identifier;
         varTypeName = typeName;
-        if (BOHelper.isType(typeName)) {
+        
+        if ("$array".equals(typeName)) {
+            type = BOType.ARRAY;
+        } else if (BOHelper.isType(typeName)) {
             type = BOHelper.getType(typeName);
         } else {
             type = BOType.REF;
