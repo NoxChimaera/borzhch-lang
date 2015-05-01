@@ -24,11 +24,11 @@ public class MethodBuilder {
     
     HashMap<String, LocalVariableGen> localVariables;
     
-    public MethodBuilder(String name, BOType returnType, Type[] argsTypes, String[] argsNames, ClassGen cg) {
+    public MethodBuilder(String name, Type returnType, Type[] argsTypes, String[] argsNames, ClassGen cg) {
         il = new InstructionList();
         this.cg = cg;
         mg = new MethodGen(ACC_STATIC | ACC_PUBLIC, 
-                BOHelper.toJVMType(returnType), 
+                returnType, 
                 argsTypes,
                 argsNames, name, cg.getClassName(),
                 il, cg.getConstantPool()

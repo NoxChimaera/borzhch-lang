@@ -10,6 +10,7 @@ import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.ArrayList;
 import org.apache.bcel.generic.ArrayType;
+import org.apache.bcel.generic.ObjectType;
 
 /**
  *
@@ -51,7 +52,15 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         if(args != null && !args.nodes.isEmpty()) args.codegen();
         
         FuncTable funcTable = Parser.getFuncTable();
-        Type retType = BOHelper.toJVMType(BOHelper.getType(funcTable.getType(identifier)));
+        String funType = funcTable.getType(identifier);
+        BOType bt = BOHelper.getType(funType);
+        Type retType = BOHelper.toJVMType(bt);
+        if (bt == BOType.REF) {
+            retType = new ObjectType(funType);
+        } else if (bt == BOType.ARRAY) {
+            retType = BOHelper.toJVMArrayType(funType);
+        }
+        
         Type[] argTypes = new Type[funcTable.getArity(identifier)];
         ArrayList<String> args = funcTable.getParamTypes(identifier);
         int i = 0;

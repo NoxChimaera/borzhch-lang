@@ -70,7 +70,7 @@ public class JavaCodegen {
      * @param argsNames
      * @param className Имя класса
      */
-    public static void newMethod(String name, BOType returnType, Type[] argsTypes, String[] argsNames, String className) {
+    public static void newMethod(String name, Type returnType, Type[] argsTypes, String[] argsNames, String className) {
         currentMethod = classes.get(className).newMethod(name, returnType, argsTypes, argsNames);
     }
     /**
