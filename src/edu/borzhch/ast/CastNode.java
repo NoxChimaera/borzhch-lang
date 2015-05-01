@@ -5,7 +5,6 @@
  */
 package edu.borzhch.ast;
 
-import com.sun.corba.se.spi.ior.iiop.JavaCodebaseComponent;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;

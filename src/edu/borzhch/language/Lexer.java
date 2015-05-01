@@ -174,24 +174,14 @@ public class Lexer {
     "\17\4\1\3\1\7\1\10\1\11\1\12\1\1\1\13"+
     "\1\14\1\15\1\4\1\16\1\17\1\20\1\21\1\22"+
     "\1\23\1\24\1\25\1\26\1\27\1\30\1\31\1\32"+
-<<<<<<< HEAD
     "\1\33\1\31\1\33\2\34\1\0\1\35\1\0\1\36"+
-    "\13\4\1\37\4\4\1\40\5\4\1\41\2\4\1\42"+
+    "\13\4\1\37\4\4\1\40\5\4\1\41\3\4\1\42"+
     "\1\43\1\11\1\44\1\40\1\4\1\45\1\46\1\47"+
     "\1\50\1\51\1\52\7\4\1\53\1\44\2\4\1\54"+
-    "\2\4\1\55\1\10\10\4\1\15\1\56\2\4\1\57"+
-    "\6\4\1\60\1\61\4\4\1\62\7\4\1\63\1\64"+
-    "\1\4\1\65\1\4\1\66\1\4\1\67\1\70\4\4"+
-=======
-    "\1\30\1\32\2\33\1\0\1\34\1\0\1\35\13\4"+
-    "\1\36\4\4\1\37\5\4\1\40\3\4\1\41\1\42"+
-    "\1\11\1\43\1\37\1\4\1\44\1\45\1\46\1\47"+
-    "\1\50\1\51\7\4\1\52\1\43\2\4\1\53\2\4"+
-    "\1\54\1\10\11\4\1\14\1\55\2\4\1\56\6\4"+
-    "\1\57\1\60\4\4\1\61\10\4\1\62\1\63\1\4"+
-    "\1\64\1\65\1\4\1\66\1\4\1\67\1\70\4\4"+
->>>>>>> fixes
-    "\1\71\2\4\1\72\1\4\1\73\1\74";
+    "\2\4\1\55\1\10\11\4\1\15\1\56\2\4\1\57"+
+    "\6\4\1\60\1\61\4\4\1\62\10\4\1\63\1\64"+
+    "\1\4\1\65\1\66\1\4\1\67\1\4\1\70\1\71"+
+    "\4\4\1\72\2\4\1\73\1\4\1\74\1\75";
 
   private static int [] zzUnpackAction() {
     int [] result = new int[170];
@@ -893,391 +883,254 @@ public class Lexer {
           { throw new Error("Illegal character <"+
                                    yytext()+">");
           }
-        case 61: break;
+        case 62: break;
         case 2: 
           { /* ignore */
           }
-        case 62: break;
+        case 63: break;
         case 3: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.MUL_ARITHM;
           }
-        case 63: break;
+        case 64: break;
         case 4: 
           { yyparser.yylval = new ParserVal(yytext());
     return Parser.IDENTIFIER;
           }
-        case 64: break;
+        case 65: break;
         case 5: 
           { yyparser.yylval = new ParserVal(Integer.parseInt(yytext()));
     return Parser.INTEGER;
           }
-        case 65: break;
+        case 66: break;
         case 6: 
           { return Parser.DOT;
           }
-        case 66: break;
+        case 67: break;
         case 7: 
           { return Parser.ASSIGN;
           }
-        case 67: break;
+        case 68: break;
         case 8: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.NOT;
           }
-        case 68: break;
+        case 69: break;
         case 9: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.MORELESS;
           }
-        case 69: break;
+        case 70: break;
         case 10: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR;
           }
-        case 70: break;
+        case 71: break;
         case 11: 
           { return Parser.PIPE;
           }
-        case 71: break;
+        case 72: break;
         case 12: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.ADD_ARITHM;
           }
-        case 72: break;
+        case 73: break;
         case 13: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.XOR;
           }
-        case 73: break;
+        case 74: break;
         case 14: 
           { return Parser.COMMA;
           }
-        case 74: break;
+        case 75: break;
         case 15: 
           { return Parser.COLON;
           }
-        case 75: break;
+        case 76: break;
         case 16: 
           { return Parser.SEMICOLON;
           }
-        case 76: break;
+        case 77: break;
         case 17: 
           { return Parser.L_CURBRACE;
           }
-        case 77: break;
+        case 78: break;
         case 18: 
           { return Parser.R_CURBRACE;
           }
-        case 78: break;
+        case 79: break;
         case 19: 
           { return Parser.L_BRACE;
           }
-        case 79: break;
+        case 80: break;
         case 20: 
           { return Parser.R_BRACE;
           }
-        case 80: break;
+        case 81: break;
         case 21: 
           { return Parser.L_SQBRACE;
           }
-        case 81: break;
+        case 82: break;
         case 22: 
           { return Parser.R_SQBRACE;
           }
-        case 82: break;
+        case 83: break;
         case 23: 
           { sb.setLength(0); yybegin(STRING_DQUOTED);
           }
-        case 83: break;
+        case 84: break;
         case 24: 
           { sb.setLength(0); yybegin(STRING_SQUOTED);
           }
-        case 84: break;
+        case 85: break;
         case 25: 
           { sb.append(yytext());
           }
-        case 85: break;
+        case 86: break;
         case 26: 
           { yybegin(YYINITIAL); 
                   yyparser.yylval = new ParserVal(sb.toString()); 
                   return Parser.STRING;
           }
-<<<<<<< HEAD
-        case 86: break;
+        case 87: break;
         case 27: 
           { sb.append('\\');
           }
-        case 87: break;
+        case 88: break;
         case 28: 
           { /*ignore*/
           }
-        case 88: break;
+        case 89: break;
         case 29: 
           { yybegin(COMMENT);
           }
-        case 89: break;
+        case 90: break;
         case 30: 
           { yyparser.yylval = new ParserVal(Float.parseFloat(yytext()));
     return Parser.FLOAT;
           }
-        case 90: break;
+        case 91: break;
         case 31: 
           { return Parser.IF;
           }
-        case 91: break;
+        case 92: break;
         case 32: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.OR;
           }
-        case 92: break;
+        case 93: break;
         case 33: 
           { return Parser.DO;
           }
-        case 93: break;
+        case 94: break;
         case 34: 
           { return Parser.POW;
           }
-        case 94: break;
+        case 95: break;
         case 35: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.EQ;
           }
-        case 95: break;
+        case 96: break;
         case 36: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.AND;
           }
-        case 96: break;
+        case 97: break;
         case 37: 
           { sb.append('\t');
           }
-        case 97: break;
+        case 98: break;
         case 38: 
           { sb.append('\r');
           }
-        case 98: break;
+        case 99: break;
         case 39: 
           { sb.append('\n');
           }
-        case 99: break;
+        case 100: break;
         case 40: 
           { sb.append('\"');
           }
-        case 100: break;
+        case 101: break;
         case 41: 
           { sb.append('\'');
           }
-        case 101: break;
+        case 102: break;
         case 42: 
           { yybegin(YYINITIAL);
           }
-        case 102: break;
+        case 103: break;
         case 43: 
           { return Parser.FOR;
           }
-        case 103: break;
+        case 104: break;
         case 44: 
           { yyparser.yylval = new ParserVal(yytext()); return Parser.TYPE;
-          }
-        case 104: break;
-        case 45: 
-          { return Parser.NEW;
           }
         case 105: break;
-        case 46: 
-=======
-        case 85: break;
-        case 26: 
-          { sb.append('\\');
-          }
-        case 86: break;
-        case 27: 
-          { /*ignore*/
-          }
-        case 87: break;
-        case 28: 
-          { yybegin(COMMENT);
-          }
-        case 88: break;
-        case 29: 
-          { yyparser.yylval = new ParserVal(Float.parseFloat(yytext()));
-    return Parser.FLOAT;
-          }
-        case 89: break;
-        case 30: 
-          { return Parser.IF;
-          }
-        case 90: break;
-        case 31: 
-          { yyparser.yylval = new ParserVal(yytext()); return Parser.OR;
-          }
-        case 91: break;
-        case 32: 
-          { return Parser.DO;
-          }
-        case 92: break;
-        case 33: 
-          { return Parser.POW;
-          }
-        case 93: break;
-        case 34: 
-          { yyparser.yylval = new ParserVal(yytext()); return Parser.EQ;
-          }
-        case 94: break;
-        case 35: 
-          { yyparser.yylval = new ParserVal(yytext()); return Parser.AND;
-          }
-        case 95: break;
-        case 36: 
-          { sb.append('\t');
-          }
-        case 96: break;
-        case 37: 
-          { sb.append('\r');
-          }
-        case 97: break;
-        case 38: 
-          { sb.append('\n');
-          }
-        case 98: break;
-        case 39: 
-          { sb.append('\"');
-          }
-        case 99: break;
-        case 40: 
-          { sb.append('\'');
-          }
-        case 100: break;
-        case 41: 
-          { yybegin(YYINITIAL);
-          }
-        case 101: break;
-        case 42: 
-          { return Parser.FOR;
-          }
-        case 102: break;
-        case 43: 
-          { yyparser.yylval = new ParserVal(yytext()); return Parser.TYPE;
-          }
-        case 103: break;
-        case 44: 
+        case 45: 
           { return Parser.NEW;
           }
-        case 104: break;
-        case 45: 
->>>>>>> fixes
+        case 106: break;
+        case 46: 
           { if (yytext().equals("true")) { yyparser.yylval = new ParserVal(1); }
     else { yyparser.yylval = new ParserVal(0); } 
     return Parser.BOOLEAN;
           }
-<<<<<<< HEAD
-        case 106: break;
+        case 107: break;
         case 47: 
           { return Parser.ELSE;
           }
-        case 107: break;
+        case 108: break;
         case 48: 
           { return Parser.NULL;
           }
-        case 108: break;
+        case 109: break;
         case 49: 
           { return Parser.GOTO;
           }
-        case 109: break;
+        case 110: break;
         case 50: 
           { return Parser.CASE;
           }
-        case 110: break;
+        case 111: break;
         case 51: 
           { return Parser.BREAK;
           }
-        case 111: break;
+        case 112: break;
         case 52: 
           { return Parser.PRINT;
-          }
-        case 112: break;
-        case 53: 
-          { return Parser.WHILE;
           }
         case 113: break;
-        case 54: 
-          { return Parser.RETURN;
-          }
-        case 114: break;
-        case 55: 
-          { return Parser.STRUCT;
-          }
-        case 115: break;
-        case 56: 
-          { return Parser.SWITCH;
-          }
-        case 116: break;
-        case 57: 
-          { return Parser.INCLUDE;
-          }
-        case 117: break;
-        case 58: 
-          { return Parser.DEFUN;
-          }
-        case 118: break;
-        case 59: 
-          { return Parser.CONTINUE;
-          }
-=======
-        case 105: break;
-        case 46: 
-          { return Parser.ELSE;
-          }
-        case 106: break;
-        case 47: 
-          { return Parser.NULL;
-          }
-        case 107: break;
-        case 48: 
-          { return Parser.GOTO;
-          }
-        case 108: break;
-        case 49: 
-          { return Parser.CASE;
-          }
-        case 109: break;
-        case 50: 
-          { return Parser.BREAK;
-          }
-        case 110: break;
-        case 51: 
-          { return Parser.PRINT;
-          }
-        case 111: break;
-        case 52: 
+        case 53: 
           { return Parser.WHILE;
           }
-        case 112: break;
-        case 53: 
+        case 114: break;
+        case 54: 
           { return Parser.CLASS;
           }
-        case 113: break;
-        case 54: 
+        case 115: break;
+        case 55: 
           { return Parser.RETURN;
           }
-        case 114: break;
-        case 55: 
+        case 116: break;
+        case 56: 
           { return Parser.STRUCT;
           }
-        case 115: break;
-        case 56: 
+        case 117: break;
+        case 57: 
           { return Parser.SWITCH;
           }
-        case 116: break;
-        case 57: 
+        case 118: break;
+        case 58: 
           { return Parser.INCLUDE;
           }
-        case 117: break;
-        case 58: 
+        case 119: break;
+        case 59: 
           { return Parser.DEFUN;
           }
-        case 118: break;
-        case 59: 
+        case 120: break;
+        case 60: 
           { return Parser.CONTINUE;
           }
->>>>>>> fixes
-        case 119: break;
-        case 60: 
+        case 121: break;
+        case 61: 
           { return Parser.PROC;
           }
-        case 120: break;
+        case 122: break;
         default: 
           if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
             zzAtEOF = true;

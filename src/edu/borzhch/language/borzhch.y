@@ -832,8 +832,9 @@ private int yylex() {
 }
 
 public void yyerror(String error) {
-    System.err.println(String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error));
     parseError = true;
+    String msg = String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error);
+    throw new Error(msg);
 }
 
 public Parser(Reader r, boolean debug) {
