@@ -11,6 +11,7 @@
   import edu.borzhch.FuncTable;
   import edu.borzhch.constants.*;
   import java.util.HashMap;
+  import java.util.ArrayList;
 %}
 
 %token <sval> TYPE IDENTIFIER
@@ -45,7 +46,8 @@
 %type <obj> codeblock stmt_list stmt decl decl_assign assign exp
 %type <obj> reference arrayref param_list decl_block idref idref_tail
 %type <obj> switch case switchblock structref builtin
-%type <obj> constant dynamic_value funcall cast dot
+%type <obj> constant dynamic_value funcall cast dot 
+%type <obj> idref_begin idref_mid idref_end dv_in_context
 %%
 
 start: 
@@ -369,21 +371,72 @@ arrayref:
     ;
  
 idref:
-    dot dynamic_value {
-        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
-        GetFieldNode node = new GetFieldNode(dot.reduce());
+    idref_begin idref_mid idref_end {
+        ArrayList<NodeAST> nodes = new ArrayList<>();
+        nodes.add((NodeAST) $1);
+        nodes.addAll((ArrayList<NodeAST>) $2);
+        GetFieldNode node = new GetFieldNode(nodes);
         $$ = node;
-        restoreContext();
-    }
-    | dot idref {
-        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
-        GetFieldNode node = new GetFieldNode(dot.reduce());
-        $$ = node;
-
-        restoreContext();
-        //fullRestoreContext();
     }
     ;
+
+idref_begin: 
+    /* Memento */
+    dynamic_value DOT { 
+        backup = topTable;
+
+        INodeWithVarTypeName tmp = (INodeWithVarTypeName) $1;
+        String schema = tmp.getVarTypeName();
+
+        if (!BOHelper.isType(schema) && !"$array".equals(schema)) {
+            SymTable tmpt = context.get(schema);
+
+            if (tmpt != topTable)
+                tmpt.setPrevious(topTable);
+            topTable = tmpt;
+        }
+        $$ = $1;
+    }
+    ;
+
+idref_mid:
+    | dv_in_context { 
+        ArrayList<NodeAST> node = new ArrayList<>();
+        node.add((NodeAST) $1);
+        $$ = node;
+    }
+    | dv_in_context DOT idref_mid { 
+        ArrayList<NodeAST> node = new ArrayList<>(); 
+        node.add((NodeAST) $1);
+        if (null != $3) {
+            node.addAll((ArrayList<NodeAST>) $3);
+        }
+
+        $$ = node;
+    }
+    ;
+
+dv_in_context: 
+    dynamic_value {
+        INodeWithVarTypeName tmp = (INodeWithVarTypeName) $1;
+        String schema = tmp.getVarTypeName();
+
+        if (!BOHelper.isType(schema) && !"$array".equals(schema)) {
+            SymTable tmpt = context.get(schema);
+
+            if (tmpt != topTable)
+                tmpt.setPrevious(topTable);
+            topTable = tmpt;
+        }
+        $$ = $1;
+    }
+
+idref_end: 
+    /* Memento */ {
+        topTable = backup;
+    }
+    ;
+
 
 dot: 
     dynamic_value DOT {
@@ -394,7 +447,7 @@ dot:
         //topTable = context.get(schema);
         //topTable.setPrevious(tmpt);
 
-        //restoreContext();
+        //??? restoreContext();
         if (!"void".equals(schema)) {
             SymTable tmpt = context.get(schema);
 
@@ -614,7 +667,7 @@ exp:
     | cast { $$ = $1; }
     | constant { $$ = $1; }
     | dynamic_value { $$ = $1; }
-    | idref { $$ = $1; restoreContext(); }
+    | idref { $$ = $1; }
     ;
 
 cast:
@@ -679,6 +732,8 @@ exp_tail: COMMA exp exp_tail {
 private SymTable topTable = null;
 private static FuncTable funcTable = null;
 private SymTable structTable = null;
+
+private SymTable backup;
 
 private HashMap<String, SymTable> context = new HashMap<>();
 
