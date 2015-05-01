@@ -53,9 +53,9 @@
 %type <obj> codeblock assign
 %type <obj> reference arrayref
 %type <obj> idref idref_tail 
-%type <sval> type
+%type <sval> type class_identifier
 %type <obj> switch switchblock case 
-%type <obj> class_list class_decl class_block class_identifier
+%type <obj> class_list class_decl class_block
 %type <obj> constant dynamic_value funcall cast dot
 %type <obj> idref_begin idref_mid idref_end dv_in_context
 %%
@@ -215,6 +215,8 @@ class_decl:
             String msg = ErrorHelper.identifierExists(identifier);
             yyerror(msg);
         }
+        context.put($2, topTable);
+        restoreContext();
         structTable.pushSymbol(identifier, "ref");
 
         currentClass = mainClass;
@@ -234,6 +236,7 @@ class_identifier:
 class_block:
     openblock class_list endblock {
         FieldList node = (FieldList) $2;
+        currentClass = mainClass;
         $$ = node; 
     };
 
@@ -473,6 +476,7 @@ idref_begin:
         String schema = tmp.getVarTypeName();
 
         if (!BOHelper.isType(schema) && !"$array".equals(schema)) {
+            currentClass = schema;
             SymTable tmpt = context.get(schema);
 
             if (tmpt != topTable)
@@ -506,6 +510,7 @@ dv_in_context:
         String schema = tmp.getVarTypeName();
 
         if (!BOHelper.isType(schema) && !"$array".equals(schema)) {
+            currentClass = schema;
             SymTable tmpt = context.get(schema);
 
             if (tmpt != topTable)
@@ -518,6 +523,7 @@ dv_in_context:
 idref_end: 
     /* Memento */ {
         topTable = backup;
+        currentClass = mainClass;
     }
     ;
 
@@ -533,6 +539,7 @@ dot:
 
         //??? restoreContext();
         if (!"void".equals(schema)) {
+            currentClass = schema;
             SymTable tmpt = context.get(schema);
 
             if (tmpt != topTable)
@@ -777,7 +784,7 @@ funcall:
           String msg = ErrorHelper.notDeclared($1);
           yyerror(msg);
         }
-        FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
+        FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3, currentClass);
         $$ = node;
     }
     ;

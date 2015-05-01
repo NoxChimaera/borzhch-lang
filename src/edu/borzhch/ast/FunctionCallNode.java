@@ -20,10 +20,12 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     String identifier;
     StatementList args;
     String varTypeName;
+    String className;
     
-    public FunctionCallNode(String identifier, StatementList args) {
+    public FunctionCallNode(String identifier, StatementList args, String className) {
         this.identifier = identifier;
         this.args = null == args ? new StatementList() : args;
+        this.className = className;
         
         this.type = BOHelper.getType(Parser.getFuncTable().getType(identifier));
     }
@@ -57,7 +59,7 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
             i++;
         }
         //TODO: first argument is a class
-        JavaCodegen.method().funCall("Program", identifier, retType, argTypes); 
+        JavaCodegen.method().funCall(className, identifier, retType, argTypes); 
     }
 
     @Override
