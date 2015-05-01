@@ -84,4 +84,9 @@ public class SymTable {
         symbols.clear();
         symbols = null;
     }
+    
+    @Override
+    public String toString() {
+        return symbols.toString();
+    }
 }
