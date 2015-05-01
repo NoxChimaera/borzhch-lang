@@ -138,6 +138,8 @@ function:
         node.setArguments((NodeList) $7);
         node.setStatements((StatementList) $9);
 
+        context.put($5, topTable);
+        restoreContext();
         funcTable.push(node);
         $$ = node;
     }
@@ -775,7 +777,7 @@ private void fullRestoreContext() {
 private void restoreContext() {
     SymTable oldTable = topTable;
     topTable = oldTable.getPrevious();
-    oldTable.setPrevious(null);
+//    oldTable.setPrevious(null);
     //oldTable.clear();
 }
 private String mainClass = "Program";

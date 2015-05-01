@@ -40,12 +40,6 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         System.out.println("Arguments:");
         if(args != null) args.debug(lvl + 1);
     }
-
-    public void foo() {
-        if (!args.nodes.isEmpty()) args.codegen();
-        
-        
-    }
     
     @Override
     public void codegen() {
@@ -53,13 +47,7 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         
         FuncTable funcTable = Parser.getFuncTable();
         String funType = funcTable.getType(identifier);
-        BOType bt = BOHelper.getType(funType);
-        Type retType = BOHelper.toJVMType(bt);
-        if (bt == BOType.REF) {
-            retType = new ObjectType(funType);
-        } else if (bt == BOType.ARRAY) {
-            retType = BOHelper.toJVMArrayType(funType);
-        }
+        Type retType = BOHelper.getJVMRetType(funType);
         
         Type[] argTypes = new Type[funcTable.getArity(identifier)];
         ArrayList<String> args = funcTable.getParamTypes(identifier);
@@ -73,7 +61,6 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     }
 
     @Override
-    
     public String getVarTypeName() {
         return Parser.getFuncTable().getType(identifier);
     }
