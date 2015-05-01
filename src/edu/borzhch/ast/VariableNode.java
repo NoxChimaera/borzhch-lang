@@ -8,6 +8,7 @@ package edu.borzhch.ast;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
 
 /**
  * Узел переменной
@@ -20,12 +21,6 @@ public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     }
     // ???
     String varTypeName;
-    public String strType() {
-        return varTypeName;
-    }
-    public void strType(String newType) {
-        varTypeName = newType;
-    }
     
     // test
     public VariableNode(String identifier) {
@@ -43,7 +38,7 @@ public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     public VariableNode(String identifier, String typeName) {
         id = identifier;
         varTypeName = typeName;
-        
+
         if ("$array".equals(typeName)) {
             type = BOType.ARRAY;
         } else if (BOHelper.isType(typeName)) {
@@ -66,7 +61,21 @@ public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     @Override
     public void codegen() {
         // iload var_index
-        JavaCodegen.method().load(id, BOHelper.toJVMType(type));
+        if(JavaCodegen.struct().hasField(id)) {
+            JavaCodegen.method().getField(JavaCodegen.struct().getName(), id, BOHelper.toJVMType(type));
+        } else {
+            JavaCodegen.method().load(id, BOHelper.toJVMType(type));
+        }
+    }
+
+    @Override
+    public void setVarTypeName(String name) {
+        varTypeName = name;
+    }
+
+    @Override
+    public String getVarTypeName() {
+        return varTypeName;
     }
 
     @Override

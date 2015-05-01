@@ -34,7 +34,7 @@ public class ArrayElementNode extends NodeAST implements INodeWithVarTypeName {
         ref = arrayRef;
         index = expr;
         
-        type = BOHelper.getType(ref.strType());
+        type = BOHelper.getType(ref.getVarTypeName());
     }
     
     @Override
@@ -65,5 +65,10 @@ public class ArrayElementNode extends NodeAST implements INodeWithVarTypeName {
     @Override
     public String getVarTypeName() {
         return ref.varTypeName;
+    }
+    
+    @Override
+    public void setVarTypeName(String name) {
+        type = BOHelper.getType(name);
     }
 }

@@ -11,29 +11,61 @@ import edu.borzhch.constants.BOType;
 public class StructDeclarationNode extends NodeAST {
     String identifier;
     FieldList fields;
+    FieldList functions;
+    boolean isClass;
     
-    public StructDeclarationNode(String identifier, FieldList statementList) {
+    public StructDeclarationNode(String identifier, FieldList fieldList, boolean isClass) {
         this.identifier = identifier;
-        fields = statementList;
+        this.isClass = isClass;
         
         StructTable.addStruct(identifier);
         
-        if (fields == null) return;
-        for (NodeAST node : fields.nodes) {
-            DeclarationNode n = (DeclarationNode) node;
-            if (BOType.ARRAY == n.type) {
-                StructTable.putField(identifier, n.getName(), "$array");
-                StructTable.putFieldSub(identifier, n.getName(), n.varTypeName);
+        try {
+            dissectFieldList(fieldList);
+        } catch (Exception e) { }
+    }
+    
+    /**
+     * Разбирает список полей на поля и функции и помещает их в соответствующие
+     * переменные этого класса. Бросает исключение, если вдруг ему попалось 
+     * нечто не типа DeclNode или FuncNode. Ничего не делает, если список полей
+     * пуст.
+     * @param fieldList Список полей.
+     * TODO: Можно упростить функцию, если сделать получение имени и типа в
+     * DeclNode и FuncNode одинаковыми.
+     */
+    private void dissectFieldList(FieldList fieldList) throws Exception {
+        if (fieldList == null) return;
+        FieldList newFields = new FieldList();
+        FieldList newFunctions = new FieldList();
+        for(NodeAST node : fieldList.nodes) {
+            if (node instanceof DeclarationNode) {
+                DeclarationNode declNode = (DeclarationNode) node;
+                newFields.nodes.add(declNode);
+                if (BOType.ARRAY == declNode.type) {
+                    StructTable.putField(identifier, declNode.getName(), "$array");
+                    StructTable.putFieldSub(identifier, declNode.getName(), declNode.varTypeName);
+                } else {
+                    StructTable.putField(identifier, declNode.getName(), declNode.varTypeName);
+                }
+            } else if(node instanceof FunctionNode) {
+                FunctionNode funcNode = (FunctionNode) node;
+                newFunctions.nodes.add(funcNode);
+                StructTable.putField(identifier, funcNode.getFuncName(), funcNode.getReturnTypeName());
             } else {
-                StructTable.putField(identifier, n.getName(), n.varTypeName);
+                String msg = String.format("Unknown type for class/struct field.");
+                throw new Exception(msg);
             }
         }
+        this.fields = newFields;
+        this.functions = newFunctions;
     }
     
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
-        System.out.println("Struct " + identifier);
+        String type = isClass? "Class " : "Struct ";
+        System.out.println(type + identifier);
         ++lvl;
         if (null == fields) return;
         fields.debug(lvl);
@@ -49,6 +81,6 @@ public class StructDeclarationNode extends NodeAST {
         }
         
         JavaCodegen.compileClass(identifier);
-        JavaCodegen.switchClass("Program");
+        JavaCodegen.switchToMainClass();
     }
 }

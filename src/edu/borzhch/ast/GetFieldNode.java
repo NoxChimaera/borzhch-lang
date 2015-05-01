@@ -35,6 +35,14 @@ public class GetFieldNode extends NodeAST {
         get(false);
     }
     
+    public void setFields(ArrayList<NodeAST> value) {
+        fields = value;
+    };
+    
+    public ArrayList<NodeAST> getFields() {
+        return fields;
+    };
+    
     /**
      * Возвращает последний узел
      * @return Последний узел
@@ -63,7 +71,7 @@ public class GetFieldNode extends NodeAST {
             if (genCode) {
                 getItem.codegen();
             }
-            schema = getItem.arrayRef.ref.strType();
+            schema = getItem.arrayRef.ref.getVarTypeName();
             type = getItem.arrayRef.ref.type;
         } else if (VariableNode.class == node.getClass()) {
             VariableNode var = (VariableNode) node;
@@ -94,7 +102,6 @@ public class GetFieldNode extends NodeAST {
                                 StructTable.getFieldType(schema, field.id));
                     }
                     
-                    //schema = field.strType();
                     type = field.type;
                     break;
                 case ARRAY:

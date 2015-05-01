@@ -35,6 +35,6 @@ public class Program {
             System.out.println(fileNotFoundException);
         }
         if(op.getDebugTree()) TreeAST.debug(0);
-        TreeAST.codegen();
+        if (!Parser.wasParseError()) TreeAST.codegen();
     }
 }

@@ -19,8 +19,9 @@ import org.apache.bcel.generic.Type;
  */
 public class FunctionNode extends NodeAST {
     String funcName;
-    BOType returnType;
-    String returnTypeName;
+    String varTypeName;
+    
+    String className;
     
     NodeList args;
     StatementList statements;
@@ -29,11 +30,13 @@ public class FunctionNode extends NodeAST {
      * Функция, возвращающая примитивный тип
      * @param name Идентификатор функции
      * @param returnType Вовзращаемый тип
+     * @param className Имя класса, которому принадлежит функция
      */
-    public FunctionNode(String name, BOType returnType) {
+    public FunctionNode(String name, BOType returnType, String className) {
         funcName = name;
-        this.returnType = returnType;
-        returnTypeName = BOHelper.toString(returnType);
+        this.type = returnType;
+        this.className = className;
+        varTypeName = BOHelper.toString(returnType);
         args = new ArgumentList();
         statements = new StatementList();
     }
@@ -42,14 +45,16 @@ public class FunctionNode extends NodeAST {
      * Функция, возвращающая ссылочный тип
      * @param name Идентификатор фукнции
      * @param returnTypeName Идентификатор типа
+     * @param className Имя класса, которому принадлежит функция
      */
-    public FunctionNode(String name, String returnTypeName) {
+    public FunctionNode(String name, String returnTypeName, String className) {
         funcName = name;
-        this.returnTypeName = returnTypeName;
+        this.varTypeName = returnTypeName;
+        this.className = className;
         if (BOHelper.isType(returnTypeName)) {
-            returnType = BOHelper.getType(returnTypeName);
+            type = BOHelper.getType(returnTypeName);
         } else {
-            returnType = BOType.REF;
+            type = BOType.REF;
         }
    
         args = new ArgumentList();
@@ -69,13 +74,13 @@ public class FunctionNode extends NodeAST {
         return this.funcName;
     }
     public Integer getArgumentsCount() {
-        return this.args.nodes.size();
+        return this.args == null ? 0 : this.args.nodes.size();
     }
     public ArrayList<NodeAST> getArguments() {
         return this.args == null ? null : this.args.nodes;
     }
     public String getReturnTypeName() {
-        return this.returnTypeName;
+        return this.varTypeName;
     }
     
     @Override
@@ -85,8 +90,8 @@ public class FunctionNode extends NodeAST {
 
         ++lvl;
         printLevel(lvl);
-        System.out.println("Type: " + returnTypeName + " ("
-                + BOHelper.toString(returnType) + ")");
+        System.out.println("Type: " + varTypeName + " ("
+                + BOHelper.toString(type) + ")");
         printLevel(lvl);
         System.out.println("Statement List:");
         ++lvl;
@@ -123,23 +128,18 @@ public class FunctionNode extends NodeAST {
                         argsTypes[i] = BOHelper.toJVMType(decl.type);
                 }
                 
-//                if (BOType.REF == decl.type() && BOHelper.isType(decl.varTypeName)) {
-//                    argsTypes[i] = BOHelper.toJVMArrayType(decl.varTypeName);
-//                } else {
-//                    argsTypes[i] = BOHelper.toJVMType(decl.type);
-//                }
                 i++;
             }
         }
         
-        JavaCodegen.newMethod(funcName, returnType, argsTypes, argsNames, "Program");
+        JavaCodegen.newMethod(funcName, type, argsTypes, argsNames, className);
         
         if (statements != null) {
             statements.codegen();
         }
         
-        if(returnType == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
+        if(type == BOType.VOID) JavaCodegen.method().createReturn(Type.VOID);
         
-        JavaCodegen.compileMethod("Program", funcName);
+        JavaCodegen.compileMethod(className, funcName);
     }
 }

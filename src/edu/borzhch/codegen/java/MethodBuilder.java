@@ -352,7 +352,6 @@ public class MethodBuilder {
     }
     public void getField(String className, String field, Type type) {
         il.append(f.createGetField(className, field, type));
-        
 //        il.append(f.createGetField(className, field, new ObjectType(className)))
     }
     public void getFieldClass(String className, String field, String fieldClass) {

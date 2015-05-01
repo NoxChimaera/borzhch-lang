@@ -47,7 +47,6 @@ public class DeclarationNode extends NodeAST {
      */
     public DeclarationNode(String name, String typeName) {
         varName = name;
-        
         this.type = BOHelper.getType(typeName);
         varTypeName = typeName;
     }
@@ -79,12 +78,11 @@ public class DeclarationNode extends NodeAST {
             } else if (StructTable.isDefined(varTypeName)) {
                 JavaCodegen.struct().addField(varName, new ObjectType(varTypeName));
             } else {
-                JavaCodegen.struct().addField(varName, 
-                        BOHelper.toJVMType(BOHelper.getType(varTypeName)));
+                JavaCodegen.struct().addField(varName, BOHelper.toJVMType(this.type));
             }
         } else {
             // Associate variable name with LocalVariableGen-object
-            JavaCodegen.method().addLocalVariable(varName, type);
+            JavaCodegen.method().addLocalVariable(varName, this.type);
         }
     }
 }

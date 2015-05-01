@@ -18,6 +18,7 @@ import org.apache.bcel.generic.ArrayType;
 public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     String identifier;
     StatementList args;
+    String varTypeName;
     
     public FunctionCallNode(String identifier, StatementList args) {
         this.identifier = identifier;
@@ -36,8 +37,7 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         System.out.println(String.format("Identifier: %s", identifier));
         printLevel(lvl);
         System.out.println("Arguments:");
-        if (null == args) return;
-        args.debug(lvl + 1);
+        if(args != null) args.debug(lvl + 1);
     }
 
     public void foo() {
@@ -48,7 +48,7 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     
     @Override
     public void codegen() {
-        if(!args.nodes.isEmpty()) args.codegen();
+        if(args != null && !args.nodes.isEmpty()) args.codegen();
         
         FuncTable funcTable = Parser.getFuncTable();
         Type retType = BOHelper.toJVMType(BOHelper.getType(funcTable.getType(identifier)));
@@ -64,7 +64,13 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     }
 
     @Override
+    
     public String getVarTypeName() {
         return Parser.getFuncTable().getType(identifier);
+    }
+    
+    @Override
+    public void setVarTypeName(String name) {
+        varTypeName = name;
     }
 }

@@ -5,18 +5,21 @@
 %{
   import java.io.IOException;
   import java.io.Reader;
+  import java.util.LinkedList;
+  import java.util.ArrayList;
+  import java.util.HashMap;
   import edu.borzhch.ast.*;
   import edu.borzhch.helpers.*;
   import edu.borzhch.SymTable;
   import edu.borzhch.FuncTable;
+  import edu.borzhch.StructTable;
   import edu.borzhch.constants.*;
-  import java.util.HashMap;
 %}
 
 %token <sval> TYPE IDENTIFIER
 %token <ival> INTEGER 
 %token <dval> FLOAT
-%token DEFUN PROC L_CURBRACE R_CURBRACE
+%token DEFUN PROC L_CURBRACE R_CURBRACE CLASS
 %token STRUCT L_SQBRACE R_SQBRACE GOTO RETURN BREAK CONTINUE
 %token IF L_BRACE R_BRACE ELSE FOR WHILE DO SWITCH NEW
 %token <sval> STRING 
@@ -39,12 +42,20 @@
 %left UN_ARITHM NOT
 %right INCR DOT
 
+%type <obj> global_list global 
+%type <obj> exp exp_list exp_tail 
+%type <obj> param_tail param_list 
+%type <obj> decl decl_list decl_assign decl_block
+%type <obj> stmt stmt_list loop
+%type <obj> struct_decl 
+%type <obj> if else tuple_value 
+%type <obj> function builtin
+%type <obj> codeblock assign
+%type <obj> reference arrayref
+%type <obj> idref idref_tail 
 %type <sval> type
-%type <obj> global_list global exp_list exp_tail param_tail loop
-%type <obj> function struct_decl decl_list if else tuple_value
-%type <obj> codeblock stmt_list stmt decl decl_assign assign exp
-%type <obj> reference arrayref param_list decl_block idref idref_tail
-%type <obj> switch case switchblock structref builtin
+%type <obj> switch switchblock case 
+%type <obj> class_list class_decl class_block class_identifier
 %type <obj> constant dynamic_value funcall cast dot
 %%
 
@@ -60,6 +71,8 @@ init: /* empty */ {
         funcTable = new FuncTable();
 
         structTable = new SymTable(null);
+
+        structTable.pushSymbol("Program", "class");
     }
     ;
 
@@ -76,6 +89,7 @@ global_list: /* empty */ {
 
 global: function { $$ = $1; }
     | struct_decl { $$ = $1; }
+    | class_decl { $$ = $1; }
     ;
 
 openblock: 
@@ -107,7 +121,7 @@ function:
         if (isIdentifierExist($3)) {
             yyerror(String.format("identifier <%s> is already defined", $3));
         }
-        FunctionNode node = new FunctionNode($3, $2);
+        FunctionNode node = new FunctionNode($3, $2, currentClass);
         node.setArguments((NodeList) $5);
         node.setStatements((StatementList) $7);
 
@@ -116,12 +130,23 @@ function:
         funcTable.push(node);
         $$ = node;
     }
+    | DEFUN type L_SQBRACE R_SQBRACE IDENTIFIER L_BRACE param_list R_BRACE codeblock {
+        if (isIdentifierExist($5)) {
+            yyerror(String.format("identifier <%s> is already defined", $5));
+        }
+        FunctionNode node = new FunctionNode($5, "$array", currentClass);
+        node.setArguments((NodeList) $7);
+        node.setStatements((StatementList) $9);
+
+        funcTable.push(node);
+        $$ = node;
+    }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if(isIdentifierExist($2)) {
-          String msg = String.format("identifier <%s> is already defined\n", $2);
+          String msg = ErrorHelper.identifierExists($2);
           yyerror(msg);
         }
-        FunctionNode func = new FunctionNode($2, BOType.VOID);
+        FunctionNode func = new FunctionNode($2, BOType.VOID, currentClass);
         func.setArguments((StatementList) $4);
         func.setStatements((StatementList) $6);
 
@@ -167,7 +192,7 @@ codeblock:
 struct_decl: 
     STRUCT IDENTIFIER decl_block {
         if(isIdentifierExist($2)) {
-            String msg = String.format("identifier <%s> is already defined\n", $2);
+            String msg = ErrorHelper.identifierExists($2);
             yyerror(msg);
         }
         
@@ -175,8 +200,66 @@ struct_decl:
         restoreContext();
         structTable.pushSymbol($2, "ref");
 
-        StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3);
+        StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3, false);
         $$ = node;
+    }
+    ;
+
+class_decl:
+    CLASS class_identifier class_block {
+        String identifier = (String) $2;
+        if(isIdentifierExist(identifier)) {
+            String msg = ErrorHelper.identifierExists(identifier);
+            yyerror(msg);
+        }
+        structTable.pushSymbol(identifier, "ref");
+
+        currentClass = mainClass;
+        StructDeclarationNode node = new StructDeclarationNode(identifier, (FieldList) $3, true);
+        $$ = node;
+    }
+    ;
+
+class_identifier:
+    IDENTIFIER {
+        funcTable = new FuncTable(funcTable);
+        currentClass = $1; 
+        $$ = $1;
+    }
+    ;
+
+class_block:
+    openblock class_list endblock {
+        FieldList node = (FieldList) $2;
+        $$ = node; 
+    };
+
+class_list:
+    decl SEMICOLON { 
+        FieldList node = new FieldList();
+        DeclarationNode decl = (DeclarationNode) $1;
+        decl.isField(true);
+        node.add((NodeAST) decl);
+        $$ = node; 
+    }
+    | function {
+        FieldList node = new FieldList();
+        node.add((NodeAST) $1);
+        $$ = node; 
+    }
+    | decl SEMICOLON class_list {
+        FieldList node = new FieldList();
+        DeclarationNode decl = (DeclarationNode) $1;
+        decl.isField(true);
+        node.add((NodeAST) decl);
+        node.addAll((NodeList) $3);
+        $$ = node; 
+    }
+    | function class_list {
+        FieldList node = new FieldList();
+        node.add((NodeAST) $1);
+        node.addAll((NodeList) $2);
+        $$ = node; 
     }
     ;
 
@@ -224,7 +307,7 @@ decl_assign:
         decl.type(BOType.ARRAY);
         NewArrayNode nan = new NewArrayNode($4, (NodeAST) $6);
         VariableNode var = new VariableNode(decl.getName(), "$array");
-        var.strType($4);
+        var.setVarTypeName($4);
         AssignNode store = new AssignNode(var, nan);
         StatementList node = new StatementList();
         node.add(decl);
@@ -245,7 +328,6 @@ decl_assign:
             yyerror(ErrorHelper.incompatibleTypes(decl.type(), 
             (((NodeAST) $3).type())));
         }
-
 
         AssignNode an = new AssignNode(new VariableNode(name, topTable.getSymbolType(name)), 
                 (NodeAST) val_peek(0).obj);
@@ -295,7 +377,7 @@ stmt: decl            { $$ = $1; }
     | assign          { $$ = $1; }
     | GOTO IDENTIFIER { 
       if(!isIdentifierExist($2)) {
-        String msg = String.format("identifier <%s> is not declared\n", $2);
+        String msg = ErrorHelper.notDeclared($2);
         yyerror(msg);
       }
       $$ = null; 
@@ -311,6 +393,7 @@ stmt: decl            { $$ = $1; }
 assign: 
     idref ASSIGN exp {
         GetFieldNode get = (GetFieldNode) $1;
+        
         NodeAST expr = (NodeAST) $3;
         SetFieldNode node = new SetFieldNode(get, expr);
         $$ = node;
@@ -319,7 +402,7 @@ assign:
     }
     | IDENTIFIER ASSIGN exp {
         if(!isIdentifierExist($1)) {
-          String msg = String.format("identifier <%s> is not declared\n", $1);
+          String msg = ErrorHelper.notDeclared($1);
           System.err.println(msg);
         }
         
@@ -595,7 +678,7 @@ exp:
     }
    | IDENTIFIER INCR { 
       if(!isIdentifierExist($1)) {
-        String msg = String.format("identifier <%s> is not declared\n", $1);
+        String msg = ErrorHelper.notDeclared($1);
         yyerror(msg);
       }
       $$ = new PostOpNode(new VariableNode($1), $2); 
@@ -604,7 +687,7 @@ exp:
     }
     | NEW IDENTIFIER { 
         if(!isTypeExist($2)) {
-            String msg = String.format("unknown type <%s>\n", $2);
+            String msg = ErrorHelper.unknownType($2);
             yyerror(msg);
         }
         $$ = new NewObjectNode($2); 
@@ -629,14 +712,17 @@ constant:
     | STRING    { $$ = new StringNode($1); }
     | BOOLEAN   { $$ = new BooleanNode($1); }
     | NULL  { $$ = new NullNode(); }
-    | idref { $$ = $1; }
+    | idref { 
+        GetFieldNode node = (GetFieldNode) $1;
+        $$ = node;
+    }
     ;
 
 funcall:
     IDENTIFIER L_BRACE exp_list R_BRACE {
         if(!isIdentifierExist($1)) {
-            String msg = String.format("identifier <%s> is not declared\n", $1);
-            yyerror(msg);
+          String msg = ErrorHelper.notDeclared($1);
+          yyerror(msg);
         }
         FunctionCallNode node = new FunctionCallNode($1, (StatementList) $3);
         $$ = node;
@@ -692,6 +778,14 @@ private void restoreContext() {
     oldTable.setPrevious(null);
     //oldTable.clear();
 }
+private String mainClass = "Program";
+private String currentClass = "Program";
+
+private static boolean parseError = false;
+
+public static boolean wasParseError() {
+    return parseError;
+}
 
 public static FuncTable getFuncTable() {
     return funcTable;
@@ -717,6 +811,12 @@ private boolean isIdentifierExist(String identifier) {
   return result;
 }
 
+private String getSymbolType(String identifier) {
+    String result = topTable.getSymbolType(identifier);
+    
+    return result;
+}
+
 private Lexer lexer;
 
 private int yylex() {
@@ -732,7 +832,8 @@ private int yylex() {
 }
 
 public void yyerror(String error) {
-  System.err.println(String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error));
+    System.err.println(String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error));
+    parseError = true;
 }
 
 public Parser(Reader r, boolean debug) {

@@ -65,12 +65,13 @@ BooleanLiteral = "true" | "false"
   "else"      { return Parser.ELSE; }
   "switch"    { return Parser.SWITCH;}
   "case"      { return Parser.CASE; }
-  "function"     { return Parser.DEFUN; }
-  "procedure"     { return Parser.PROC; }
+  "function"  { return Parser.DEFUN; }
+  "procedure" { return Parser.PROC; }
   "include"   { return Parser.INCLUDE; }
   "new"       { return Parser.NEW; }
   "struct"    { return Parser.STRUCT; }
   "print"     { return Parser.PRINT; }
+  "class"     { return Parser.CLASS; }
 }  
 
 /* operators */
