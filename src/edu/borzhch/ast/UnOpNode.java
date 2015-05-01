@@ -8,10 +8,10 @@ package edu.borzhch.ast;
 import edu.borzhch.codegen.java.JavaCodegen;
 
 /**
- *
+ * Унарная операция
  * @author Balushkin M.
  */
-public class UnOpNode extends OpNode {
+public class UnOpNode extends NodeAST {
     NodeAST expr;
     String op;
     public UnOpNode(NodeAST expression, String operation) {
