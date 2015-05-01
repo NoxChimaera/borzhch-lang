@@ -57,6 +57,7 @@
 %type <obj> switch switchblock case 
 %type <obj> class_list class_decl class_block class_identifier
 %type <obj> constant dynamic_value funcall cast dot
+%type <obj> idref_begin idref_mid idref_end dv_in_context
 %%
 
 start: 
@@ -452,20 +453,72 @@ arrayref:
     ;
  
 idref:
-    dot dynamic_value {
-        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
-        GetFieldNode node = new GetFieldNode(dot.reduce());
+    idref_begin idref_mid idref_end {
+        ArrayList<NodeAST> nodes = new ArrayList<>();
+        nodes.add((NodeAST) $1);
+        nodes.addAll((ArrayList<NodeAST>) $2);
+        GetFieldNode node = new GetFieldNode(nodes);
         $$ = node;
-        //restoreContext();
-    }
-    | dot idref {
-        DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
-        GetFieldNode node = new GetFieldNode(dot.reduce());
-        $$ = node;
-
-        restoreContext();
     }
     ;
+
+idref_begin: 
+    /* Memento */
+    dynamic_value DOT { 
+        backup = topTable;
+
+        INodeWithVarTypeName tmp = (INodeWithVarTypeName) $1;
+        String schema = tmp.getVarTypeName();
+
+        if (!BOHelper.isType(schema) && !"$array".equals(schema)) {
+            SymTable tmpt = context.get(schema);
+
+            if (tmpt != topTable)
+                tmpt.setPrevious(topTable);
+            topTable = tmpt;
+        }
+        $$ = $1;
+    }
+    ;
+
+idref_mid:
+    | dv_in_context { 
+        ArrayList<NodeAST> node = new ArrayList<>();
+        node.add((NodeAST) $1);
+        $$ = node;
+    }
+    | dv_in_context DOT idref_mid { 
+        ArrayList<NodeAST> node = new ArrayList<>(); 
+        node.add((NodeAST) $1);
+        if (null != $3) {
+            node.addAll((ArrayList<NodeAST>) $3);
+        }
+
+        $$ = node;
+    }
+    ;
+
+dv_in_context: 
+    dynamic_value {
+        INodeWithVarTypeName tmp = (INodeWithVarTypeName) $1;
+        String schema = tmp.getVarTypeName();
+
+        if (!BOHelper.isType(schema) && !"$array".equals(schema)) {
+            SymTable tmpt = context.get(schema);
+
+            if (tmpt != topTable)
+                tmpt.setPrevious(topTable);
+            topTable = tmpt;
+        }
+        $$ = $1;
+    }
+
+idref_end: 
+    /* Memento */ {
+        topTable = backup;
+    }
+    ;
+
 
 dot: 
     dynamic_value DOT {
@@ -476,7 +529,7 @@ dot:
         //topTable = context.get(schema);
         //topTable.setPrevious(tmpt);
 
-        //restoreContext();
+        //??? restoreContext();
         if (!"void".equals(schema)) {
             SymTable tmpt = context.get(schema);
 
@@ -492,6 +545,7 @@ dynamic_value:
     | IDENTIFIER { 
         if (null == topTable.getSymbolType($1)) {
             $$ = new VariableNode($1, BOType.VOID);
+            yyerror(String.format("identifier <%s> is not declared", $1));
         } else {
             $$ = new VariableNode($1, topTable.getSymbolType($1)); 
         }
@@ -695,6 +749,7 @@ exp:
     | cast { $$ = $1; }
     | constant { $$ = $1; }
     | dynamic_value { $$ = $1; }
+    | idref { $$ = $1; }
     ;
 
 cast:
@@ -712,10 +767,6 @@ constant:
     | STRING    { $$ = new StringNode($1); }
     | BOOLEAN   { $$ = new BooleanNode($1); }
     | NULL  { $$ = new NullNode(); }
-    | idref { 
-        GetFieldNode node = (GetFieldNode) $1;
-        $$ = node;
-    }
     ;
 
 funcall:
@@ -764,6 +815,8 @@ private SymTable topTable = null;
 private static FuncTable funcTable = null;
 private SymTable structTable = null;
 
+private SymTable backup;
+
 private HashMap<String, SymTable> context = new HashMap<>();
 
 private void fullRestoreContext() {
@@ -773,10 +826,7 @@ private void fullRestoreContext() {
 }
 
 private void restoreContext() {
-    SymTable oldTable = topTable;
-    topTable = oldTable.getPrevious();
-    oldTable.setPrevious(null);
-    //oldTable.clear();
+    topTable = topTable.getPrevious();
 }
 private String mainClass = "Program";
 private String currentClass = "Program";
