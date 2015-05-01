@@ -373,7 +373,7 @@ idref:
         DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         $$ = node;
-        //restoreContext();
+        restoreContext();
     }
     | dot idref {
         DotOpNode dot = new DotOpNode((NodeAST) $1, (NodeAST) $2);
@@ -381,6 +381,7 @@ idref:
         $$ = node;
 
         restoreContext();
+        //fullRestoreContext();
     }
     ;
 
@@ -409,6 +410,7 @@ dynamic_value:
     | IDENTIFIER { 
         if (null == topTable.getSymbolType($1)) {
             $$ = new VariableNode($1, BOType.VOID);
+            yyerror(String.format("identifier <%s> is not declared", $1));
         } else {
             $$ = new VariableNode($1, topTable.getSymbolType($1)); 
         }
@@ -612,6 +614,7 @@ exp:
     | cast { $$ = $1; }
     | constant { $$ = $1; }
     | dynamic_value { $$ = $1; }
+    | idref { $$ = $1; restoreContext(); }
     ;
 
 cast:
@@ -629,7 +632,6 @@ constant:
     | STRING    { $$ = new StringNode($1); }
     | BOOLEAN   { $$ = new BooleanNode($1); }
     | NULL  { $$ = new NullNode(); }
-    | idref { $$ = $1; }
     ;
 
 funcall:
@@ -687,10 +689,7 @@ private void fullRestoreContext() {
 }
 
 private void restoreContext() {
-    SymTable oldTable = topTable;
-    topTable = oldTable.getPrevious();
-    oldTable.setPrevious(null);
-    //oldTable.clear();
+    topTable = topTable.getPrevious();
 }
 
 public static FuncTable getFuncTable() {

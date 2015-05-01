@@ -229,7 +229,7 @@ final static short yylhs[] = {                           -1,
    29,   29,   29,   11,   12,   12,   12,    7,    7,    7,
    24,   24,   26,   26,   25,   19,   19,   19,   19,   19,
    19,   19,   19,   19,   19,   19,   19,   19,   19,   19,
-   19,   31,   28,   28,   28,   28,   28,   28,   30,    4,
+   19,   19,   31,   28,   28,   28,   28,   28,   30,    4,
     4,    4,    5,    5,
 };
 final static short yylen[] = {                            2,
@@ -241,7 +241,7 @@ final static short yylen[] = {                            2,
     1,    1,    1,    6,    0,    2,    2,    9,    5,    7,
    11,    7,    0,    2,    4,    3,    3,    3,    3,    3,
     3,    3,    3,    3,    2,    4,    2,    2,    1,    1,
-    1,    4,    1,    1,    1,    1,    1,    1,    4,    0,
+    1,    1,    4,    1,    1,    1,    1,    1,    4,    0,
     1,    2,    3,    2,
 };
 final static short yydefred[] = {                         2,
@@ -252,8 +252,8 @@ final static short yydefred[] = {                         2,
    11,   24,   16,    0,    0,    0,   39,   40,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,   34,
    35,    0,    0,    0,   41,    0,    0,    0,    0,    0,
-    0,   36,    0,   83,   84,    0,    0,   85,   86,    0,
-   87,    0,    0,    0,   51,   88,   80,    0,   53,   79,
+    0,   36,    0,   84,   85,    0,    0,   86,   87,    0,
+   88,    0,    0,    0,   51,   82,   80,    0,   53,   79,
     0,    0,    0,    0,    0,    0,   30,   29,   18,    0,
     0,    0,    0,   31,   50,    0,   49,    0,    0,    0,
     0,    0,   77,    0,   78,    0,    0,   75,    0,    0,
@@ -261,7 +261,7 @@ final static short yydefred[] = {                         2,
     0,    0,   28,    0,    0,    0,    0,    0,   47,   89,
     0,   92,   74,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,   76,   82,    0,    0,   59,    0,    0,    0,
+    0,    0,   76,   83,    0,    0,   59,    0,    0,    0,
     0,   93,    0,   54,    0,    0,    0,    0,    0,    0,
     0,   56,   57,    0,    0,   60,    0,   64,    0,   25,
    46,    0,    0,    0,   58,   65,    0,    0,   61,
@@ -587,13 +587,13 @@ final static String yyrule[] = {
 "exp : cast",
 "exp : constant",
 "exp : dynamic_value",
+"exp : idref",
 "cast : PIPE TYPE exp PIPE",
 "constant : INTEGER",
 "constant : FLOAT",
 "constant : STRING",
 "constant : BOOLEAN",
 "constant : NULL",
-"constant : idref",
 "funcall : IDENTIFIER L_BRACE exp_list R_BRACE",
 "exp_list :",
 "exp_list : exp",
@@ -602,7 +602,7 @@ final static String yyrule[] = {
 "exp_tail : COMMA exp",
 };
 
-//#line 676 "./borzhch.y"
+//#line 678 "./borzhch.y"
 
 private SymTable topTable = null;
 private static FuncTable funcTable = null;
@@ -617,9 +617,7 @@ private void fullRestoreContext() {
 }
 
 private void restoreContext() {
-    SymTable oldTable = topTable;
-    topTable = oldTable.getPrevious();
-    oldTable.setPrevious(null);
+    topTable = topTable.getPrevious();
     //oldTable.clear();
 }
 
@@ -1236,7 +1234,7 @@ case 48:
         DotOpNode dot = new DotOpNode((NodeAST) val_peek(1).obj, (NodeAST) val_peek(0).obj);
         GetFieldNode node = new GetFieldNode(dot.reduce());
         yyval.obj = node;
-        /*restoreContext();*/
+        //restoreContext();
     }
 break;
 case 49:
@@ -1247,10 +1245,11 @@ case 49:
         yyval.obj = node;
 
         restoreContext();
+        /*fullRestoreContext();*/
     }
 break;
 case 50:
-//#line 388 "./borzhch.y"
+//#line 389 "./borzhch.y"
 {
         INodeWithVarTypeName tmp = (INodeWithVarTypeName) val_peek(1).obj;
         String schema = tmp.getVarTypeName();
@@ -1271,51 +1270,52 @@ case 50:
     }
 break;
 case 51:
-//#line 408 "./borzhch.y"
+//#line 409 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 52:
-//#line 409 "./borzhch.y"
+//#line 410 "./borzhch.y"
 { 
         if (null == topTable.getSymbolType(val_peek(0).sval)) {
             yyval.obj = new VariableNode(val_peek(0).sval, BOType.VOID);
+            yyerror(String.format("identifier <%s> is not declared", val_peek(0).sval));
         } else {
             yyval.obj = new VariableNode(val_peek(0).sval, topTable.getSymbolType(val_peek(0).sval)); 
         }
     }
 break;
 case 53:
-//#line 416 "./borzhch.y"
+//#line 418 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
 case 54:
-//#line 420 "./borzhch.y"
+//#line 422 "./borzhch.y"
 {
         IfNode node = new IfNode((NodeAST) val_peek(3).obj, (StatementList) val_peek(1).obj, (IfNode) val_peek(0).obj);
         yyval.obj = node;
     }
 break;
 case 55:
-//#line 426 "./borzhch.y"
+//#line 428 "./borzhch.y"
 {
       yyval.obj = null;
     }
 break;
 case 56:
-//#line 429 "./borzhch.y"
+//#line 431 "./borzhch.y"
 {
       yyval.obj = (IfNode) val_peek(0).obj;
     }
 break;
 case 57:
-//#line 432 "./borzhch.y"
+//#line 434 "./borzhch.y"
 {
       IfNode node = new IfNode(null, (StatementList) val_peek(0).obj, null);
       yyval.obj = node;
     }
 break;
 case 58:
-//#line 438 "./borzhch.y"
+//#line 440 "./borzhch.y"
 {
         NodeAST decl = (NodeAST) val_peek(6).obj;
         NodeAST counter = (NodeAST) val_peek(4).obj;
@@ -1326,21 +1326,21 @@ case 58:
     }
 break;
 case 59:
-//#line 446 "./borzhch.y"
+//#line 448 "./borzhch.y"
 {
         WhileNode node = new WhileNode((NodeAST) val_peek(2).obj, (StatementList) val_peek(0).obj);
         yyval.obj = node;
     }
 break;
 case 60:
-//#line 450 "./borzhch.y"
+//#line 452 "./borzhch.y"
 {
         DoWhileNode node = new DoWhileNode((NodeAST) val_peek(2).obj, (StatementList) val_peek(5).obj);
         yyval.obj = node;
     }
 break;
 case 61:
-//#line 456 "./borzhch.y"
+//#line 458 "./borzhch.y"
 {
         /*TODO: exp should be of INTEGER type*/
         SwitchNode node = new SwitchNode((NodeAST) val_peek(8).obj, (StatementList) val_peek(5).obj, (StatementList) val_peek(1).obj);
@@ -1348,7 +1348,7 @@ case 61:
       }
 break;
 case 62:
-//#line 461 "./borzhch.y"
+//#line 463 "./borzhch.y"
 {
         /*TODO: exp should be of INTEGER type*/
         SwitchNode node = new SwitchNode((NodeAST) val_peek(4).obj, (StatementList) val_peek(1).obj, null);
@@ -1356,11 +1356,11 @@ case 62:
       }
 break;
 case 63:
-//#line 468 "./borzhch.y"
+//#line 470 "./borzhch.y"
 { yyval.obj = null; }
 break;
 case 64:
-//#line 469 "./borzhch.y"
+//#line 471 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(1).obj);
@@ -1369,14 +1369,14 @@ case 64:
         }
 break;
 case 65:
-//#line 476 "./borzhch.y"
+//#line 478 "./borzhch.y"
 {
         CaseNode node = new CaseNode(val_peek(2).ival, (StatementList) val_peek(0).obj);
         yyval.obj = node;
     }
 break;
 case 66:
-//#line 483 "./borzhch.y"
+//#line 485 "./borzhch.y"
 { 
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;
@@ -1390,7 +1390,7 @@ case 66:
     }
 break;
 case 67:
-//#line 494 "./borzhch.y"
+//#line 496 "./borzhch.y"
 { 
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;
@@ -1404,7 +1404,7 @@ case 67:
     }
 break;
 case 68:
-//#line 505 "./borzhch.y"
+//#line 507 "./borzhch.y"
 { 
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;
@@ -1421,7 +1421,7 @@ case 68:
     }
 break;
 case 69:
-//#line 519 "./borzhch.y"
+//#line 521 "./borzhch.y"
 {          
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;     
@@ -1435,7 +1435,7 @@ case 69:
     }
 break;
 case 70:
-//#line 530 "./borzhch.y"
+//#line 532 "./borzhch.y"
 {         
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj;     
@@ -1452,7 +1452,7 @@ case 70:
     }
 break;
 case 71:
-//#line 544 "./borzhch.y"
+//#line 546 "./borzhch.y"
 {
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj; 
@@ -1466,7 +1466,7 @@ case 71:
     }
 break;
 case 72:
-//#line 555 "./borzhch.y"
+//#line 557 "./borzhch.y"
 {
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj; 
@@ -1480,7 +1480,7 @@ case 72:
     }
 break;
 case 73:
-//#line 566 "./borzhch.y"
+//#line 568 "./borzhch.y"
 {
         NodeAST l = (NodeAST) val_peek(2).obj;
         NodeAST r = (NodeAST) val_peek(0).obj; 
@@ -1494,11 +1494,11 @@ case 73:
     }
 break;
 case 74:
-//#line 577 "./borzhch.y"
+//#line 579 "./borzhch.y"
 { yyval.obj = val_peek(1).obj; }
 break;
 case 75:
-//#line 578 "./borzhch.y"
+//#line 580 "./borzhch.y"
 {
         NodeAST r = (NodeAST) val_peek(0).obj; 
         if (BOType.BOOL != r.type()) {
@@ -1510,7 +1510,7 @@ case 75:
     }
 break;
 case 76:
-//#line 587 "./borzhch.y"
+//#line 589 "./borzhch.y"
 {
         NodeAST e = (NodeAST) val_peek(2).obj; 
         if (!BOHelper.isNumber(e.type())) {
@@ -1522,7 +1522,7 @@ case 76:
     }
 break;
 case 77:
-//#line 596 "./borzhch.y"
+//#line 598 "./borzhch.y"
 { 
       if(!isIdentifierExist(val_peek(1).sval)) {
         String msg = String.format("identifier <%s> is not declared\n", val_peek(1).sval);
@@ -1534,7 +1534,7 @@ case 77:
     }
 break;
 case 78:
-//#line 605 "./borzhch.y"
+//#line 607 "./borzhch.y"
 { 
         if(!isTypeExist(val_peek(0).sval)) {
             String msg = String.format("unknown type <%s>\n", val_peek(0).sval);
@@ -1544,19 +1544,23 @@ case 78:
     }
 break;
 case 79:
-//#line 612 "./borzhch.y"
-{ yyval.obj = val_peek(0).obj; }
-break;
-case 80:
-//#line 613 "./borzhch.y"
-{ yyval.obj = val_peek(0).obj; }
-break;
-case 81:
 //#line 614 "./borzhch.y"
 { yyval.obj = val_peek(0).obj; }
 break;
+case 80:
+//#line 615 "./borzhch.y"
+{ yyval.obj = val_peek(0).obj; }
+break;
+case 81:
+//#line 616 "./borzhch.y"
+{ yyval.obj = val_peek(0).obj; }
+break;
 case 82:
-//#line 618 "./borzhch.y"
+//#line 617 "./borzhch.y"
+{ yyval.obj = val_peek(0).obj; restoreContext(); }
+break;
+case 83:
+//#line 621 "./borzhch.y"
 {
         BOType type = BOHelper.getType(val_peek(2).sval);
         NodeAST exp = (NodeAST) val_peek(1).obj;
@@ -1564,32 +1568,28 @@ case 82:
         yyval.obj = node;
     }
 break;
-case 83:
-//#line 627 "./borzhch.y"
+case 84:
+//#line 630 "./borzhch.y"
 { yyval.obj = new IntegerNode(val_peek(0).ival); }
 break;
-case 84:
-//#line 628 "./borzhch.y"
+case 85:
+//#line 631 "./borzhch.y"
 { yyval.obj = new FloatNode((float)val_peek(0).dval); }
 break;
-case 85:
-//#line 629 "./borzhch.y"
+case 86:
+//#line 632 "./borzhch.y"
 { yyval.obj = new StringNode(val_peek(0).sval); }
 break;
-case 86:
-//#line 630 "./borzhch.y"
+case 87:
+//#line 633 "./borzhch.y"
 { yyval.obj = new BooleanNode(val_peek(0).ival); }
 break;
-case 87:
-//#line 631 "./borzhch.y"
+case 88:
+//#line 634 "./borzhch.y"
 { yyval.obj = new NullNode(); }
 break;
-case 88:
-//#line 632 "./borzhch.y"
-{ yyval.obj = val_peek(0).obj; }
-break;
 case 89:
-//#line 636 "./borzhch.y"
+//#line 638 "./borzhch.y"
 {
         if(!isIdentifierExist(val_peek(3).sval)) {
             String msg = String.format("identifier <%s> is not declared\n", val_peek(3).sval);
@@ -1600,13 +1600,13 @@ case 89:
     }
 break;
 case 90:
-//#line 646 "./borzhch.y"
+//#line 648 "./borzhch.y"
 {
           yyval.obj = null;
         }
 break;
 case 91:
-//#line 649 "./borzhch.y"
+//#line 651 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(0).obj);
@@ -1614,7 +1614,7 @@ case 91:
         }
 break;
 case 92:
-//#line 654 "./borzhch.y"
+//#line 656 "./borzhch.y"
 {
           StatementList node = new StatementList();
           node.add((NodeAST) val_peek(1).obj);
@@ -1623,7 +1623,7 @@ case 92:
         }
 break;
 case 93:
-//#line 662 "./borzhch.y"
+//#line 664 "./borzhch.y"
 {
           StatementList node = new StatementList();
           node.add((NodeAST) val_peek(1).obj);
@@ -1632,14 +1632,14 @@ case 93:
         }
 break;
 case 94:
-//#line 668 "./borzhch.y"
+//#line 670 "./borzhch.y"
 {
             StatementList node = new StatementList();
             node.add((NodeAST) val_peek(0).obj);
             yyval.obj = node;
         }
 break;
-//#line 1565 "Parser.java"
+//#line 1567 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
