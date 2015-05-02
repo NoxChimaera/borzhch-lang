@@ -69,6 +69,8 @@ public class StructDeclarationNode extends NodeAST {
         ++lvl;
         if (null == fields) return;
         fields.debug(lvl);
+        if (null == functions) return;
+        functions.debug(lvl);
     }
 
     @Override
@@ -78,6 +80,10 @@ public class StructDeclarationNode extends NodeAST {
         
         if (null != fields) {
             fields.codegen();
+        }
+        
+        if (null != functions) {
+            functions.codegen();
         }
         
         JavaCodegen.compileClass(identifier);

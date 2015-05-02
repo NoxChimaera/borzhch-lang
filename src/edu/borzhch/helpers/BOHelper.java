@@ -117,4 +117,15 @@ public class BOHelper {
                 return new ArrayType(type, 1);
         }
     }
+    
+    public static Type getJVMRetType(String typeName) {
+        BOType bt = BOHelper.getType(typeName);
+        Type retType = BOHelper.toJVMType(bt);
+        if (bt == BOType.REF) {
+            retType = new ObjectType(typeName);
+        } else if (bt == BOType.ARRAY) {
+            retType = BOHelper.toJVMArrayType(typeName);
+        }
+        return retType;
+    }
 }

@@ -24,11 +24,12 @@ public class MethodBuilder {
     
     HashMap<String, LocalVariableGen> localVariables;
     
-    public MethodBuilder(String name, BOType returnType, Type[] argsTypes, String[] argsNames, ClassGen cg) {
+    public MethodBuilder(String name, Type returnType, Type[] argsTypes, String[] argsNames, ClassGen cg, boolean accessStatic) {
         il = new InstructionList();
         this.cg = cg;
-        mg = new MethodGen(ACC_STATIC | ACC_PUBLIC, 
-                BOHelper.toJVMType(returnType), 
+        int access = accessStatic? (ACC_STATIC | ACC_PUBLIC) : ACC_PUBLIC;
+        mg = new MethodGen(access, 
+                returnType, 
                 argsTypes,
                 argsNames, name, cg.getClassName(),
                 il, cg.getConstantPool()
@@ -330,8 +331,8 @@ public class MethodBuilder {
         il.append(f.createArrayLoad(arrayType));
     }
     
-    public void funCall(String class_name, String func_name, Type ret_type, Type[] arg_types) {
-        il.append(f.createInvoke(class_name, func_name, ret_type, arg_types, INVOKESTATIC));
+    public void funCall(String class_name, String func_name, Type ret_type, Type[] arg_types, short invoke_type) {
+        il.append(f.createInvoke(class_name, func_name, ret_type, arg_types, invoke_type));
     }
     
     public void createReturn(Type type) {

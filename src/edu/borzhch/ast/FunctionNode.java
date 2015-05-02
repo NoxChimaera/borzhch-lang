@@ -131,8 +131,9 @@ public class FunctionNode extends NodeAST {
                 i++;
             }
         }
-        
-        JavaCodegen.newMethod(funcName, type, argsTypes, argsNames, className);
+        Type retType = BOHelper.getJVMRetType(varTypeName);
+        boolean accessStatic = "Program".equals(className);
+        JavaCodegen.newMethod(funcName, retType, argsTypes, argsNames, className, accessStatic);
         
         if (statements != null) {
             statements.codegen();

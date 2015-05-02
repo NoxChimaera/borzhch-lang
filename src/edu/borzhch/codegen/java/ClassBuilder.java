@@ -78,8 +78,8 @@ public class ClassBuilder {
      * @param retType Возвращаемый тип
      * @return MethodGen созданного метода
      */
-    public MethodBuilder newMethod(String name, BOType retType, Type[] argsTypes, String[] argsNames) {
-        MethodBuilder mb = new MethodBuilder(name, retType, argsTypes, argsNames, cg);
+    public MethodBuilder newMethod(String name, Type retType, Type[] argsTypes, String[] argsNames, boolean accessStatic) {
+        MethodBuilder mb = new MethodBuilder(name, retType, argsTypes, argsNames, cg, accessStatic);
         methods.put(name, mb);
         return mb;
     }

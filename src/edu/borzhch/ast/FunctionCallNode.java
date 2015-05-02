@@ -2,6 +2,7 @@
  */
 package edu.borzhch.ast;
 
+import com.sun.org.apache.bcel.internal.Constants;
 import edu.borzhch.codegen.java.JavaCodegen;
 import org.apache.bcel.generic.Type;
 import edu.borzhch.language.Parser;
@@ -10,6 +11,7 @@ import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.ArrayList;
 import org.apache.bcel.generic.ArrayType;
+import org.apache.bcel.generic.ObjectType;
 
 /**
  *
@@ -19,10 +21,12 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     String identifier;
     StatementList args;
     String varTypeName;
+    String className;
     
-    public FunctionCallNode(String identifier, StatementList args) {
+    public FunctionCallNode(String identifier, StatementList args, String className) {
         this.identifier = identifier;
         this.args = null == args ? new StatementList() : args;
+        this.className = className;
         
         this.type = BOHelper.getType(Parser.getFuncTable().getType(identifier));
     }
@@ -39,19 +43,15 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         System.out.println("Arguments:");
         if(args != null) args.debug(lvl + 1);
     }
-
-    public void foo() {
-        if (!args.nodes.isEmpty()) args.codegen();
-        
-        
-    }
     
     @Override
     public void codegen() {
         if(args != null && !args.nodes.isEmpty()) args.codegen();
         
         FuncTable funcTable = Parser.getFuncTable();
-        Type retType = BOHelper.toJVMType(BOHelper.getType(funcTable.getType(identifier)));
+        String funType = funcTable.getType(identifier);
+        Type retType = BOHelper.getJVMRetType(funType);
+        
         Type[] argTypes = new Type[funcTable.getArity(identifier)];
         ArrayList<String> args = funcTable.getParamTypes(identifier);
         int i = 0;
@@ -59,12 +59,15 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
             argTypes[i] = BOHelper.toJVMType(BOHelper.getType(arg));
             i++;
         }
-        //TODO: first argument is a class
-        JavaCodegen.method().funCall("Program", identifier, retType, argTypes); 
+        
+        if (className.equals("Program")) {
+            JavaCodegen.method().funCall(className, identifier, retType, argTypes, Constants.INVOKESTATIC); 
+        } else {
+            JavaCodegen.method().funCall(className, identifier, retType, argTypes, Constants.INVOKEVIRTUAL); 
+        }
     }
 
     @Override
-    
     public String getVarTypeName() {
         return Parser.getFuncTable().getType(identifier);
     }

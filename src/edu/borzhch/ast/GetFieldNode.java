@@ -111,8 +111,6 @@ public class GetFieldNode extends NodeAST {
                     
                     break;
                     
-                    
-                    
                 default:
                     String t = StructTable.getFieldType(schema, field.id);
                     type = BOHelper.getType(t);
@@ -142,6 +140,14 @@ public class GetFieldNode extends NodeAST {
             if (generateLast || genCode) {
                 schema = item.ref.varTypeName;
                 type = BOHelper.getType(item.ref.varTypeName);
+            }
+        } else {
+            if (generateLast || genCode) {
+                schema = ((INodeWithVarTypeName) node).getVarTypeName();
+                type = node.type;
+            }
+            if (genCode) {
+                node.codegen();
             }
         }
     }
