@@ -7,12 +7,14 @@ package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
+import edu.borzhch.optimization.IConstant;
+import edu.borzhch.optimization.IFoldable;
 
 /**
  * Целочтсленная константа
  * @author Balushkin M.
  */
-public class IntegerNode extends ConstantNode {
+public class IntegerNode extends NodeAST implements IConstant {
     int val;
     public IntegerNode(int value) {
         val = value;
@@ -29,5 +31,25 @@ public class IntegerNode extends ConstantNode {
     public void codegen() {
         // Push variable into stack
         JavaCodegen.method().push(val);
+    }
+
+    @Override
+    public boolean coerceBoolean() {
+        return val > 0;
+    }
+
+    @Override
+    public float coerceFloat() {
+        return (float) val;
+    }
+
+    @Override
+    public int coerceInt() {
+        return val;
+    }
+
+    @Override
+    public String coerceString() {
+        return String.valueOf(val);
     }
 }

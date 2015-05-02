@@ -15,26 +15,27 @@ import edu.borzhch.ast.TreeAST;
  * @author Balushkin M.
  */
 public class Program {
-
+    public static OptParser config;
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        OptParser op = new OptParser();
-        new JCommander(op, args);
+        config = new OptParser();
+        new JCommander(config, args);
         
         FileReader r;
         try {
-            for (String arg : op.getFiles()) {
+            for (String arg : config.getFiles()) {
                 r = new FileReader(arg);
-                Parser parser = new Parser(r, op.getDebugParser());
+                Parser parser = new Parser(r, config.getDebugParser());
                 parser.run();
             }
         } catch (FileNotFoundException fileNotFoundException){
             System.err.println(fileNotFoundException);
             System.out.println(fileNotFoundException);
         }
-        if(op.getDebugTree()) TreeAST.debug(0);
+        if(config.getDebugTree()) TreeAST.debug(0);
         if (!Parser.wasParseError()) TreeAST.codegen();
     }
 }

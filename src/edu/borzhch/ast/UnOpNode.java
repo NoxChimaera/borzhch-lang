@@ -1,17 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.borzhch.ast;
 
+import edu.borzhch.Program;
 import edu.borzhch.codegen.java.JavaCodegen;
+import edu.borzhch.optimization.IConstant;
+import edu.borzhch.optimization.IFoldable;
 
 /**
- *
+ * Унарная операция
  * @author Balushkin M.
  */
-public class UnOpNode extends OpNode {
+public class UnOpNode extends NodeAST implements IFoldable {
     NodeAST expr;
     String op;
     public UnOpNode(NodeAST expression, String operation) {
@@ -28,14 +26,50 @@ public class UnOpNode extends OpNode {
 
     @Override
     public void codegen() {
+        if (Program.config.getConstantFolding()) {
+            NodeAST fold = fold();
+            if (fold != this) {
+                fold.codegen();
+                return;
+            }
+        }
+        
         expr.codegen();
         switch (op) {
-            case "!":
+            case "not":
                 JavaCodegen.method().not();
                 break;
             case "-":
                 JavaCodegen.method().neg(expr.type);
                 break;
         }
+    }
+
+    @Override
+    public NodeAST fold() {
+        if (expr instanceof IFoldable) {
+            expr = ((IFoldable) expr).fold();
+        }
+        
+        if (expr instanceof IConstant) {
+            switch (op) {
+                case "not":
+                    return new BooleanNode(!((IConstant) expr).coerceBoolean());
+                case "-":
+                    return foldNegation((IConstant) expr);
+            }
+        }
+
+        return this;
+    }
+    
+    private NodeAST foldNegation(IConstant c) {
+        switch (((NodeAST) c).type) {
+            case INT:
+                return new IntegerNode(-c.coerceInt());
+            case FLOAT:
+                return new FloatNode(-c.coerceFloat());
+        }
+        return this;
     }
 }

@@ -18,6 +18,9 @@ public class OptParser {
     @Parameter(names = "-dtree", description = "Tree debug mode")
     private boolean debugTree = false;
     
+    @Parameter(names = "-folding", description = "Optimization: constant folding")
+    private boolean constantFolding = false;
+    
     public List<String> getFiles() {
         return this.files;
     }
@@ -26,5 +29,8 @@ public class OptParser {
     }
     public boolean getDebugTree() {
         return this.debugTree;
+    }
+    public boolean getConstantFolding() {
+        return this.constantFolding;
     }
 }

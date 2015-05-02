@@ -77,9 +77,4 @@ public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     public String getVarTypeName() {
         return varTypeName;
     }
-
-    @Override
-    public String getVarTypeName() {
-        return varTypeName;
-    }
 }
