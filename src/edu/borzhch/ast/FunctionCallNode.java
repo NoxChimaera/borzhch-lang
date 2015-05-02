@@ -2,6 +2,7 @@
  */
 package edu.borzhch.ast;
 
+import com.sun.org.apache.bcel.internal.Constants;
 import edu.borzhch.codegen.java.JavaCodegen;
 import org.apache.bcel.generic.Type;
 import edu.borzhch.language.Parser;
@@ -58,8 +59,12 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
             argTypes[i] = BOHelper.toJVMType(BOHelper.getType(arg));
             i++;
         }
-        //TODO: first argument is a class
-        JavaCodegen.method().funCall(className, identifier, retType, argTypes); 
+        
+        if (className.equals("Program")) {
+            JavaCodegen.method().funCall(className, identifier, retType, argTypes, Constants.INVOKESTATIC); 
+        } else {
+            JavaCodegen.method().funCall(className, identifier, retType, argTypes, Constants.INVOKEVIRTUAL); 
+        }
     }
 
     @Override

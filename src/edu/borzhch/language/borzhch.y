@@ -463,6 +463,7 @@ idref:
         nodes.add((NodeAST) $1);
         nodes.addAll((ArrayList<NodeAST>) $2);
         GetFieldNode node = new GetFieldNode(nodes);
+        node.generateLast(true);
         $$ = node;
     }
     ;

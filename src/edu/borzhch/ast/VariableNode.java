@@ -62,6 +62,7 @@ public class VariableNode extends NodeAST implements INodeWithVarTypeName {
     public void codegen() {
         // iload var_index
         if(JavaCodegen.struct().hasField(id)) {
+            JavaCodegen.method().load("this", Type.OBJECT);
             JavaCodegen.method().getField(JavaCodegen.struct().getName(), id, BOHelper.toJVMType(type));
         } else {
             JavaCodegen.method().load(id, BOHelper.toJVMType(type));
