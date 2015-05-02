@@ -5,15 +5,18 @@
  */
 package edu.borzhch.ast;
 
+import edu.borzhch.Program;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import edu.borzhch.optimization.IConstant;
+import edu.borzhch.optimization.IFoldable;
 
 /**
  * Узел AST, представляющий арифметическую операцию
  * @author Balushkin M.
  */
-public class ArOpNode extends OpNode {
+public class ArOpNode extends NodeAST implements IFoldable {
     NodeAST l;
     NodeAST r;
     String op;
@@ -42,9 +45,17 @@ public class ArOpNode extends OpNode {
 
     @Override
     public void codegen() {
-        if (op.equals("**")) {
-            codegenPower();
-            return;
+        if (Program.config.getConstantFolding()) {
+            NodeAST fold = fold();
+            if (fold != this) {
+                fold.codegen();
+                return;
+            }
+
+            if (op.equals("**")) {
+                codegenPower();
+                return;
+            }
         }
         
         l.codegen();
@@ -101,5 +112,78 @@ public class ArOpNode extends OpNode {
                 JavaCodegen.method().div(type);
                 break;
         }
+    }
+
+    @Override
+    public NodeAST fold() {
+        if (l instanceof IFoldable) {
+            l = (NodeAST) ((IFoldable) l).fold();
+        }
+        if (r instanceof IFoldable) {
+            r = (NodeAST) ((IFoldable) r).fold();
+        }
+        
+        if (l instanceof IConstant && r instanceof IConstant) {
+            return foldConst((IConstant) l, (IConstant) r);
+        } else {
+            return this;
+        }
+    }
+    
+    /**
+     * Сворачивает константное выражение
+     * @param l Константа слева
+     * @param r Константа справа
+     * @return Новое значение, полученне после оптимизации, или this, если что-то пошло не так
+     */
+    private NodeAST foldConst(IConstant l, IConstant r) {
+        switch (op) {
+            case "+":
+                switch (((NodeAST) l).type) {
+                    case INT:
+                        return new IntegerNode(l.coerceInt() + r.coerceInt());
+                    case FLOAT:
+                        return new FloatNode(l.coerceFloat() + r.coerceFloat());
+                    default:
+                        return this;
+                }
+            case "-":
+                switch (((NodeAST) l).type) {
+                    case INT:
+                        return new IntegerNode(l.coerceInt() - r.coerceInt());
+                    case FLOAT:
+                        return new FloatNode(l.coerceFloat() - r.coerceFloat());
+                    default:
+                        return this;
+                }
+            case "*":                
+                switch (((NodeAST) l).type) {
+                    case INT:
+                        return new IntegerNode(l.coerceInt() * r.coerceInt());
+                    case FLOAT:
+                        return new FloatNode(l.coerceFloat() * r.coerceFloat());
+                    default:
+                        return this;
+                }
+            case "/":                
+                switch (((NodeAST) l).type) {
+                    case INT:
+                        return new IntegerNode(l.coerceInt() / r.coerceInt());
+                    case FLOAT:
+                        return new FloatNode(l.coerceFloat() / r.coerceFloat());
+                    default:
+                        return this;
+                }
+            case "**":
+                switch (((NodeAST) l).type) {
+                    case INT:
+                    case FLOAT:
+                        return new FloatNode((float) Math.pow(l.coerceFloat(), r.coerceFloat()));
+                    default:
+                        return this;
+                }
+        }
+        
+        return this;
     }
 }

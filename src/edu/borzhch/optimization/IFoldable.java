@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.borzhch.ast;
+package edu.borzhch.optimization;
 
-import edu.borzhch.constants.BOType;
+import edu.borzhch.ast.NodeAST;
 
 /**
- * Константа
+ * Сворачиваемый узел (constant folding)
  * @author Balushkin M.
  */
-public abstract class ConstantNode extends NodeAST {
-    BOType cType;
+public interface IFoldable {
+    NodeAST fold();
 }

@@ -7,12 +7,13 @@ package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
+import edu.borzhch.optimization.IConstant;
 
 /**
  *
  * @author Balushkin M.
  */
-public class FloatNode extends ConstantNode {
+public class FloatNode extends NodeAST implements IConstant {
     float val;
     public FloatNode(float fval) {
         val = fval;
@@ -28,6 +29,26 @@ public class FloatNode extends ConstantNode {
     @Override
     public void codegen() {
         JavaCodegen.method().push(val);
+    }
+
+    @Override
+    public boolean coerceBoolean() {
+        return val > 0;
+    }
+
+    @Override
+    public float coerceFloat() {
+        return val;
+    }
+
+    @Override
+    public int coerceInt() {
+        return (int) val;
+    }
+
+    @Override
+    public String coerceString() {
+        return String.valueOf(val);
     }
     
 }

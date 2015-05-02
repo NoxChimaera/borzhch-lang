@@ -13,7 +13,7 @@ import org.apache.bcel.generic.Type;
  * Пост-оператор
  * @author Balushkin M.
  */
-public class PostOpNode extends OpNode {
+public class PostOpNode extends NodeAST {
     /**
      * Переменная
      */
