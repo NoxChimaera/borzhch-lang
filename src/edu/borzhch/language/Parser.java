@@ -1313,7 +1313,7 @@ case 51:
 //#line 396 "./borzhch.y"
 { 
         FunctionCallNode node = (FunctionCallNode) val_peek(0).obj;
-        if (!node.isProcedure()) node.popLast(true);
+/*        if (!node.isProcedure()) node.popLast(true); */
         yyval.obj = node;
     }
 break;
@@ -1321,14 +1321,14 @@ case 52:
 //#line 401 "./borzhch.y"
 {
         GetFieldNode node = (GetFieldNode) val_peek(0).obj;
-        NodeAST last = node.getLast();
+/*        NodeAST last = node.getLast();
         if (last instanceof FunctionCallNode) {
             FunctionCallNode funCall = (FunctionCallNode) last;
             if(!funCall.isProcedure()) { 
                 funCall.popLast(true);
                 node.setLast((NodeAST) funCall);
             }
-        }
+        }*/
         yyval.obj = node; 
     }
 break;

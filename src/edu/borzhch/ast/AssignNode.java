@@ -7,6 +7,7 @@ package edu.borzhch.ast;
 
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.helpers.BOHelper;
+import org.apache.bcel.generic.Type;
 
 /**
  * Узел AST, представляющий присваивание
@@ -49,11 +50,19 @@ public class AssignNode extends NodeAST {
         // Generate expression, push result into stack
         // e.g.:
         // 0:   bipush 42
+        boolean isField = JavaCodegen.struct().hasField(left.id);
+        if(isField) {
+            JavaCodegen.method().load("this", Type.OBJECT);
+        }
         right.codegen();
         // And convert it to variable type
         JavaCodegen.method().convert(right.type, left.type);
         // 1:   istore var_index
         // TODO: types. It works only with integers just now
-        JavaCodegen.method().store(left.id, BOHelper.toJVMType(left.type));
+        if(isField) {
+            JavaCodegen.method().putField(JavaCodegen.struct().getName(), left.id, BOHelper.toJVMType(left.type));
+        } else {
+            JavaCodegen.method().store(left.id, BOHelper.toJVMType(left.type));
+        }
     }
 }
