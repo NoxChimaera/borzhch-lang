@@ -283,12 +283,17 @@ public class MethodBuilder {
             case INT:
                 if (BOType.FLOAT == to) {
                     il.append(new I2F());
+                } else if (BOType.STRING == to) {
+                    this.getString(BOHelper.toJVMType(BOType.INT));
                 }
             break;
             case FLOAT:
                 if (BOType.INT == to) {
                     il.append(new F2I());
+                } else if (BOType.STRING == to) {
+                    this.getString(BOHelper.toJVMType(BOType.FLOAT));
                 }
+            break;
         }
     }
 
@@ -299,6 +304,11 @@ public class MethodBuilder {
                     new Type[] { Type.DOUBLE, Type.DOUBLE }, INVOKESTATIC));
                 break;
         }
+    }
+    
+    public void getString(Type type) {
+        il.append(f.createInvoke("java.lang.String", "valueOf", Type.STRING,
+            new Type[] {type}, INVOKESTATIC));
     }
     
     public void invokeInit(String structName) {
