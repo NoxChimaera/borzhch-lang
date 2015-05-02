@@ -294,6 +294,10 @@ public class MethodBuilder {
                     this.getString(BOHelper.toJVMType(BOType.FLOAT));
                 }
             break;
+            case BOOL:
+                if (BOType.STRING == to) {
+                    this.getString(BOHelper.toJVMType(BOType.BOOL));
+                }
         }
     }
 
