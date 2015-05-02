@@ -7,6 +7,7 @@ package edu.borzhch.codegen.java;
 
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
+import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import static org.apache.bcel.Constants.*;
 import org.apache.bcel.generic.*;
@@ -304,19 +305,24 @@ public class MethodBuilder {
         il.append(f.createInvoke(structName, "<init>", Type.VOID, new Type[0], INVOKESPECIAL));
     }
     
+    public void getStdin() {
+        il.append(f.createInvoke("java.lang.System", "console", 
+                new ObjectType("java.io.Console"), new Type[] {}, INVOKESTATIC));
+    }
+    
+    public void getLine() {
+        il.append(f.createInvoke("java.io.Console", "readLine", Type.STRING, new Type[] {}, INVOKEVIRTUAL));
+    }
+    
     public void getStdout() {
         il.append(f.createGetStatic("java.lang.System", 
             "out", new ObjectType("java.io.PrintStream")));
-    }
+    }    
     
     public void printLine(Type type) {
         il.append(f.createInvoke("java.io.PrintStream", "println", 
             Type.VOID, new Type[] { type }, INVOKEVIRTUAL));
     }
-//    public void printLine(String str) {
-//        getStdout();
-//        il.append(f.createPrintln(str));
-//    }
    
     public void newArray(Type type) {
         il.append(f.createNewArray(type, (short) 1));

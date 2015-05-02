@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import com.beust.jcommander.JCommander;
 import edu.borzhch.ast.TreeAST;
+import java.io.Console;
 
 /**
  *

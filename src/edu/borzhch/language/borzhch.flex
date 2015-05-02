@@ -70,10 +70,13 @@ BooleanLiteral = "true" | "false"
   "include"   { return Parser.INCLUDE; }
   "new"       { return Parser.NEW; }
   "struct"    { return Parser.STRUCT; }
-  "print"     { return Parser.PRINT; }
   "class"     { return Parser.CLASS; }
-}  
-
+} 
+ 
+<YYINITIAL> {
+  "print"     { return Parser.PRINT; }
+  "input"     { return Parser.INPUT; }
+}
 /* operators */
 <YYINITIAL> {
   "**"          { return Parser.POW; }

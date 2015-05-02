@@ -24,10 +24,11 @@
 %token IF L_BRACE R_BRACE ELSE FOR WHILE DO SWITCH NEW
 %token <sval> STRING 
 %token <ival> BOOLEAN 
-%token COMMA ASSIGN DOT SEMICOLON PRINT COLON
+%token COMMA ASSIGN DOT SEMICOLON COLON
 %token CASE TUPLE INCLUDE UN_MINUS UN_PLUS
 %token <sval> INCR MUL_ARITHM ADD_ARITHM MORELESS EQ
 %token NULL PIPE
+%token PRINT INPUT
 
 %nonassoc IFX
 
@@ -49,7 +50,7 @@
 %type <obj> stmt stmt_list loop
 %type <obj> struct_decl 
 %type <obj> if else tuple_value 
-%type <obj> function builtin
+%type <obj> function builtin_in builtin_out
 %type <obj> codeblock assign
 %type <obj> reference arrayref
 %type <obj> idref idref_tail 
@@ -372,9 +373,15 @@ stmt_list: /* empty */ { $$ = null; }
     }
     ;
 
-builtin:
+builtin_in:
     PRINT exp {
         $$ = new PrintNode((NodeAST) $2);
+    }
+    ;
+
+builtin_out:
+    INPUT L_BRACE R_BRACE {
+        $$ = new InputNode();
     }
     ;
 
@@ -392,7 +399,7 @@ stmt: decl            { $$ = $1; }
     | RETURN          { $$ = new ReturnNode(null); }
     | BREAK           { $$ = new BreakNode(); }
     | CONTINUE        { $$ = new ContinueNode(); }
-    | builtin         { $$ = $1; }
+    | builtin_in         { $$ = $1; }
     | funcall { 
         FunctionCallNode node = (FunctionCallNode) $1;
         if (!node.isProcedure()) node.popLast(true);
@@ -776,6 +783,7 @@ exp:
     | constant { $$ = $1; }
     | dynamic_value { $$ = $1; }
     | idref { $$ = $1; }
+    | builtin_out { $$ = $1; }
     ;
 
 cast:
