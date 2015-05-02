@@ -23,6 +23,16 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     String varTypeName;
     String className;
     
+    boolean popLast = false;
+    
+    public void popLast(boolean value) {
+        this.popLast = value;
+    }
+    
+    public boolean isProcedure() {
+        return (type == BOType.VOID);
+    }
+    
     public FunctionCallNode(String identifier, StatementList args, String className) {
         this.identifier = identifier;
         this.args = null == args ? new StatementList() : args;
@@ -65,6 +75,8 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         } else {
             JavaCodegen.method().funCall(className, identifier, retType, argTypes, Constants.INVOKEVIRTUAL); 
         }
+        
+        if (popLast) JavaCodegen.method().pop();
     }
 
     @Override

@@ -393,7 +393,23 @@ stmt: decl            { $$ = $1; }
     | BREAK           { $$ = new BreakNode(); }
     | CONTINUE        { $$ = new ContinueNode(); }
     | builtin         { $$ = $1; }
-    | funcall         { $$ = $1; }
+    | funcall { 
+        FunctionCallNode node = (FunctionCallNode) $1;
+        if (!node.isProcedure()) node.popLast(true);
+        $$ = node;
+    }
+    | idref {
+        GetFieldNode node = (GetFieldNode) $1;
+        NodeAST last = node.getLast();
+        if (last instanceof FunctionCallNode) {
+            FunctionCallNode funCall = (FunctionCallNode) last;
+            if(!funCall.isProcedure()) { 
+                funCall.popLast(true);
+                node.setLast((NodeAST) funCall);
+            }
+        }
+        $$ = node; 
+    }
     ;
 
 assign: 

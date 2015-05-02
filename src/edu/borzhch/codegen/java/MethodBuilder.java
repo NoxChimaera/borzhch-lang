@@ -250,6 +250,10 @@ public class MethodBuilder {
         return nop;
     }
     
+    public void pop() {
+        il.append(new POP());
+    }
+    
     public void convertToDouble(BOType from) {
         switch (from) {
             case INT:

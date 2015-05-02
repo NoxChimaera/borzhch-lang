@@ -51,6 +51,10 @@ public class GetFieldNode extends NodeAST {
         return fields.get(fields.size() - 1);
     }
     
+    public void setLast(NodeAST value) {
+        fields.set(fields.size() - 1, value);
+    }
+    
     @Override
     public void debug(int lvl) {
         printLevel(lvl);
