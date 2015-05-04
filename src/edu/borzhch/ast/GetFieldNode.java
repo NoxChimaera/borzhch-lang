@@ -106,8 +106,11 @@ public class GetFieldNode extends NodeAST {
                                 StructTable.getFieldType(schema, field.id));
                     }
                     
-                    type = field.type;
-                    break;
+                    if (generateLast || genCode) {
+                        schema = field.getVarTypeName();
+                        type = field.type;
+                    }
+                    break; 
                 case ARRAY:
                     String subtype = StructTable.getFieldSub(schema, field.id);
                     type = BOHelper.getType(subtype);

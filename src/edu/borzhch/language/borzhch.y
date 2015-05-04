@@ -754,7 +754,7 @@ exp:
         node.type(BOType.BOOL);
         $$ = node;
     }
-    | ADD_ARITHM exp %prec UN_ARITHM NOT exp {
+    | ADD_ARITHM exp %prec UN_ARITHM {
         NodeAST e = (NodeAST) $2; 
         if (!BOHelper.isNumber(e.type())) {
             yyerror(ErrorHelper.incompatibleTypes(e.type(), "number"));

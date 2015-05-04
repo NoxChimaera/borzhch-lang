@@ -47,16 +47,17 @@ public class UnOpNode extends NodeAST implements IFoldable {
 
     @Override
     public NodeAST fold() {
-        if (expr instanceof IFoldable) {
-            expr = ((IFoldable) expr).fold();
+        NodeAST ex = expr;
+        if (ex instanceof IFoldable) {
+            ex = ((IFoldable) ex).fold();
         }
         
-        if (expr instanceof IConstant) {
+        if (ex instanceof IConstant) {
             switch (op) {
                 case "not":
-                    return new BooleanNode(!((IConstant) expr).coerceBoolean());
+                    return new BooleanNode(!((IConstant) ex).coerceBoolean());
                 case "-":
-                    return foldNegation((IConstant) expr);
+                    return foldNegation((IConstant) ex);
             }
         }
 
