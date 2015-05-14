@@ -35,7 +35,7 @@ Whitespace     = {LineTerminator} | [ \t\f]
 Comment = "//" {InputCharacter}* {LineTerminator}
 
 /* identifiers */
-Identifier = _?[:letter:][[:letter:][:digit:]]*
+Identifier = _?(([:letter:][[:letter:][:digit:]]*)|([:letter:][[:letter:][:digit:]]*_*[[:letter:][:digit:]]+))
 
 /* literals */
 IntegerLiteral = 0 | [1-9][0-9]*
