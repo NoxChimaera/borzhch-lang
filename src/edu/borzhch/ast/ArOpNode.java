@@ -51,11 +51,11 @@ public class ArOpNode extends NodeAST implements IFoldable {
                 fold.codegen();
                 return;
             }
+        }
 
-            if (op.equals("**")) {
-                codegenPower();
-                return;
-            }
+        if (op.equals("**")) {
+            codegenPower();
+            return;
         }
         
         l.codegen();
