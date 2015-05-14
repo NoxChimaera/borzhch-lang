@@ -417,6 +417,18 @@ stmt: decl            { $$ = $1; }
         }
         $$ = node; 
     }
+    | IDENTIFIER INCR { 
+        VariableNode var;
+        if (null == topTable.getSymbolType($1)) {
+            var = new VariableNode($1, BOType.VOID);
+            yyerror(String.format("identifier <%s> is not declared", $1));
+        } else {
+            var = new VariableNode($1, topTable.getSymbolType($1)); 
+        }
+        $$ = new PostOpNode(var, $2); 
+        ((NodeAST) $$).type(BOType.INT);
+        ((PostOpNode) $$).setPush(true);
+    }
     ;
 
 assign: 
@@ -764,11 +776,14 @@ exp:
         $$ = node;
     }
    | IDENTIFIER INCR { 
-      if(!isIdentifierExist($1)) {
-        String msg = ErrorHelper.notDeclared($1);
-        yyerror(msg);
-      }
-      $$ = new PostOpNode(new VariableNode($1), $2); 
+        VariableNode var;
+        if (null == topTable.getSymbolType($1)) {
+            var = new VariableNode($1, BOType.VOID);
+            yyerror(String.format("identifier <%s> is not declared", $1));
+        } else {
+            var = new VariableNode($1, topTable.getSymbolType($1)); 
+        }
+        $$ = new PostOpNode(var, $2); 
         ((NodeAST) $$).type(BOType.INT);
         ((PostOpNode) $$).setPush(true);
     }

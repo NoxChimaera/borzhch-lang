@@ -38,6 +38,8 @@ public class PostOpNode extends NodeAST {
     public PostOpNode(VariableNode variable, String operator) {
         var = variable;
         op = operator;
+        
+        type = variable.type;
     }
     
     @Override
