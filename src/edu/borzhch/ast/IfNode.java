@@ -15,12 +15,16 @@ import org.apache.bcel.generic.InstructionHandle;
 public class IfNode extends NodeAST {
     NodeAST condition = null;
     StatementList statementList = null;
-    IfNode elseNode = null;
+//    IfNode elseNode = null;
+    NodeAST elseBranch;
     
-    public IfNode(NodeAST condition, StatementList statementList, IfNode elseNode) {
+    
+    public IfNode(NodeAST condition, StatementList statementList, NodeAST elseNode) {
         this.condition = condition;
         this.statementList = statementList;
-        this.elseNode = elseNode;
+        
+        elseBranch = elseNode;
+//        this.elseNode = elseNode;
     }
     
     @Override
@@ -33,7 +37,7 @@ public class IfNode extends NodeAST {
         
         statementList.debug(lvl);
         
-        if(elseNode != null) elseNode.debug(lvl);
+        if(elseBranch != null) elseBranch.debug(lvl);
     }
 
     @Override
@@ -51,8 +55,8 @@ public class IfNode extends NodeAST {
         JavaCodegen.method().nop();
         ifeq.setTarget(JavaCodegen.method().getLastHandler());
         // 4: el-branch
-        if (elseNode != null) {
-            elseNode.codegen();
+        if (elseBranch != null) {
+            elseBranch.codegen();
         }
         // 5: magic crutchy mega super nop
         JavaCodegen.method().nop();

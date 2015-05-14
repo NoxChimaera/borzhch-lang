@@ -600,7 +600,7 @@ dynamic_value:
 
 if: 
     IF L_BRACE exp R_BRACE codeblock %prec IFX else {
-        IfNode node = new IfNode((NodeAST) $3, (StatementList) $5, (IfNode) $6);
+        IfNode node = new IfNode((NodeAST) $3, (StatementList) $5, (NodeAST) $6);
         $$ = node;
     }
     ;
@@ -609,11 +609,10 @@ else: /* empty */ {
       $$ = null;
     }
     | ELSE if {
-      $$ = (IfNode) $2;
+      $$ = (NodeAST) $2;
     }
     | ELSE codeblock {
-      IfNode node = new IfNode(null, (StatementList) $2, null);
-      $$ = node;
+      $$ = $2;
     }
     ;
 

@@ -23,7 +23,7 @@ public class ErrorHelper {
     }
     
     public static String identifierExists(String identifier) {
-        return String.format("identifier <$s> is already defined\n", identifier);
+        return String.format("identifier <%s> is already defined\n", identifier);
     }
     
     public static String unknownType(String type) {
