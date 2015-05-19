@@ -26,16 +26,20 @@ public class Program {
         
         FileReader r;
         try {
+            Parser parser = new Parser(null, config.getDebugParser());
             for (String arg : config.getFiles()) {
                 r = new FileReader(arg);
-                Parser parser = new Parser(r, config.getDebugParser());
+                parser.newLexer(r);
                 parser.run();
+                        
+                if(config.getDebugTree()) TreeAST.debug(0);
+                if (!Parser.wasParseError()) {
+                    TreeAST.codegen();
+                }
             }
         } catch (FileNotFoundException fileNotFoundException){
             System.err.println(fileNotFoundException);
             System.out.println(fileNotFoundException);
         }
-        if(config.getDebugTree()) TreeAST.debug(0);
-        if (!Parser.wasParseError()) TreeAST.codegen();
     }
 }

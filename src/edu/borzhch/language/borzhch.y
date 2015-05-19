@@ -68,11 +68,16 @@ start:
      ;
 
 init: /* empty */ {
-        topTable = new SymTable(null);
-        topTable.contextIdentifier = "TOP";
-        funcTable = new FuncTable();
-        structTable = new SymTable(null);
-        structTable.pushSymbol("Program", "class");
+        if (null == topTable) {
+            topTable = new SymTable(null);
+            topTable.contextIdentifier = "TOP";
+        }
+        if (null == funcTable)
+            funcTable = new FuncTable();
+        if (null == structTable) {
+            structTable = new SymTable(null);
+            structTable.pushSymbol("Program", "class");
+        }
     }
     ;
 
@@ -943,4 +948,8 @@ public void yyerror(String error) {
 public Parser(Reader r, boolean debug) {
   lexer = new Lexer(r, this);
   yydebug = debug;
+}
+
+public void newLexer(Reader r) {
+    lexer = new Lexer(r, this);
 }
