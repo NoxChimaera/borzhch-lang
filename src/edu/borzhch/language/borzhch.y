@@ -913,7 +913,7 @@ private boolean isIdentifierExist(String identifier) {
   boolean result = false;
 
   result = topTable.findSymbol(identifier);
-  if(!result) result = funcTable.find(identifier);
+  if(!result) result = funcTable.find(identifier, currentClass);
   if(!result) result = structTable.findSymbol(identifier);
 
   return result;

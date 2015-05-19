@@ -36,19 +36,21 @@ public class FuncTable {
     /**
      * Проверяет наличие идентификатора функции в текущей и предыдущей таблицах.
      * @param identifier Идентификатор функции.
+     * @param containingClass Идентификатор, в котором ищем.
      * @return true, если идентификатор найден; иначе - false.
      */
-    public boolean find(String identifier) {
+    public boolean find(String identifier, String containingClass) {
         boolean result= false;
         
         for(FunctionNode function : functions) {
-            if(function.getFuncName().equals(identifier)) {
+            if(function.getFuncName().equals(identifier)
+                    && function.getClassName().equals(containingClass)) {
                 result = true;
                 break;
             }
         }
         if(!result && previous != null) {
-            result = previous.find(identifier);
+            result = previous.find(identifier, containingClass);
         }
         
         return result;
