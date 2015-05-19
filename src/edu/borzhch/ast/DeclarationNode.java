@@ -29,6 +29,10 @@ public class DeclarationNode extends NodeAST {
         return varName;
     }
     
+    public String getVarTypeName() {
+        return varTypeName;
+    }
+    
     /**
      * Объявление переменных примитивных типов
      * @param name Идентификатор переменной

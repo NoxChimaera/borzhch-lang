@@ -101,6 +101,19 @@ public class BOHelper {
         }
     }
     
+    public static Type toJVMType(String type) {
+        BOType t = getType(type);
+        if (BOType.REF != t) {
+            return toJVMType(t);
+        } else if (type.contains("$")) {
+            String tmp = type.substring(1);
+            Type tmpType = toJVMType(tmp);
+            return new ArrayType(tmpType, 1);
+        } else{
+            return new ObjectType(type);
+        }
+    }
+    
     public static ArrayType toJVMArrayType(String type) {
         switch (type) {
             case "void":

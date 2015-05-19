@@ -118,6 +118,14 @@ type:
     }
     ;
 
+func_header:
+    type IDENTIFIER {
+        if (isIdentifierExist($2)) {
+            yyerror(String.format("identifier <%s> is already defined", $3));
+        }
+    }
+    ;
+
 function:
     DEFUN type IDENTIFIER L_BRACE param_list R_BRACE codeblock {
         if (isIdentifierExist($3)) {
@@ -814,7 +822,7 @@ constant:
     | FLOAT { $$ = new FloatNode((float)$1); }
     | STRING    { $$ = new StringNode($1); }
     | BOOLEAN   { $$ = new BooleanNode($1); }
-    | NULL  { $$ = new NullNode(); }
+    | NULL  { $$ = new aa(); }
     ;
 
 funcall:

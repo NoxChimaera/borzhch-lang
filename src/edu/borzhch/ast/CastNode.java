@@ -41,7 +41,23 @@ public class CastNode extends NodeAST implements IFoldable {
         }
         
         expression.codegen();
+        if (BOType.STRING == expression.type) {
+            anyFromString(type);
+            return;
+        }
         JavaCodegen.method().convert(expression.type, type);
+    }
+    
+    private void anyFromString(BOType any) {
+//        switch (any) {
+//            case INT:
+//                
+//        }
+        
+        
+//        Integer.valueOf("qwe");
+//        Float.valueOf("q");
+//        Boolean.valueOf("");
     }
 
     @Override

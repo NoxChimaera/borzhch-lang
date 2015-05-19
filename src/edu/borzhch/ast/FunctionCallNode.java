@@ -66,7 +66,7 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
         ArrayList<String> args = funcTable.getParamTypes(identifier);
         int i = 0;
         for(String arg : args) {
-            argTypes[i] = BOHelper.toJVMType(BOHelper.getType(arg));
+            argTypes[i] = BOHelper.toJVMType(arg);
             i++;
         }
         

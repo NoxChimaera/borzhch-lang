@@ -6,6 +6,7 @@ import edu.borzhch.ast.DeclarationNode;
 import java.util.ArrayList;
 import edu.borzhch.ast.FunctionNode;
 import edu.borzhch.ast.NodeAST;
+import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -114,7 +115,15 @@ public class FuncTable {
                 ArrayList<NodeAST> arguments = function.getArguments();
                 if (arguments != null) {
                     for(NodeAST argument : arguments) {
-                        result.add(BOHelper.toString(argument.type()));
+                        if (BOType.REF == argument.type()) {
+                            DeclarationNode tmp = (DeclarationNode) argument;
+                            result.add(tmp.getVarTypeName());
+                        } else if (BOType.ARRAY == argument.type()) {
+                            DeclarationNode tmp = (DeclarationNode) argument;
+                            result.add("$" + tmp.getVarTypeName());
+                        } else {
+                            result.add(BOHelper.toString(argument.type()));
+                        }
                     }
                 }
                 
