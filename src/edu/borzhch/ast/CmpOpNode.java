@@ -10,6 +10,7 @@ import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.optimization.IConstant;
 import edu.borzhch.optimization.IFoldable;
+import edu.borzhch.optimization.IReductable;
 import java.util.function.Function;
 import org.apache.bcel.generic.GOTO;
 import org.apache.bcel.generic.IFEQ;
@@ -20,7 +21,7 @@ import org.apache.bcel.generic.InstructionHandle;
  * Узел AST, представляющий операцию сравнения
  * @author Balushkin M.
  */
-public class CmpOpNode extends NodeAST implements IFoldable {
+public class CmpOpNode extends NodeAST implements IFoldable, IReductable {
     NodeAST l;
     NodeAST r;
     String op;
@@ -52,6 +53,13 @@ public class CmpOpNode extends NodeAST implements IFoldable {
             NodeAST fold = fold();
             if (fold != this) {
                 fold.codegen();
+                return;
+            }
+        }
+        if (Program.config.getStrengthReduction()) {
+            NodeAST reduct = reduct();
+            if (this != reduct) {
+                reduct.codegen();
                 return;
             }
         }
@@ -318,6 +326,43 @@ public class CmpOpNode extends NodeAST implements IFoldable {
             case "!=":
                 return new BooleanNode(left.coerceFloat() 
                         != right.coerceFloat());
+        }
+        return this;
+    }
+
+    @Override
+    public NodeAST reduct() {
+        if (l instanceof IConstant && r instanceof IConstant) {
+            float lt = ((IConstant) l).coerceFloat();
+            float rt = ((IConstant) r).coerceFloat();
+            
+            if (lt == rt) {
+                switch (op) {
+                    case "==":
+                    case ">=":
+                    case "<=":
+                        return new BooleanNode(true);
+                    case "!=":
+                    case ">":
+                    case "<":
+                        return new BooleanNode(false);
+                }
+            }
+        } else if (l instanceof VariableNode && r instanceof VariableNode) {
+            VariableNode lvar = (VariableNode) l;
+            VariableNode rvar = (VariableNode) r;
+            if (lvar.id.equals(rvar.id)) {
+                switch (op) {
+                    case "==":
+                    case ">=":
+                    case "<=":
+                        return new BooleanNode(true);
+                    case "!=":
+                    case ">":
+                    case "<":
+                        return new BooleanNode(false);
+                }
+            }
         }
         return this;
     }

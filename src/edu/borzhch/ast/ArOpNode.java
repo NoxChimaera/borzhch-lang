@@ -11,12 +11,13 @@ import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import edu.borzhch.optimization.IConstant;
 import edu.borzhch.optimization.IFoldable;
+import edu.borzhch.optimization.IReductable;
 
 /**
  * Узел AST, представляющий арифметическую операцию
  * @author Balushkin M.
  */
-public class ArOpNode extends NodeAST implements IFoldable {
+public class ArOpNode extends NodeAST implements IFoldable, IReductable {
     NodeAST l;
     NodeAST r;
     String op;
@@ -47,8 +48,15 @@ public class ArOpNode extends NodeAST implements IFoldable {
     public void codegen() {
         if (Program.config.getConstantFolding()) {
             NodeAST fold = fold();
-            if (fold != this) {
+            if (this != fold) {
                 fold.codegen();
+                return;
+            }
+        }
+        if (Program.config.getStrengthReduction()) {
+            NodeAST reduct = reduct();
+            if (this != reduct) {
+                reduct.codegen();
                 return;
             }
         }
@@ -59,7 +67,12 @@ public class ArOpNode extends NodeAST implements IFoldable {
         }
         
         l.codegen();
-        r.codegen();
+        
+        if (l == r) {
+            JavaCodegen.method().dup();
+        } else {
+            r.codegen();
+        }
         switch (type) {
             case INT:
             case FLOAT:
@@ -67,6 +80,72 @@ public class ArOpNode extends NodeAST implements IFoldable {
                 break;
         }
     }
+
+    @Override
+    public NodeAST reduct() {
+        switch (op) {
+            case "**":
+                if (l instanceof VariableNode && r instanceof IntegerNode) {
+                    String ll = ((VariableNode) l).id;
+                    int rr = ((IntegerNode) r).val;
+                    if (2 == rr) {
+                        ArOpNode tmp = new ArOpNode(l, l, "*");
+                        tmp.type(l.type);
+                        type(l.type);
+                        return tmp;
+                    }
+                }
+                break;
+            case "*":
+                if (r instanceof IntegerNode) {
+                    int count = ((IntegerNode) r).val;
+                    switch (count) {
+                        case 0:
+                            return new IntegerNode(0);
+                        case 1:
+                            return l;
+                        case 2:
+                            ArOpNode tmp = new ArOpNode(l, l, "+");
+                            tmp.type(l.type);
+                            type(l.type);
+                            return tmp;
+                    }
+                }
+                break;
+            case "/":
+                if (r instanceof IntegerNode) {
+                    int val = ((IntegerNode) r).val;
+                    switch (val) {
+                        case 0:
+                            throw new ArithmeticException();
+                        case 1:
+                            return l;
+                        case 2:
+                            ArOpNode tmp = new ArOpNode(new FloatNode(0.5f), l, "*");
+                            tmp.type(BOType.FLOAT);
+                            type(BOType.FLOAT);
+                            return tmp;
+                        case 4:
+                            ArOpNode tmp4 = new ArOpNode(new FloatNode(0.25f), l, "*");
+                            tmp4.type(BOType.FLOAT);
+                            type(BOType.FLOAT);
+                            return tmp4;
+                    }
+                }
+            case "+":
+            case "-":
+                if (r instanceof IConstant) {
+                    float val = ((IConstant) r).coerceFloat();
+                    if (val == 0f) return l;
+                } else if (l instanceof IConstant) {
+                    float val = ((IConstant) l).coerceFloat();
+                    if (val == 0f) return r;
+                }
+                break;
+        } 
+        return this;
+    }
+    
     /**
      * Генерация кода для операции возведения в степень
      * Тип операндов - double

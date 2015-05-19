@@ -301,6 +301,36 @@ public class MethodBuilder {
         }
     }
 
+    public void valueOf(BOType type) {
+        String t = "";
+        String t2 = "";
+        switch (type) {
+            case INT:
+                t = "Integer";
+                t2 = "int";
+                break;
+            case FLOAT:
+                t = "Float";
+                t2 = "float";
+                break;
+            case STRING:
+                t = "String";
+                break;
+            case BOOL:
+                t = "Boolean";
+                t2 = "boolean";
+                break;
+        }
+        
+        il.append(f.createInvoke("java.lang." + t, "valueOf", new ObjectType("java.lang." + t), 
+                new Type[] { Type.STRING }, INVOKESTATIC));
+        
+        if (BOType.STRING == type) return;
+        
+        il.append(f.createInvoke("java.lang." + t, t2 + "Value", BOHelper.toJVMType(type), 
+                new Type[] {}, INVOKEVIRTUAL));
+    }
+    
     public void invokeStatic(String function) {
         switch (function) {
             case "pow":
