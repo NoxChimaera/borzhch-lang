@@ -69,11 +69,9 @@ start:
 
 init: /* empty */ {
         topTable = new SymTable(null);
-        
+        topTable.contextIdentifier = "TOP";
         funcTable = new FuncTable();
-
         structTable = new SymTable(null);
-
         structTable.pushSymbol("Program", "class");
     }
     ;
@@ -105,6 +103,7 @@ endblock: R_CURBRACE {
             topTable = oldTable.getPrevious();
             oldTable.setPrevious(null);
             oldTable.clear();*/
+            restoreContext();
         }
         ;
 
@@ -125,6 +124,7 @@ func_header:
         }
         FunctionNode node = new FunctionNode($2, $1, currentClass);
         funcTable.push(node);
+        topTable = new SymTable(topTable);
         $$ = node;
     }
     | type L_SQBRACE R_SQBRACE IDENTIFIER {
@@ -133,6 +133,7 @@ func_header:
         }
         FunctionNode node = new FunctionNode($4, "$" + $1, currentClass);
         funcTable.push(node);
+        topTable = new SymTable(topTable);
         $$ = node;
     }
     ;
@@ -144,6 +145,7 @@ function:
         node.setStatements((StatementList) $6);
 
         context.put(node.getFuncName(), topTable);
+        //restoreContext();
         restoreContext();
         $$ = node;
     }
@@ -157,14 +159,15 @@ function:
         func.setStatements((StatementList) $6);
 
         context.put($2, topTable);
-        restoreContext();
+        //restoreContext();
+        //restoreContext();
         funcTable.push(func);
     
         $$ = func;
     }
     ;
 
-param_list: /* empty */ { $$ = null; }
+param_list: /* empty */ { $$ = new StatementList(); }
     | decl { 
         StatementList node = new StatementList();
         node.add((NodeAST) $1);
@@ -203,7 +206,7 @@ struct_decl:
         }
         
         context.put($2, topTable);
-        restoreContext();
+        //restoreContext();
         structTable.pushSymbol($2, "ref");
 
         StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3, false);
@@ -219,7 +222,7 @@ class_decl:
             yyerror(msg);
         }
         context.put($2, topTable);
-        restoreContext();
+        //restoreContext();
         structTable.pushSymbol(identifier, "ref");
 
         currentClass = mainClass;
@@ -526,7 +529,7 @@ idref_begin:
     ;
 
 idref_mid:
-    | dv_in_context { 
+    dv_in_context { 
         ArrayList<NodeAST> node = new ArrayList<>();
         node.add((NodeAST) $1);
         $$ = node;
