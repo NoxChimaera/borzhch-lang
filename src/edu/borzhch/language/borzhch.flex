@@ -85,7 +85,7 @@ BooleanLiteral = "true" | "false"
   "#" | "@"     { yyparser.yylval = new ParserVal(yytext()); return Parser.INCR; }
   "&&" | "and"  { yyparser.yylval = new ParserVal(yytext()); return Parser.AND; }
   "||" | "or"   { yyparser.yylval = new ParserVal(yytext()); return Parser.OR; }
-  "|"   { return Parser.PIPE; }
+  "|"           { return Parser.PIPE; }
 }
 
 <YYINITIAL> {
@@ -144,18 +144,17 @@ BooleanLiteral = "true" | "false"
 <YYINITIAL> \/\*                { yybegin(COMMENT); }
 
 <STRING_DQUOTED> {
-  \"            { 
-                  yybegin(YYINITIAL); 
-                  yyparser.yylval = new ParserVal(sb.toString()); 
-                  return Parser.STRING; 
-                }
-  [^\n\r\"\\]+  { sb.append(yytext()); }
-  \\t           { sb.append('\t'); }
-  \\n           { sb.append('\n'); }
-
-  \\r           { sb.append('\r'); }
-  \\\"          { sb.append('\"'); }
-  \\            { sb.append('\\'); }
+  \" {
+    yybegin(YYINITIAL);
+    yyparser.yylval = new ParserVal(sb.toString());
+    return Parser.STRING;
+  }
+  \\\" { sb.append('\"'); }
+  \\t  { sb.append('\t'); }
+  \\r  { sb.append('\r'); }
+  \\n  { sb.append('\n'); }
+  \\   { sb.append('\\'); }
+  [^\"\\]+ { sb.append(yytext()); }
 }
 
 <STRING_SQUOTED> {
@@ -164,13 +163,12 @@ BooleanLiteral = "true" | "false"
                   yyparser.yylval = new ParserVal(sb.toString()); 
                   return Parser.STRING; 
                 }
-  [^\n\r\'\\]+  { sb.append(yytext()); }
-  \\t           { sb.append('\t'); }
-  \\n           { sb.append('\n'); }
-
-  \\r           { sb.append('\r'); }
-  \\\'          { sb.append('\''); }
-  \\            { sb.append('\\'); }
+  \\\' { sb.append('\''); }
+  \\t { sb.append('\t'); }
+  \\r { sb.append('\r'); }
+  \\n  { sb.append('\n'); }
+  \\\\ { sb.append('\\'); }
+  [^\'\\]+ { sb.append(yytext()); }
 }
 
 <COMMENT> {
@@ -179,5 +177,8 @@ BooleanLiteral = "true" | "false"
 }
 
 /* error fallback */
-[^]             { throw new Error("Illegal character <"+
-                                   yytext()+">"); }
+[^] { 
+  String msg = String.format("Illegal character <%s> at line %d, column %d in file %s",
+    yytext(), Yyline(), Yycolumn(), yyparser.getFilename());
+  throw new Error(msg);
+}

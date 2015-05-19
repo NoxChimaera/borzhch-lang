@@ -877,6 +877,14 @@ private SymTable backup;
 
 private HashMap<String, SymTable> context = new HashMap<>();
 
+private String mainClass = "Program";
+private String currentClass = "Program";
+private String filename = "";
+
+private static boolean parseError = false;
+
+private Lexer lexer;
+
 private void fullRestoreContext() {
     while (null != topTable.getPrevious()) {
         topTable = topTable.getPrevious();
@@ -886,10 +894,6 @@ private void fullRestoreContext() {
 private void restoreContext() {
     topTable = topTable.getPrevious();
 }
-private String mainClass = "Program";
-private String currentClass = "Program";
-
-private static boolean parseError = false;
 
 public static boolean wasParseError() {
     return parseError;
@@ -925,8 +929,6 @@ private String getSymbolType(String identifier) {
     return result;
 }
 
-private Lexer lexer;
-
 private int yylex() {
   int yyl_return = -1;
   try {
@@ -941,7 +943,7 @@ private int yylex() {
 
 public void yyerror(String error) {
     parseError = true;
-    String msg = String.format("Error on line %d, column %d: %s", lexer.Yyline(), lexer.Yycolumn(), error);
+    String msg = String.format("Error in %s on line %d, column %d: %s", this.filename, lexer.Yyline(), lexer.Yycolumn(), error);
     throw new Error(msg);
 }
 
@@ -950,6 +952,11 @@ public Parser(Reader r, boolean debug) {
   yydebug = debug;
 }
 
-public void newLexer(Reader r) {
+public void newLexer(Reader r, String filename) {
     lexer = new Lexer(r, this);
+    this.filename = filename;
+}
+
+public String getFilename() {
+    return this.filename;
 }
