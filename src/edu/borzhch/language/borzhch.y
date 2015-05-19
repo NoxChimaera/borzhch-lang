@@ -50,7 +50,7 @@
 %type <obj> stmt stmt_list loop
 %type <obj> struct_decl 
 %type <obj> if else tuple_value 
-%type <obj> function builtin_in builtin_out
+%type <obj> function  func_header builtin_in builtin_out
 %type <obj> codeblock assign
 %type <obj> reference arrayref
 %type <obj> idref idref_tail 
@@ -121,36 +121,30 @@ type:
 func_header:
     type IDENTIFIER {
         if (isIdentifierExist($2)) {
-            yyerror(String.format("identifier <%s> is already defined", $3));
+            yyerror(String.format("identifier <%s> is already defined", $2));
         }
+        FunctionNode node = new FunctionNode($2, $1, currentClass);
+        funcTable.push(node);
+        $$ = node;
+    }
+    | type L_SQBRACE R_SQBRACE IDENTIFIER {
+        if (isIdentifierExist($4)) {
+            yyerror(String.format("identifier <%s> is already defined", $4));
+        }
+        FunctionNode node = new FunctionNode($4, "$" + $1, currentClass);
+        funcTable.push(node);
+        $$ = node;
     }
     ;
 
 function:
-    DEFUN type IDENTIFIER L_BRACE param_list R_BRACE codeblock {
-        if (isIdentifierExist($3)) {
-            yyerror(String.format("identifier <%s> is already defined", $3));
-        }
-        FunctionNode node = new FunctionNode($3, $2, currentClass);
-        node.setArguments((NodeList) $5);
-        node.setStatements((StatementList) $7);
+    DEFUN func_header L_BRACE param_list R_BRACE codeblock {
+        FunctionNode node = (FunctionNode) $2;
+        node.setArguments((NodeList) $4);
+        node.setStatements((StatementList) $6);
 
-        context.put($3, topTable);
+        context.put(node.getFuncName(), topTable);
         restoreContext();
-        funcTable.push(node);
-        $$ = node;
-    }
-    | DEFUN type L_SQBRACE R_SQBRACE IDENTIFIER L_BRACE param_list R_BRACE codeblock {
-        if (isIdentifierExist($5)) {
-            yyerror(String.format("identifier <%s> is already defined", $5));
-        }
-        FunctionNode node = new FunctionNode($5, "$array", currentClass);
-        node.setArguments((NodeList) $7);
-        node.setStatements((StatementList) $9);
-
-        context.put($5, topTable);
-        restoreContext();
-        funcTable.push(node);
         $$ = node;
     }
     | PROC IDENTIFIER L_BRACE param_list R_BRACE codeblock {
@@ -822,7 +816,7 @@ constant:
     | FLOAT { $$ = new FloatNode((float)$1); }
     | STRING    { $$ = new StringNode($1); }
     | BOOLEAN   { $$ = new BooleanNode($1); }
-    | NULL  { $$ = new aa(); }
+    | NULL  { $$ = new NullNode(); }
     ;
 
 funcall:
