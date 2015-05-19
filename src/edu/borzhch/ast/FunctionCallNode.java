@@ -56,6 +56,10 @@ public class FunctionCallNode extends NodeAST implements INodeWithVarTypeName {
     
     @Override
     public void codegen() {
+        if (!JavaCodegen.struct().getName().equals("Program")) {
+            JavaCodegen.method().loadThis();
+        }
+        
         if(args != null && !args.nodes.isEmpty()) args.codegen();
         
         FuncTable funcTable = Parser.getFuncTable();

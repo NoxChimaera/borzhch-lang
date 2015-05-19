@@ -222,7 +222,7 @@ class_decl:
             yyerror(msg);
         }
         context.put($2, topTable);
-        //restoreContext();
+        restoreContext();
         structTable.pushSymbol(identifier, "ref");
 
         currentClass = mainClass;
@@ -240,7 +240,7 @@ class_identifier:
     ;
 
 class_block:
-    openblock class_list endblock {
+    openblock class_list R_CURBRACE {
         FieldList node = (FieldList) $2;
         currentClass = mainClass;
         $$ = node; 

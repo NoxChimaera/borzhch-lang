@@ -390,6 +390,10 @@ public class MethodBuilder {
         il.append(f.createPutField(className, field, new ObjectType(fieldClass)));
     }
     
+    public void loadThis() {
+        il.append(f.THIS);
+    }
+    
     /**
      * Компилирует метод
      */

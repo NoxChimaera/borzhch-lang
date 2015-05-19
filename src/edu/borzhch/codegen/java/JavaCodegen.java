@@ -5,6 +5,7 @@
  */
 package edu.borzhch.codegen.java;
 
+import edu.borzhch.ast.FunctionNode;
 import edu.borzhch.constants.BOType;
 import edu.borzhch.helpers.BOHelper;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ import org.apache.bcel.generic.Type;
  */
 public class JavaCodegen {
     static HashMap<String, ClassBuilder> classes = new HashMap<>();
+    static HashMap<String, FunctionNode> classFunctions = new HashMap<>();
+    
+    
     static ClassBuilder programClass;
     static ClassBuilder currentClass;
     public static ClassBuilder struct() {
