@@ -4,12 +4,13 @@ import edu.borzhch.Program;
 import edu.borzhch.codegen.java.JavaCodegen;
 import edu.borzhch.optimization.IConstant;
 import edu.borzhch.optimization.IFoldable;
+import edu.borzhch.optimization.IReductable;
 
 /**
  *
  * @author Balushkin M.
  */
-public class LogOpNode extends NodeAST implements IFoldable {
+public class LogOpNode extends NodeAST implements IFoldable, IReductable {
     NodeAST l;
     NodeAST r;
     String op;
@@ -37,9 +38,18 @@ public class LogOpNode extends NodeAST implements IFoldable {
                 return;
             }
         }
+        if (Program.config.getStrengthReduction()) {
+            NodeAST reduct = reduct();
+            if (this != reduct) {
+                reduct.codegen();
+                return;
+            }
+        }
         
         l.codegen();
-        r.codegen();
+        if (l == r) {
+            JavaCodegen.method().dup();
+        }
         switch (op) {
             case "and":
                 JavaCodegen.method().and();
@@ -88,6 +98,24 @@ public class LogOpNode extends NodeAST implements IFoldable {
                         ^ right.coerceBoolean());
         }
         
+        return this;
+    }
+
+    @Override
+    public NodeAST reduct() {
+        if (l instanceof VariableNode && r instanceof VariableNode) {
+            String lid = ((VariableNode) l).id;
+            String rid = ((VariableNode) r).id;
+            if (lid.equals(rid)) {
+                switch (op) {
+                    case "and":
+                    case "or":
+                        return new BooleanNode(true);
+                    case "xor":
+                        return new BooleanNode(false);
+                }
+            }
+        }
         return this;
     }
 }

@@ -49,15 +49,7 @@ public class CastNode extends NodeAST implements IFoldable {
     }
     
     private void anyFromString(BOType any) {
-//        switch (any) {
-//            case INT:
-//                
-//        }
-        
-        
-//        Integer.valueOf("qwe");
-//        Float.valueOf("q");
-//        Boolean.valueOf("");
+        JavaCodegen.method().valueOf(any);
     }
 
     @Override

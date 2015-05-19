@@ -21,6 +21,9 @@ public class OptParser {
     @Parameter(names = "-folding", description = "Optimization: constant folding")
     private boolean constantFolding = false;
     
+    @Parameter(names = "-reduction", description = "Optimization: strength reduction")
+    private boolean strengthReduction = false;
+    
     public List<String> getFiles() {
         return this.files;
     }
@@ -32,5 +35,8 @@ public class OptParser {
     }
     public boolean getConstantFolding() {
         return this.constantFolding;
+    }
+    public boolean getStrengthReduction() {
+        return strengthReduction;
     }
 }
