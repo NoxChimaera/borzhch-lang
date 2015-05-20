@@ -29,7 +29,7 @@ public class Program {
             Parser parser = new Parser(null, config.getDebugParser());
             for (String arg : config.getFiles()) {
                 r = new FileReader(arg);
-                parser.newLexer(r);
+                parser.newLexer(r, arg);
                 parser.run();
                         
                 if(config.getDebugTree()) TreeAST.debug(0);

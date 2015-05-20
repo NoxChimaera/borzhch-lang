@@ -82,6 +82,9 @@ public class FunctionNode extends NodeAST {
     public String getReturnTypeName() {
         return this.varTypeName;
     }
+    public String getClassName() {
+        return this.className;
+    }
     
     @Override
     public void debug(int lvl) {
