@@ -211,7 +211,7 @@ struct_decl:
         }
         
         context.put($2, topTable);
-        //restoreContext();
+        restoreContext();
         structTable.pushSymbol($2, "ref");
 
         StructDeclarationNode node = new StructDeclarationNode($2, (FieldList) $3, false);
@@ -281,7 +281,7 @@ class_list:
     ;
 
 decl_block: 
-    openblock decl_list endblock {
+    openblock decl_list R_CURBRACE {
         $$ = $2;
     }
     ;
