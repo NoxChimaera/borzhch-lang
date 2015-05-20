@@ -26,17 +26,20 @@ public class ReturnNode extends NodeAST {
         System.out.println("Return: ");
         ++lvl;
         printLevel(lvl);
-        System.out.println("Expression: ");
-        expr.debug(lvl + 1);
+        
+        if (null != expr) {
+            System.out.println("Expression: ");
+            expr.debug(lvl + 1);
+        }
     }
 
     @Override
     public void codegen() {
-        Type type = Type.VOID;
+        Type ret = Type.VOID;
         if(expr != null) {
             expr.codegen();
-            type = BOHelper.toJVMType(expr.type);
+            ret = BOHelper.toJVMType(expr.type);
         }
-        JavaCodegen.method().createReturn(type);
+        JavaCodegen.method().createReturn(ret);
     }
 }
