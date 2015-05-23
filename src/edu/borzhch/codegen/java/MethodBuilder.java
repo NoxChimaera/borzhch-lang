@@ -27,6 +27,7 @@ public class MethodBuilder {
     
     public MethodBuilder(String name, Type returnType, Type[] argsTypes, String[] argsNames, ClassGen cg, boolean accessStatic) {
         il = new InstructionList();
+        
         this.cg = cg;
         int access = accessStatic? (ACC_STATIC | ACC_PUBLIC) : ACC_PUBLIC;
         mg = new MethodGen(access, 

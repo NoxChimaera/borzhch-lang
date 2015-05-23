@@ -78,9 +78,9 @@ public class SwitchNode extends NodeAST {
         }
         
         //default
+        NOP nop = JavaCodegen.method().nop();
+        defCase = JavaCodegen.method().getLastHandler();
         if(defaultCase != null) {
-            NOP nop = JavaCodegen.method().nop();
-            defCase = JavaCodegen.method().getLastHandler();
             defaultCase.codegen();
         }
         
